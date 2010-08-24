@@ -10,7 +10,7 @@ import sys
 import tkinter
 import tkinter.font
 import tkinter.messagebox
-from tkinter import ttk
+import tkinter.ttk as ttk
 
 import html.parser
 import html.entities
@@ -26,6 +26,7 @@ class TableError (Exception):
 
 class Table:
     def __init__ (self):
+        '''Initiate a new empty table object'''
         self._data = []
         self.row = -1
         self.headered = False
@@ -52,6 +53,7 @@ class Table:
         return string
 
     def _mk_header (self):
+        '''Internal function to prepare the header'''
         if self.headered and self._header is None and self._data != []:
             print (self._data)
             self._header = self._data [0]
@@ -91,6 +93,9 @@ class Table:
         self.row += 1
 
     def add_data (self, data):
+        '''Adds new data to the current row.
+        The table must contain at least one row. The data will be appended to
+        the current row. This is also true for list or tuples'''
         if self.row >= 0:
             if type (data) in (list, tuple):
                 # A tuple will be transformed automatically to a list if the row
@@ -102,18 +107,22 @@ class Table:
             raise TableError ('Table contains no row')
 
     def add_header_data (self, data):
+        '''Adds new data to the header. This function have to be called, before
+        normal data was added.'''
         if not self.headered:
             self.headered = True
         self.add_data (data)
 
     def del_last_row (self):
+        '''Deletes the last row of the table.'''
         if self.row >= 0:
             self._data.pop()
             self.row -= 1
         else:
-            raise TableError ('Table containts no row to delete')
+            raise TableError ('Table contains no row to delete')
 
     def del_col (self, index):
+        '''Deletes a column of the table'''
         if self._header is not None:
             self._header.remove (self._header [index])
         if self._data is not None and self._data != []:
