@@ -437,8 +437,8 @@ class CmdWidget:
                 return
         elif addr.endswith ('.html') or addr.endswith ('.htm'):
             try:
-                f = open (addr, 'r')
-                page = f.read()
+                f = open (addr, 'rb')
+                page = f.read().decode ('utf_8', 'ignore').strip()
                 f.close()
             except IOError as msg:
                 tkinter.messagebox.showerror (title,
