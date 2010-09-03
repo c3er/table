@@ -4,6 +4,7 @@
 '''Reads tables from HTML files'''
 
 title = 'Tabellenauswerter'
+default_addr = 'wm2010.html'
 
 import sys
 
@@ -55,14 +56,15 @@ class Table:
     def _mk_header (self):
         '''Internal function to prepare the header'''
         if self.headered and self._header is None and self._data != []:
-            # print (self._data)
             self._header = self._data [0]
             self._data = self._data [1:]
             self.row -= 1
             if len (self._header) < len (self._data [0]):
                 for i in range (len (self._header), len (self._data [0])):
                     self._header.append ('Spalte ' + str (i + 1))
-
+            for i in range (len (self._header)):
+                if self._header [i] == '':
+                    self._header [i] = 'Spalte ' + str (i + 1)
 
     def get_data (self):
         self._mk_header()
@@ -233,8 +235,8 @@ class TableRead (html.parser.HTMLParser):
 
     def td_start (self, attrs):
         if self.table is not None and not self.incell:
-            for attr in attrs:
-                if attr [0] == 'colspan':
+            for param, val in attrs:
+                if param == 'colspan':
                     self.colspaned = True
             if not self.colspaned:
                 self.incell = True
@@ -433,7 +435,7 @@ class CmdWidget:
         label = ttk.Label (addr_frame, text = 'Adresse: ')
         tmp_frame = ttk.Frame (addr_frame)
         addr_entry = tkinter.Entry (tmp_frame, width = 40)
-        addr_entry.insert (0, 'test.html')
+        addr_entry.insert (0, default_addr)
         addr_handler = lambda s = self, a = addr_entry: s.addr_button_click (a)
         addr_entry.bind ('<Return>', lambda event: addr_handler())
         addr_button = ttk.Button (tmp_frame,
