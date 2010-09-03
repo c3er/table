@@ -10,7 +10,7 @@ import sys
 import tkinter
 import tkinter.font
 import tkinter.messagebox
-from tkinter import ttk
+import tkinter.ttk as ttk
 
 import html.parser
 import html.entities
@@ -26,6 +26,7 @@ class TableError (Exception):
 
 class Table:
     def __init__ (self):
+        '''Initiate a new empty table object'''
         self._data = []
         self.row = -1
         self.headered = False
@@ -52,11 +53,16 @@ class Table:
         return string
 
     def _mk_header (self):
-        if self._header is None and self.headered and self._data != []:
-            print (self._data)
+        '''Internal function to prepare the header'''
+        if self.headered and self._header is None and self._data != []:
+            # print (self._data)
             self._header = self._data [0]
             self._data = self._data [1:]
             self.row -= 1
+            if len (self._header) < len (self._data [0]):
+                for i in range (len (self._header), len (self._data [0])):
+                    self._header.append ('Spalte ' + str (i + 1))
+
 
     def get_data (self):
         self._mk_header()
@@ -91,6 +97,9 @@ class Table:
         self.row += 1
 
     def add_data (self, data):
+        '''Adds new data to the current row.
+        The table must contain at least one row. The data will be appended to
+        the current row. This is also true for list or tuples'''
         if self.row >= 0:
             if type (data) in (list, tuple):
                 # A tuple will be transformed automatically to a list if the row
@@ -99,26 +108,33 @@ class Table:
             else:
                 self._data [self.row].append (data)
         else:
-            raise TableError ('Table contains no row')
+            raise TableError (
+                'Table contains no row where the data could be added')
 
     def add_header_data (self, data):
+        '''Adds new data to the header. This function have to be called, before
+        normal data was added.'''
         if not self.headered:
             self.headered = True
         self.add_data (data)
 
     def del_last_row (self):
+        '''Deletes the last row of the table.'''
         if self.row >= 0:
             self._data.pop()
             self.row -= 1
         else:
-            raise TableError ('Table containts no row to delete')
+            raise TableError ('Table contains no row to delete')
 
     def del_col (self, index):
+        '''Deletes a column of the table'''
         if self._header is not None:
             self._header.remove (self._header [index])
         if self._data is not None and self._data != []:
             for row in self._data:
                 row.remove (row [index])
+        else:
+            raise TableError ('Error by deleting column')
 
     def make_header (self):
         '''Transforms the first line of the table to the header line'''
@@ -196,9 +212,9 @@ class TableRead (html.parser.HTMLParser):
 
     def th_start (self, attrs):
         if self.table is not None and not self.incell:
-            for attr in attrs:
-                if attr [0] == 'colspan':
-                    self.colspaned = int (attr [1])
+            for param, val in attrs:
+                if param == 'colspan':
+                    self.colspaned = int (val)
             self.incell = True
 
     def th_end (self):
@@ -232,7 +248,7 @@ class TableRead (html.parser.HTMLParser):
             self.tmpdat += '<Bild>'
     ############################################################################
 
-    # Helperfunctions ##########################################################
+    # Helper functions #########################################################
     def add_cell_data (self, func):
         if self.incell and not self.colspaned:
             if type (self.tmpdat) == str:
@@ -273,6 +289,33 @@ class TableRead (html.parser.HTMLParser):
         if self.incell:
             self.tmpdat += html.entities.entitydefs [name]
 
+def html2tables (page):
+    '''Transforms a HTML page, containing tables, to a list of Table objects'''
+    linecount = len (page.splitlines())
+    with TableRead() as parser:
+        parerr = False
+        while parser.getpos() [0] < linecount:
+            try:
+                parser.feed (page)
+                if not parerr:
+                    break
+            except html.parser.HTMLParseError as msg:
+                # print (msg)
+                parerr = True
+        return parser.tables
+
+def filter_trash (tables):
+    listlen = len (tables)
+    j = 0
+    for i in range (listlen):
+        if (tables [j].data in ([], [['']], [''], [['', '', 'No.']]) or
+                len (tables [j].data) <= 3):
+            tables.remove (tables [j])
+            listlen -= 1
+        else:
+            j += 1
+
+
 ################################################################################
 # This stuff was originally from some demos in the Python-distribution #########
 
@@ -281,8 +324,31 @@ def sortby (tree, col, descending):
     # grab values to sort
     data = [(tree.set (child, col), child) for child in tree.get_children ('')]
 
+    # The numeric values should not be sorted alphabetical
+    tmpstr = ''
+    converted = False
+    tmpdat = []
+    try:
+        for val, foo in data:
+            if val.endswith ('.'):
+                val = val [0: -1]
+                tmpstr = '.'
+            elif val.endswith ('%'):
+                val = val [0: -1]
+                tmpstr = '%'
+            fval = float (val)
+            ival = int (fval)
+            tmpdat.append ((ival if fval - ival == 0 else fval, foo))
+        converted = True
+    except ValueError:
+        pass
+
     # reorder data
-    data.sort (reverse = descending)
+    if converted:
+        tmpdat.sort (reverse = descending)
+        data = [(str (val) + tmpstr, foo) for val, foo in tmpdat]
+    else:
+        data.sort (reverse = descending)
     for index, item in enumerate (data):
         tree.move (item [1], '', index)
 
@@ -348,20 +414,6 @@ class TableWidget:
                     self.tree.column (self.tabcols [index], width = ilen)
 ################################################################################
 
-def html2tables (page):
-    linecount = len (page.splitlines())
-    with TableRead() as parser:
-        parerr = False
-        while parser.getpos() [0] < linecount:
-            try:
-                parser.feed (page)
-                if not parerr:
-                    break
-            except html.parser.HTMLParseError as msg:
-                # print (msg)
-                parerr = True
-        return parser.tables
-
 class CmdWidget:
     def __init__ (self, root):
         self.frame = ttk.Frame (root)
@@ -401,6 +453,8 @@ class CmdWidget:
             tkinter.messagebox.showerror (title,
                 'Sie müssen zuerst eine gültige Adresse eingeben')
         else:
+            # The current table index will be estimated by the text in the
+            # notebook
             tabconf = self.notebook.tab ('current')
             index = int (tabconf ['text'].split() [1]) - 1
             self.tables [index].make_header()
@@ -414,7 +468,7 @@ class CmdWidget:
         addr = addr_entry.get()
 
         if addr == '':
-            tkinter.messagebox.showerror (title,
+            tkinter.messagebox.showerror ('Fehler',
                 'Bitte Adresse eingeben\n' + std_err_str)
             return
         if addr.startswith ('http://'):
@@ -423,23 +477,24 @@ class CmdWidget:
                 page = f.read().decode ('utf_8', 'ignore').strip()
                 f.close()
             except urllib.request.URLError as msg:
-                tkinter.messagebox.showerror (title,
+                tkinter.messagebox.showerror ('Fehler',
                     'Web-Seite konnte nicht gelesent werden\n' + str (msg))
                 return
         elif addr.endswith ('.html') or addr.endswith ('.htm'):
             try:
-                f = open (addr, 'r')
-                page = f.read()
+                f = open (addr, 'rb')
+                page = f.read().decode ('utf_8', 'ignore').strip()
                 f.close()
             except IOError as msg:
-                tkinter.messagebox.showerror (title,
+                tkinter.messagebox.showerror ('Fehler',
                     'Datei konnte nicht gelesen werden\n' + str (msg))
                 return
         else:
-            tkinter.messagebox.showerror (title, std_err_str)
+            tkinter.messagebox.showerror ('Fehler', std_err_str)
             return
 
         self.tables = html2tables (page)
+        filter_trash (self.tables)
         # print (self.tables)
         self.show_tables()
     ############################################################################
