@@ -319,7 +319,17 @@ def filter_trash (tables):
 
 
 ################################################################################
-# This stuff was originally from some demos in the Python-distribution #########
+# This stuff was originally from some demos ####################################
+
+class Curry:
+    """handles arguments for callback functions"""
+    def __init__ (self, callback, *args, **kwargs):
+        self.callback = callback
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__ (self):
+        return self.callback (*self.args, **self.kwargs)
 
 def sortby (tree, col, descending):
     """Sort tree contents when a column is clicked on."""
@@ -356,7 +366,7 @@ def sortby (tree, col, descending):
 
     # switch the heading so that it will sort in the opposite direction
     tree.heading (col,
-        command = lambda c = col: sortby (tree, c, int (not descending)))
+        command = Curry (sortby, tree, col, int (not descending)))
 
 class TableWidget:
     def __init__ (self, root, table):
@@ -399,7 +409,7 @@ class TableWidget:
     def _build_tree (self):
         for col in self.tabcols:
             self.tree.heading (col, text = str (col),
-                command = lambda c = col: sortby (self.tree, c, 0))
+                command = Curry (sortby, self.tree, col, 0))
 
             # XXX tkinter.font.Font().measure expected args are incorrect
             # according to the Tk docs
@@ -436,7 +446,7 @@ class CmdWidget:
         tmp_frame = ttk.Frame (addr_frame)
         addr_entry = tkinter.Entry (tmp_frame, width = 40)
         addr_entry.insert (0, default_addr)
-        addr_handler = lambda s = self, a = addr_entry: s.addr_button_click (a)
+        addr_handler = Curry (self.addr_button_click, addr_entry)
         addr_entry.bind ('<Return>', lambda event: addr_handler())
         addr_button = ttk.Button (tmp_frame,
             text = 'Öffnen',
@@ -507,7 +517,7 @@ class CmdWidget:
             self.notebook.destroy()
         self.notebook = ttk.Notebook()
         for table in self.tables:
-            print (table)
+            # print (table)
             # print (repr (table))
             tw = TableWidget (self.notebook, table)
             self.notebook.add (tw.frame,
