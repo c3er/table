@@ -1,0 +1,31 @@
+[PyScripter]
+Version=2.1.1.0
+
+[Project]
+ClassName=TProjectRootNode
+StoreRelativePaths=FALSE
+ShowFileExtensions=FALSE
+
+[Project\ChildNodes\Node0]
+ClassName=TProjectFilesNode
+
+[Project\ChildNodes\Node0\ChildNodes\Node0]
+ClassName=TProjectFileNode
+FileName=E:\eigene dateien\devel\python\table\tabellenauswerter\Tabellenauwerter.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node1]
+ClassName=TProjectFileNode
+FileName=E:\eigene dateien\devel\python\table\tabellenauswerter\table.pyw
+
+[Project\ChildNodes\Node0\ChildNodes]
+Count=2
+
+[Project\ChildNodes\Node1]
+ClassName=TProjectRunConfiguationsNode
+
+[Project\ChildNodes]
+Count=2
+
+[Project\ExtraPythonPath]
+Count=0
+
