@@ -1,6 +1,5 @@
 simple.html
 nested.html
 test.html
-index.cfm.htm
-http://blog-fussball.de/wm-2010-in-sudafrika/die-wm-2010-spielplan-im-fernsehen-live-ubertragungen-der-ard-zdf-und-rtl
+wm2010.html
 http://www.nescenter.de/gamechecks.htm

@@ -4,8 +4,10 @@
 '''Reads tables from HTML files'''
 
 title = 'Tabellenauswerter'
+default_addr = 'wm2010.html'
 
 import sys
+import subprocess
 
 import tkinter
 import tkinter.font
@@ -55,14 +57,15 @@ class Table:
     def _mk_header (self):
         '''Internal function to prepare the header'''
         if self.headered and self._header is None and self._data != []:
-            # print (self._data)
             self._header = self._data [0]
             self._data = self._data [1:]
             self.row -= 1
             if len (self._header) < len (self._data [0]):
                 for i in range (len (self._header), len (self._data [0])):
                     self._header.append ('Spalte ' + str (i + 1))
-
+            for i in range (len (self._header)):
+                if self._header [i] == '':
+                    self._header [i] = 'Spalte ' + str (i + 1)
 
     def get_data (self):
         self._mk_header()
@@ -233,8 +236,8 @@ class TableRead (html.parser.HTMLParser):
 
     def td_start (self, attrs):
         if self.table is not None and not self.incell:
-            for attr in attrs:
-                if attr [0] == 'colspan':
+            for param, val in attrs:
+                if param == 'colspan':
                     self.colspaned = True
             if not self.colspaned:
                 self.incell = True
@@ -317,7 +320,17 @@ def filter_trash (tables):
 
 
 ################################################################################
-# This stuff was originally from some demos in the Python-distribution #########
+# This stuff was originally from some demos ####################################
+
+class Curry:
+    """handles arguments for callback functions"""
+    def __init__ (self, callback, *args, **kw):
+        self.callback = callback
+        self.args = args
+        self.kw = kw
+
+    def __call__ (self):
+        return self.callback (*self.args, **self.kw)
 
 def sortby (tree, col, descending):
     """Sort tree contents when a column is clicked on."""
@@ -354,7 +367,7 @@ def sortby (tree, col, descending):
 
     # switch the heading so that it will sort in the opposite direction
     tree.heading (col,
-        command = lambda c = col: sortby (tree, c, int (not descending)))
+        command = Curry (sortby, tree, col, int (not descending)))
 
 class TableWidget:
     def __init__ (self, root, table):
@@ -397,7 +410,7 @@ class TableWidget:
     def _build_tree (self):
         for col in self.tabcols:
             self.tree.heading (col, text = str (col),
-                command = lambda c = col: sortby (self.tree, c, 0))
+                command = Curry (sortby, self.tree, col, 0))
 
             # XXX tkinter.font.Font().measure expected args are incorrect
             # according to the Tk docs
@@ -414,18 +427,109 @@ class TableWidget:
                     self.tree.column (self.tabcols [index], width = ilen)
 ################################################################################
 
+notebook = None
+tables = None
+asian_flag = None
+
+def show_tables():
+    global notebook
+    if notebook is not None:
+        notebook.destroy()
+    notebook = ttk.Notebook()
+    for table in tables:
+        print (table)
+        # print (repr (table))
+        tw = TableWidget (notebook, table)
+        notebook.add (tw.frame,
+            text = 'Tabelle ' + str (tables.index (table) + 1))
+    notebook.pack (expand = True, fill = 'both', anchor = 'n')
+
+# Handler functions ############################################################
+def mk_tabcols():
+    if notebook is None:
+        tkinter.messagebox.showerror ('Fehler',
+            'Sie müssen zuerst eine gültige Adresse eingeben')
+    else:
+        # The current table index will be estimated by the text in the
+        # notebook
+        tabconf = notebook.tab ('current')
+        index = int (tabconf ['text'].split() [1]) - 1
+        tables [index].make_header()
+        show_tables()
+        notebook.select (index)
+
+def addr_button_click (addr_entry):
+    global tables
+    std_err_str = ('Die Adresse muss entweder auf eine lokale HTML-Datei ' +
+        'verweisen oder eine vollständige Adresse zu einer Web-Seite enthalten')
+    addr = addr_entry.get()
+
+    if addr == '':
+        tkinter.messagebox.showerror ('Fehler',
+            'Bitte Adresse eingeben\n' + std_err_str)
+        return
+    if addr.startswith ('http://'):
+        if asian_flag.get() == '1':
+            try:
+                page = subprocess.check_output (['asian', addr])
+                page = page.decode ('utf_8', 'ignore').strip()
+            except subprocess.CalledProcessError as msg:
+                tkinter.messagebox.showerror ('Fehler',
+                    'Asian-Modus gescheitert\n' + str (msg))
+                return
+            except OSError as msg:
+                tkinter.messagebox.showerror ('Fehler',
+                    'asian.exe konnte nicht aufgerufen werden\n' + str(msg))
+                return
+        else:
+            try:
+                f = urllib.request.urlopen (addr)
+                page = f.read().decode ('utf_8', 'ignore').strip()
+                f.close()
+            except urllib.request.URLError as msg:
+                tkinter.messagebox.showerror ('Fehler',
+                    'Web-Seite konnte nicht gelesen werden\n' + str (msg))
+                return
+    elif addr.endswith ('.html') or addr.endswith ('.htm'):
+        try:
+            f = open (addr, 'rb')
+            page = f.read().decode ('utf_8', 'ignore').strip()
+            f.close()
+        except IOError as msg:
+            tkinter.messagebox.showerror ('Fehler',
+                'Datei konnte nicht gelesen werden\n' + str (msg))
+            return
+    else:
+        tkinter.messagebox.showerror ('Fehler', std_err_str)
+        return
+
+    tables = html2tables (page)
+    filter_trash (tables)
+    # print (tables)
+    show_tables()
+################################################################################
+
+class Toolbar:
+    def __init__ (self):
+        global asian_flag
+        self.frame = ttk.Frame()
+        ttk.Button (self.frame,
+            text = 'Erste Reihe zu Überschriften',
+            command = mk_tabcols
+        ).pack (side = 'left', padx = 2, pady = 2)
+        asian_flag = tkinter.StringVar (self.frame)
+        ttk.Checkbutton (self.frame,
+            text = 'Asian-Modus',
+            variable = asian_flag
+        ).pack (side = 'left', padx = 2, pady = 2)
+
 class CmdWidget:
     def __init__ (self, root):
         self.frame = ttk.Frame (root)
-        self.notebook = None
-        self.tables = None
         self._setup_widgets()
 
     def _setup_widgets (self):
-        ttk.Button (self.frame,
-            text = 'Erste Reihe zu Überschriften',
-            command = self.mk_tabcols
-        ).pack (anchor = 'n')
+        Toolbar().frame.pack (anchor = 'n', fill = 'x')
         self.build_addr_bar().pack (fill = 'x', anchor = 's')
 
     def build_addr_bar (self):
@@ -433,85 +537,19 @@ class CmdWidget:
         label = ttk.Label (addr_frame, text = 'Adresse: ')
         tmp_frame = ttk.Frame (addr_frame)
         addr_entry = tkinter.Entry (tmp_frame, width = 40)
-        addr_entry.insert (0, 'test.html')
-        addr_handler = lambda s = self, a = addr_entry: s.addr_button_click (a)
+        addr_entry.insert (0, default_addr)
+        addr_handler = Curry (addr_button_click, addr_entry)
         addr_entry.bind ('<Return>', lambda event: addr_handler())
         addr_button = ttk.Button (tmp_frame,
             text = 'Öffnen',
             command = addr_handler
         )
 
-        label.pack (side = 'left')
-        addr_entry.pack (side = 'left', expand = True, fill = 'x')
-        addr_button.pack (side = 'right')
+        label.pack (side = 'left', padx = 2, pady = 2)
+        addr_entry.pack (side = 'left', expand = True, fill = 'x', pady = 2)
+        addr_button.pack (side = 'right', pady = 2)
         tmp_frame.pack (side = 'right', expand = True, fill = 'x')
         return addr_frame
-
-    # Handler functions ########################################################
-    def mk_tabcols (self):
-        if self.notebook is None:
-            tkinter.messagebox.showerror (title,
-                'Sie müssen zuerst eine gültige Adresse eingeben')
-        else:
-            # The current table index will be estimated by the text in the
-            # notebook
-            tabconf = self.notebook.tab ('current')
-            index = int (tabconf ['text'].split() [1]) - 1
-            self.tables [index].make_header()
-            self.show_tables()
-            self.notebook.select (index)
-
-    def addr_button_click (self, addr_entry):
-        std_err_str = ('Die Adresse muss entweder auf eine lokale HTML-Datei ' +
-            'verweisen oder eine vollständige Adresse zu einer Web-Seite ' +
-            'enthalten')
-        addr = addr_entry.get()
-
-        if addr == '':
-            tkinter.messagebox.showerror ('Fehler',
-                'Bitte Adresse eingeben\n' + std_err_str)
-            return
-        if addr.startswith ('http://'):
-            try:
-                f = urllib.request.urlopen (addr)
-                page = f.read().decode ('utf_8', 'ignore').strip()
-                f.close()
-            except urllib.request.URLError as msg:
-                tkinter.messagebox.showerror ('Fehler',
-                    'Web-Seite konnte nicht gelesent werden\n' + str (msg))
-                return
-        elif addr.endswith ('.html') or addr.endswith ('.htm'):
-            try:
-                f = open (addr, 'rb')
-                page = f.read().decode ('utf_8', 'ignore').strip()
-                f.close()
-            except IOError as msg:
-                tkinter.messagebox.showerror ('Fehler',
-                    'Datei konnte nicht gelesen werden\n' + str (msg))
-                return
-        else:
-            tkinter.messagebox.showerror ('Fehler', std_err_str)
-            return
-
-        self.tables = html2tables (page)
-        filter_trash (self.tables)
-        # print (self.tables)
-        self.show_tables()
-    ############################################################################
-
-    # Helper functions #########################################################
-    def show_tables (self):
-        if self.notebook is not None:
-            self.notebook.destroy()
-        self.notebook = ttk.Notebook()
-        for table in self.tables:
-            print (table)
-            # print (repr (table))
-            tw = TableWidget (self.notebook, table)
-            self.notebook.add (tw.frame,
-                text = 'Tabelle ' + str (self.tables.index (table) + 1))
-        self.notebook.pack (expand = True, fill = 'both', anchor = 'n')
-    ############################################################################
 
 if __name__ == '__main__':
     root = tkinter.Tk()
