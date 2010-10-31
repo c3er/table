@@ -3,9 +3,6 @@
 
 '''Reads tables from HTML files'''
 
-title = 'Tabellenauswerter'
-default_addr = 'wm2010.html'
-
 import tkinter
 import tkinter.font
 import tkinter.messagebox
@@ -21,6 +18,18 @@ class TableError (Exception):
     def __str__ (self):
         return repr (self.value)
 
+class Entry:
+    def __init__ (self, data = None, image = None, link = None):
+        self.data = data
+        self.image = image
+        self.link = link
+
+    def __str__ (self):
+        return self.data
+
+    def __repr__ (self):
+        return self.data
+
 class Table:
     def __init__ (self):
         '''Initiate a new empty table object'''
@@ -28,6 +37,15 @@ class Table:
         self.row = -1
         self.headered = False
         self._header = None
+
+    def __str__ (self):
+        if self._header is not None:
+            string = str (self._header) + '\n'
+        else:
+            string = ''
+        for row in self._data:
+            string += str (row) + '\n'
+        return string
 
     def __repr__ (self):
         string = '['
@@ -40,27 +58,23 @@ class Table:
                 string += ', '
         return string + ']'
 
-    def __str__ (self):
-        if self._header is not None:
-            string = str (self._header) + '\n'
-        else:
-            string = ''
-        for row in self._data:
-            string += str (row) + '\n'
-        return string
-
     def _mk_header (self):
         '''Internal function to prepare the header'''
         if self.headered and self._header is None and self._data != []:
             self._header = self._data [0]
-            self._data = self._data [1:]
+            if len (self._data) > 0:
+                self._data = self._data [1:]
             self.row -= 1
-            if len (self._header) < len (self._data [0]):
-                for i in range (len (self._header), len (self._data [0])):
-                    self._header.append ('Spalte ' + str (i + 1))
+
+            # This handles some special conditions, which occures while working
+            # with Tk
+            if self._data is not None and len (self._data) > 0:
+                if len (self._header) < len (self._data [0]):
+                    for i in range (len (self._header), len (self._data [0])):
+                        self._header.append (Entry ('Spalte ' + str (i + 1)))
             for i in range (len (self._header)):
-                if self._header [i] == '':
-                    self._header [i] = 'Spalte ' + str (i + 1)
+                if self._header [i].data == '':
+                    self._header [i] = Entry ('Spalte ' + str (i + 1))
 
     def get_data (self):
         self._mk_header()
@@ -103,8 +117,10 @@ class Table:
                 # A tuple will be transformed automatically to a list if the row
                 # is already a list
                 self._data [self.row] += data
-            else:
+            elif type (data) == Entry:
                 self._data [self.row].append (data)
+            else:
+                raise TableError ('data is neither a list, tuble nor Entry')
         else:
             raise TableError (
                 'Table contains no row where the data could be added')
@@ -112,7 +128,9 @@ class Table:
     def add_header_data (self, data):
         '''Adds new data to the header. This function have to be called, before
         normal data was added.'''
-        if not self.headered:
+        if type (data) != Entry:
+            raise TableError ('data must be of type Entry')
+        elif not self.headered:
             self.headered = True
         self.add_data (data)
 
@@ -143,10 +161,13 @@ class TableRead (html.parser.HTMLParser):
     def __init__ (self):
         super().__init__()
         self.table = None
+        self.entry = None
+        self.entrylist = []
         self.row = None
         self.tablelist = []
         self.tmptable = []
         self.incell = False
+        self.incelllist = []
         self.nested = False
         self.colspaned = False
         self.collist = []
@@ -156,13 +177,15 @@ class TableRead (html.parser.HTMLParser):
             'tr': self.tr_start,
             'td': self.td_start,
             'th': self.th_start,
-            'img': self.img
+            'img': self.img,
+            'a': self.a_start
         }
         self.endtags = {
             'table': self.table_end,
             'tr': self.tr_end,
             'td': self.td_end,
-            'th': self.th_end
+            'th': self.th_end,
+            'a': self.a_end
         }
 
     def __enter__ (self):
@@ -183,6 +206,9 @@ class TableRead (html.parser.HTMLParser):
         else:
             self.tmptable.append (self.table)
             self.table = Table()
+            self.entrylist.append (self.entry)
+            self.entry = None
+            self.incelllist.append (self.incell)
             self.incell = False
             self.nested = True
             self.collist.append (self.colspaned)
@@ -193,7 +219,8 @@ class TableRead (html.parser.HTMLParser):
             self.tablelist.append (self.table)
             self.table = self.tmptable.pop()
             self.nested = False
-            self.incell = True
+            self.entry = self.entrylist.pop()
+            self.incell = self.incelllist.pop()
             self.colspaned = self.collist.pop()
         elif self.table is not None:
             self.tablelist.append (self.table)
@@ -214,18 +241,21 @@ class TableRead (html.parser.HTMLParser):
                 if param == 'colspan':
                     self.colspaned = int (val)
             self.incell = True
+            self.entry = Entry()
 
     def th_end (self):
         if self.table is not None:
             if type (self.colspaned) == int:
                 self.tmpdat = self.tmpdat.strip()
+                self.entry.data = self.tmpdat
                 self.table.add_header_data (
-                    [self.tmpdat if i == 0 else 'Spalte ' + str (i + 1)
+                    [self.entry if i == 0 else Entry ('Spalte ' + str (i + 1))
                     for i in range (self.colspaned)]
                 )
                 self.colspaned = False
                 self.tmpdat = ''
                 self.incell = False
+                self.entry = None
             else:
                 self.add_cell_data (self.table.add_header_data)
 
@@ -236,6 +266,7 @@ class TableRead (html.parser.HTMLParser):
                     self.colspaned = True
             if not self.colspaned:
                 self.incell = True
+                self.entry = Entry()
 
     def td_end (self):
         if self.table is not None:
@@ -243,21 +274,31 @@ class TableRead (html.parser.HTMLParser):
 
     def img (self, attrs):
         if self.incell:
+            # Todo: Download the actual image from the web page
             self.tmpdat += '<Bild>'
+
+    def a_start (self, attrs):
+        pass
+
+    def a_end (self):
+        pass
     ############################################################################
 
     # Helper functions #########################################################
     def add_cell_data (self, func):
         if self.incell and not self.colspaned:
             if type (self.tmpdat) == str:
+                # Keep just one space character between the words
                 tmplist = self.tmpdat.split()
                 self.tmpdat = ''
                 for word in tmplist:
                     self.tmpdat += word + ' '
                 self.tmpdat = self.tmpdat.strip()
-            func (self.tmpdat)
+            self.entry.data = self.tmpdat
+            func (self.entry)
             self.tmpdat = ''
             self.incell = False
+            self.entry = None
     ############################################################################
 
     # Inherited from HTMLParser ################################################
@@ -298,7 +339,6 @@ def html2tables (page):
                 if not parerr:
                     break
             except html.parser.HTMLParseError as msg:
-                # print (msg)
                 parerr = True
         return parser.tables
 
@@ -329,6 +369,7 @@ class Curry:
 
 def sortby (tree, col, descending):
     """Sort tree contents when a column is clicked on."""
+
     # grab values to sort
     data = [(tree.set (child, col), child) for child in tree.get_children ('')]
 
@@ -353,12 +394,12 @@ def sortby (tree, col, descending):
 
     # reorder data
     if converted:
-        tmpdat.sort (reverse = descending)
+        tmpdat.sort (reverse = not descending)
         data = [(str (val) + tmpstr, foo) for val, foo in tmpdat]
     else:
         data.sort (reverse = descending)
-    for index, item in enumerate (data):
-        tree.move (item [1], '', index)
+    for i, val in enumerate (data):
+        tree.move (val [1], '', i)
 
     # switch the heading so that it will sort in the opposite direction
     tree.heading (col,
@@ -376,14 +417,20 @@ class TableWidget:
             except ValueError:
                 self.tabcols = ['Ungültig']
         else:
+            self.tabcols = [str (entry) for entry in self.tabcols]
             j = 0
             for i in range (len (self.tabcols)):
                 col = table.get_col (j)
-                if (col is not None and
-                        col [1:] == ['' for k in range (len (col) - 1)]):
-                    table.del_col (j)
-                else:
-                    j += 1
+                if col is not None:
+                    col = [str (entry) for entry in col]
+                    collen = len (col) - 1
+                    if col [1:] == ['' for k in range (collen)]:
+                        table.del_col (j)
+                    else:
+                        j += 1
+        if self.tabdata is not None:
+            for row in self.tabdata:
+                row = [str (entry) for entry in row]
         self.frame = ttk.Frame (root)
         self._setup_widgets (self.frame)
         self._build_tree()
@@ -404,22 +451,24 @@ class TableWidget:
 
     def _build_tree (self):
         for col in self.tabcols:
-            self.tree.heading (col, text = str (col),
-                command = Curry (sortby, self.tree, col, 0))
+            self.tree.heading (str (col),
+                text = str (col),
+                command = Curry (sortby, self.tree, col, False)
+            )
 
             # XXX tkinter.font.Font().measure expected args are incorrect
             # according to the Tk docs
             self.tree.column (col,
                 width = tkinter.font.Font().measure (str (col)))
 
-        for item in self.tabdata:
-            self.tree.insert ('', 'end', values = item)
+        for line in self.tabdata:
+            self.tree.insert ('', 'end', values = line)
 
             # adjust columns lenghts if necessary
-            for index, val in enumerate (item):
+            for i, val in enumerate (line):
                 ilen = tkinter.font.Font().measure (val)
-                if self.tree.column (self.tabcols [index], width = None) < ilen:
-                    self.tree.column (self.tabcols [index], width = ilen)
+                if self.tree.column (self.tabcols [i], width = None) < ilen:
+                    self.tree.column (self.tabcols [i], width = ilen)
 ################################################################################
 
 if __name__ == '__main__':

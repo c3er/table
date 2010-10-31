@@ -4,12 +4,13 @@
 '''Reads tables from HTML files'''
 
 title = 'Tabellenauswerter'
-default_addr = 'wm2010.html'
+default_addr = 'nested.html'
 
 import subprocess
 
 import tkinter
 import tkinter.messagebox
+# import tkinter.filedialog
 import tkinter.ttk as ttk
 
 import urllib.request
@@ -20,33 +21,28 @@ from table import Curry
 notebook = None
 tables = None
 asian_flag = None
+tabcols_button = None
 
 def show_tables():
     global notebook
     if notebook is not None:
         notebook.destroy()
     notebook = ttk.Notebook()
-    for t in tables:
-        print (t)
-        # print (repr (t))
+    for i, t in enumerate (tables):
         tw = table.TableWidget (notebook, t)
         notebook.add (tw.frame,
-            text = 'Tabelle ' + str (tables.index (t) + 1))
+            text = 'Tabelle ' + str (i + 1))
     notebook.pack (expand = True, fill = 'both', anchor = 'n')
 
 # Handler functions ############################################################
 def mk_tabcols():
-    if notebook is None:
-        tkinter.messagebox.showerror ('Fehler',
-            'Sie müssen zuerst eine gültige Adresse eingeben')
-    else:
-        # The current table index will be estimated by the text in the
-        # notebook
-        tabconf = notebook.tab ('current')
-        index = int (tabconf ['text'].split() [1]) - 1
-        tables [index].make_header()
-        show_tables()
-        notebook.select (index)
+    # The current table index will be estimated by the text in the
+    # notebook
+    tabconf = notebook.tab ('current')
+    index = int (tabconf ['text'].split() [1]) - 1
+    tables [index].make_header()
+    show_tables()
+    notebook.select (index)
 
 def addr_button_click (addr_entry):
     global tables
@@ -59,10 +55,10 @@ def addr_button_click (addr_entry):
             'Bitte Adresse eingeben\n' + std_err_str)
         return
     if addr.startswith ('http://'):
-        if asian_flag.get() == '1':
+        if asian_flag.get():
             try:
-                page = subprocess.check_output (['asian', addr])
-                page = page.decode ('utf_8', 'ignore').strip()
+                page = subprocess.check_output (['asian', addr]
+                ).decode ('utf_8', 'ignore').strip()
             except subprocess.CalledProcessError as msg:
                 tkinter.messagebox.showerror ('Fehler',
                     'Asian-Modus gescheitert\n' + str (msg))
@@ -95,25 +91,31 @@ def addr_button_click (addr_entry):
 
     tables = table.html2tables (page)
     table.filter_trash (tables)
-    # print (tables)
     show_tables()
+    if len (tables) > 0:
+        tabcols_button.config (state = tkinter.NORMAL)
+    else:
+        tabcols_button.config (state = tkinter.DISABLED)
 ################################################################################
 
 class Toolbar:
     def __init__ (self):
         global asian_flag
+        global tabcols_button
         self.frame = ttk.Frame()
 
-        ttk.Button (self.frame,
+        tabcols_button = ttk.Button (self.frame,
             text = 'Erste Reihe zu Überschriften',
-            command = mk_tabcols
-        ).pack (side = 'left', padx = 2, pady = 2)
+            command = mk_tabcols,
+            state = tkinter.DISABLED
+        )
+        tabcols_button.pack (side = 'left')
 
-        asian_flag = tkinter.StringVar (self.frame)
+        asian_flag = tkinter.BooleanVar (self.frame)
         ttk.Checkbutton (self.frame,
             text = 'Asian-Modus',
             variable = asian_flag
-        ).pack (side = 'left', padx = 2, pady = 2)
+        ).pack (side = 'left')
 
 class CmdWidget:
     def __init__ (self, root):
@@ -121,7 +123,7 @@ class CmdWidget:
         self._setup_widgets()
 
     def _setup_widgets (self):
-        Toolbar().frame.pack (anchor = 'n', fill = 'x')
+        Toolbar().frame.pack (anchor = 'n', fill = 'x', padx = 2, pady = 2)
         self.build_addr_bar().pack (fill = 'x', anchor = 's')
 
     def build_addr_bar (self):
@@ -146,5 +148,5 @@ class CmdWidget:
 if __name__ == '__main__':
     root = tkinter.Tk()
     root.wm_title (title)
-    CmdWidget (root).frame.pack (fill = 'x', anchor = 'n')
+    CmdWidget (root).frame.pack (fill = 'x', anchor = 'n', padx = 2, pady = 2)
     root.mainloop()
