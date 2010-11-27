@@ -19,7 +19,7 @@ class TableError (Exception):
         return repr (self.value)
 
 class Entry:
-    def __init__ (self, data = None, image = None, link = None):
+    def __init__ (self, data = '', image = None, link = None):
         self.data = data
         self.image = image
         self.link = link
@@ -28,7 +28,10 @@ class Entry:
         return self.data
 
     def __repr__ (self):
-        return self.data
+        return "'" + self.data + "'"
+
+    def isempty (self):
+        return self.data in ('', None)
 
 class Table:
     def __init__ (self):
@@ -66,11 +69,13 @@ class Table:
                 self._data = self._data [1:]
             self.row -= 1
 
-            # This handles some special conditions, which occures while working
+            # This handles some special conditions, which occurre while working
             # with Tk
             if self._data is not None and len (self._data) > 0:
-                if len (self._header) < len (self._data [0]):
-                    for i in range (len (self._header), len (self._data [0])):
+                headerlen = len (self._header)
+                datalen = len (self._data [0])
+                if headerlen < datalen:
+                    for i in range (headerlen, datalen):
                         self._header.append (Entry ('Spalte ' + str (i + 1)))
             for i in range (len (self._header)):
                 if self._header [i].data == '':
@@ -89,7 +94,11 @@ class Table:
         if self._header is not None:
             col.append (self._header [index])
         for row in self._data:
-            col.append (row [index])
+            if len (row) > index:
+                col.append (row [index])
+            else:
+                row.append (Entry())
+                col.append (row [index])
         return col
 
     data = property (get_data)
@@ -120,7 +129,7 @@ class Table:
             elif type (data) == Entry:
                 self._data [self.row].append (data)
             else:
-                raise TableError ('data is neither a list, tuble nor Entry')
+                self._data [self.row].append (Entry (data))
         else:
             raise TableError (
                 'Table contains no row where the data could be added')
@@ -128,9 +137,7 @@ class Table:
     def add_header_data (self, data):
         '''Adds new data to the header. This function have to be called, before
         normal data was added.'''
-        if type (data) != Entry:
-            raise TableError ('data must be of type Entry')
-        elif not self.headered:
+        if not self.headered:
             self.headered = True
         self.add_data (data)
 
@@ -160,25 +167,19 @@ class Table:
 class TableRead (html.parser.HTMLParser):
     def __init__ (self):
         super().__init__()
-        self.table = None
-        self.entry = None
-        self.entrylist = []
+        self.stack = []
+        self._reset (True)
         self.row = None
         self.tablelist = []
-        self.tmptable = []
-        self.incell = False
-        self.incelllist = []
         self.nested = False
-        self.colspaned = False
-        self.collist = []
         self.tmpdat = ''
         self.starttags = {
             'table': self.table_start,
             'tr': self.tr_start,
             'td': self.td_start,
             'th': self.th_start,
-            'img': self.img,
-            'a': self.a_start
+            'a': self.a_start,
+            'img': self.img
         }
         self.endtags = {
             'table': self.table_end,
@@ -194,34 +195,51 @@ class TableRead (html.parser.HTMLParser):
     def __exit__ (self, exc_type, exc_value, traceback):
         self.close()
 
+    def _reset (self, isinit):
+        if isinit:
+            self.table = None
+        else:
+            self.table = Table()
+        self.nested = not isinit
+        self.entry = None
+        self.incell = False
+        self.colspaned = False
+
     def get_tables (self):
         return self.tablelist
 
     tables = property (get_tables)
+
+    def push (self):
+        self.stack.append ((
+            self.table,
+            self.entry,
+            self.incell,
+            self.colspaned,
+            self.nested
+        ))
+
+    def pop (self):
+        (
+            self.table,
+            self.entry,
+            self.incell,
+            self.colspaned,
+            self.nested
+        ) = self.stack.pop()
 
     # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
     def table_start (self, attrs):
         if self.table is None:
             self.table = Table()
         else:
-            self.tmptable.append (self.table)
-            self.table = Table()
-            self.entrylist.append (self.entry)
-            self.entry = None
-            self.incelllist.append (self.incell)
-            self.incell = False
-            self.nested = True
-            self.collist.append (self.colspaned)
-            self.colspaned = False
+            self.push()
+            self._reset (False)
 
     def table_end (self):
         if self.nested:
             self.tablelist.append (self.table)
-            self.table = self.tmptable.pop()
-            self.nested = False
-            self.entry = self.entrylist.pop()
-            self.incell = self.incelllist.pop()
-            self.colspaned = self.collist.pop()
+            self.pop()
         elif self.table is not None:
             self.tablelist.append (self.table)
             self.table = None
@@ -274,7 +292,7 @@ class TableRead (html.parser.HTMLParser):
 
     def img (self, attrs):
         if self.incell:
-            # Todo: Download the actual image from the web page
+            # Todo: Download the actuall image from the web page
             self.tmpdat += '<Bild>'
 
     def a_start (self, attrs):
@@ -327,9 +345,12 @@ class TableRead (html.parser.HTMLParser):
     def handle_entityref (self, name):
         if self.incell:
             self.tmpdat += html.entities.entitydefs [name]
+    ############################################################################
 
 def html2tables (page):
-    '''Transforms a HTML page, containing tables, to a list of Table objects'''
+    '''Transforms a HTML page, containing tables, to a list of Table objects
+    The parameter "page" has to be a bytes object'''
+    page = page.decode ('utf_8', 'ignore').strip()
     linecount = len (page.splitlines())
     with TableRead() as parser:
         parerr = False
@@ -338,7 +359,7 @@ def html2tables (page):
                 parser.feed (page)
                 if not parerr:
                     break
-            except html.parser.HTMLParseError as msg:
+            except html.parser.HTMLParseError:
                 parerr = True
         return parser.tables
 
@@ -353,10 +374,7 @@ def filter_trash (tables):
         else:
             j += 1
 
-
-################################################################################
 # This stuff was originally from some demos ####################################
-
 class Curry:
     """handles arguments for callback functions"""
     def __init__ (self, callback, *args, **kw):
@@ -378,6 +396,7 @@ def sortby (tree, col, descending):
     converted = False
     tmpdat = []
     try:
+        # XXX Erkennung für Zahlenwerte überarbeiten
         for val, foo in data:
             if val.endswith ('.'):
                 val = val [0: -1]
@@ -417,7 +436,12 @@ class TableWidget:
             except ValueError:
                 self.tabcols = ['Ungültig']
         else:
-            self.tabcols = [str (entry) for entry in self.tabcols]
+            self.tabcols = self._build_row (self.tabcols)
+        if self.tabdata is not None:
+            tmp = []
+            for row in self.tabdata:
+                tmp.append (self._build_row (row))
+            self.tabdata = tmp
             j = 0
             for i in range (len (self.tabcols)):
                 col = table.get_col (j)
@@ -428,17 +452,22 @@ class TableWidget:
                         table.del_col (j)
                     else:
                         j += 1
-        if self.tabdata is not None:
-            for row in self.tabdata:
-                row = [str (entry) for entry in row]
         self.frame = ttk.Frame (root)
         self._setup_widgets (self.frame)
         self._build_tree()
 
+    def _build_row (self, row):
+        tmp = []
+        for entry in row:
+            entry = ' ' if entry.isempty() else str (entry)
+            tmp.append (entry)
+        return tmp
+
     def _setup_widgets (self, frame):
         frame.pack (fill = 'both', expand = True)
-
         self.tree = ttk.Treeview (columns = self.tabcols, show = "headings")
+        self.tree.bind ("<MouseWheel>", self.wheelscroll)
+
         vsb = ttk.Scrollbar (orient = "vertical", command = self.tree.yview)
         hsb = ttk.Scrollbar (orient = "horizontal", command = self.tree.xview)
         self.tree.configure (yscrollcommand = vsb.set, xscrollcommand = hsb.set)
@@ -462,13 +491,20 @@ class TableWidget:
                 width = tkinter.font.Font().measure (str (col)))
 
         for line in self.tabdata:
-            self.tree.insert ('', 'end', values = line)
+            # XXX Link this ID to the appropriate row in the appropriate table
+            id_ = self.tree.insert ('', 'end', values = line)
 
             # adjust columns lenghts if necessary
             for i, val in enumerate (line):
                 ilen = tkinter.font.Font().measure (val)
                 if self.tree.column (self.tabcols [i], width = None) < ilen:
                     self.tree.column (self.tabcols [i], width = ilen)
+
+    def wheelscroll (self, event):
+        if event.delta > 0:
+            self.tree.yview ('scroll', -2, 'units')
+        else:
+            self.tree.yview ('scroll', 2, 'units')
 ################################################################################
 
 if __name__ == '__main__':

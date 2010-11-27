@@ -4,7 +4,7 @@
 '''Reads tables from HTML files'''
 
 title = 'Tabellenauswerter'
-default_addr = 'nested.html'
+default_addr = 'wm2010.html'
 
 import subprocess
 
@@ -29,6 +29,7 @@ def show_tables():
         notebook.destroy()
     notebook = ttk.Notebook()
     for i, t in enumerate (tables):
+        # print (t)
         tw = table.TableWidget (notebook, t)
         notebook.add (tw.frame,
             text = 'Tabelle ' + str (i + 1))
@@ -36,10 +37,7 @@ def show_tables():
 
 # Handler functions ############################################################
 def mk_tabcols():
-    # The current table index will be estimated by the text in the
-    # notebook
-    tabconf = notebook.tab ('current')
-    index = int (tabconf ['text'].split() [1]) - 1
+    index = notebook.index ('current')
     tables [index].make_header()
     show_tables()
     notebook.select (index)
@@ -54,33 +52,32 @@ def addr_button_click (addr_entry):
         tkinter.messagebox.showerror ('Fehler',
             'Bitte Adresse eingeben\n' + std_err_str)
         return
-    if addr.startswith ('http://'):
+    elif addr.startswith ('http://'):
         if asian_flag.get():
             try:
-                page = subprocess.check_output (['asian', addr]
-                ).decode ('utf_8', 'ignore').strip()
+                page = subprocess.check_output (['asian', addr])
             except subprocess.CalledProcessError as msg:
                 tkinter.messagebox.showerror ('Fehler',
                     'Asian-Modus gescheitert\n' + str (msg))
                 return
             except OSError as msg:
                 tkinter.messagebox.showerror ('Fehler',
-                    'asian.exe konnte nicht aufgerufen werden\n' + str(msg))
+                    'asian.exe konnte nicht aufgerufen werden\n' + str (msg))
                 return
         else:
             try:
-                f = urllib.request.urlopen (addr)
-                page = f.read().decode ('utf_8', 'ignore').strip()
-                f.close()
+                req = urllib.request.Request (addr)
+                req.add_header ('User-agent', 'Mozilla/5.0')
+                with urllib.request.urlopen (req) as f:
+                    page = f.read()
             except urllib.request.URLError as msg:
                 tkinter.messagebox.showerror ('Fehler',
                     'Web-Seite konnte nicht gelesen werden\n' + str (msg))
                 return
     elif addr.endswith ('.html') or addr.endswith ('.htm'):
         try:
-            f = open (addr, 'rb')
-            page = f.read().decode ('utf_8', 'ignore').strip()
-            f.close()
+            with open (addr, 'rb') as f:
+                page = f.read()
         except IOError as msg:
             tkinter.messagebox.showerror ('Fehler',
                 'Datei konnte nicht gelesen werden\n' + str (msg))
@@ -98,24 +95,25 @@ def addr_button_click (addr_entry):
         tabcols_button.config (state = tkinter.DISABLED)
 ################################################################################
 
-class Toolbar:
-    def __init__ (self):
-        global asian_flag
-        global tabcols_button
-        self.frame = ttk.Frame()
+def toolbar():
+    global asian_flag
+    global tabcols_button
+    frame = ttk.Frame()
 
-        tabcols_button = ttk.Button (self.frame,
-            text = 'Erste Reihe zu Überschriften',
-            command = mk_tabcols,
-            state = tkinter.DISABLED
-        )
-        tabcols_button.pack (side = 'left')
+    tabcols_button = ttk.Button (frame,
+        text = 'Erste Reihe zu Überschriften',
+        command = mk_tabcols,
+        state = tkinter.DISABLED
+    )
+    tabcols_button.pack (side = 'left')
 
-        asian_flag = tkinter.BooleanVar (self.frame)
-        ttk.Checkbutton (self.frame,
-            text = 'Asian-Modus',
-            variable = asian_flag
-        ).pack (side = 'left')
+    asian_flag = tkinter.BooleanVar (frame)
+    ttk.Checkbutton (frame,
+        text = 'Asian-Modus',
+        variable = asian_flag
+    ).pack (side = 'left')
+
+    return frame
 
 class CmdWidget:
     def __init__ (self, root):
@@ -123,7 +121,7 @@ class CmdWidget:
         self._setup_widgets()
 
     def _setup_widgets (self):
-        Toolbar().frame.pack (anchor = 'n', fill = 'x', padx = 2, pady = 2)
+        toolbar().pack (anchor = 'n', fill = 'x', padx = 2, pady = 2)
         self.build_addr_bar().pack (fill = 'x', anchor = 's')
 
     def build_addr_bar (self):
