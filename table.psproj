@@ -10,15 +10,30 @@ ShowFileExtensions=TRUE
 ClassName=TProjectFilesNode
 
 [Project\ChildNodes\Node0\ChildNodes\Node0]
+ClassName=TProjectFolderNode
+Name=res
+
+[Project\ChildNodes\Node0\ChildNodes\Node0\ChildNodes\Node0]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\res\__init__.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node0\ChildNodes]
+Count=1
+
+[Project\ChildNodes\Node0\ChildNodes\Node1]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\log.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node2]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
 
-[Project\ChildNodes\Node0\ChildNodes\Node1]
+[Project\ChildNodes\Node0\ChildNodes\Node3]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\table.pyw
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=2
+Count=4
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

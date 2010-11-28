@@ -11,6 +11,8 @@ import tkinter.ttk as ttk
 import html.parser
 import html.entities
 
+import res
+
 class TableError (Exception):
     def __init__ (self, value):
         self.value = value
@@ -76,10 +78,12 @@ class Table:
                 datalen = len (self._data [0])
                 if headerlen < datalen:
                     for i in range (headerlen, datalen):
-                        self._header.append (Entry ('Spalte ' + str (i + 1)))
+                        self._header.append (
+                            Entry (res.std_col_label + str (i + 1))
+                        )
             for i in range (len (self._header)):
                 if self._header [i].data == '':
-                    self._header [i] = Entry ('Spalte ' + str (i + 1))
+                    self._header [i] = Entry (res.std_col_label + str (i + 1))
 
     def get_data (self):
         self._mk_header()
@@ -171,7 +175,6 @@ class TableRead (html.parser.HTMLParser):
         self._reset (True)
         self.row = None
         self.tablelist = []
-        self.nested = False
         self.tmpdat = ''
         self.starttags = {
             'table': self.table_start,
@@ -265,9 +268,9 @@ class TableRead (html.parser.HTMLParser):
         if self.table is not None:
             if type (self.colspaned) == int:
                 self.tmpdat = self.tmpdat.strip()
-                self.entry.data = self.tmpdat
+                self.entry.data = self.tmpdat + '1'
                 self.table.add_header_data (
-                    [self.entry if i == 0 else Entry ('Spalte ' + str (i + 1))
+                    [self.entry if i == 0 else Entry (self.tmpdat + str (i + 1))
                     for i in range (self.colspaned)]
                 )
                 self.colspaned = False
@@ -292,11 +295,14 @@ class TableRead (html.parser.HTMLParser):
 
     def img (self, attrs):
         if self.incell:
-            # Todo: Download the actuall image from the web page
-            self.tmpdat += '<Bild>'
+            # Todo: Download the actual image from the web page
+            self.tmpdat += res.image_dummy
 
     def a_start (self, attrs):
-        pass
+        if self.incell:
+            for param, val in attrs:
+                if param == 'href':
+                    self.entry.link = val
 
     def a_end (self):
         pass
@@ -375,7 +381,8 @@ def filter_trash (tables):
             j += 1
 
 # This stuff was originally from some demos ####################################
-class Curry:
+
+class curry:
     """handles arguments for callback functions"""
     def __init__ (self, callback, *args, **kw):
         self.callback = callback
@@ -388,30 +395,32 @@ class Curry:
 def sortby (tree, col, descending):
     """Sort tree contents when a column is clicked on."""
 
-    # grab values to sort
+    # Grab values to sort
     data = [(tree.set (child, col), child) for child in tree.get_children ('')]
 
     # The numeric values should not be sorted alphabetical
-    tmpstr = ''
-    converted = False
+    converted = True
     tmpdat = []
-    try:
-        # XXX Erkennung für Zahlenwerte überarbeiten
-        for val, foo in data:
-            if val.endswith ('.'):
-                val = val [0: -1]
-                tmpstr = '.'
-            elif val.endswith ('%'):
-                val = val [0: -1]
-                tmpstr = '%'
-            fval = float (val)
+    for val, foo in data:
+        if val [0].isdigit():
+            tmpstr = ''
+            for char in val:
+                if char.isdigit() or char == '.':
+                    tmpstr += char
+                elif char == ',':
+                    tmpstr += '.'
+                else:
+                    break
+            if tmpstr.endswith ('.'):
+                tmpstr = tmpstr [: -1]
+            fval = float (tmpstr)
             ival = int (fval)
-            tmpdat.append ((ival if fval - ival == 0 else fval, foo))
-        converted = True
-    except ValueError:
-        pass
+            tmpdat.append (((ival if fval - ival == 0 else fval), foo))
+        else:
+            converted = False
+            break
 
-    # reorder data
+    # Reorder data
     if converted:
         tmpdat.sort (reverse = not descending)
         data = [(str (val) + tmpstr, foo) for val, foo in tmpdat]
@@ -420,9 +429,9 @@ def sortby (tree, col, descending):
     for i, val in enumerate (data):
         tree.move (val [1], '', i)
 
-    # switch the heading so that it will sort in the opposite direction
+    # Switch the heading so that it will sort in the opposite direction
     tree.heading (col,
-        command = Curry (sortby, tree, col, int (not descending)))
+        command = curry (sortby, tree, col, int (not descending)))
 
 class TableWidget:
     def __init__ (self, root, table):
@@ -432,9 +441,11 @@ class TableWidget:
         if self.tabcols is None:
             try:
                 maxlen = max (len (line) for line in self.tabdata)
-                self.tabcols = ['Spalte ' + str (i + 1) for i in range (maxlen)]
+                self.tabcols = [
+                    res.std_col_label + str (i + 1) for i in range (maxlen)
+                ]
             except ValueError:
-                self.tabcols = ['Ungültig']
+                self.tabcols = [res.std_illegal_label]
         else:
             self.tabcols = self._build_row (self.tabcols)
         if self.tabdata is not None:
@@ -482,7 +493,7 @@ class TableWidget:
         for col in self.tabcols:
             self.tree.heading (str (col),
                 text = str (col),
-                command = Curry (sortby, self.tree, col, False)
+                command = curry (sortby, self.tree, col, False)
             )
 
             # XXX tkinter.font.Font().measure expected args are incorrect
@@ -494,7 +505,7 @@ class TableWidget:
             # XXX Link this ID to the appropriate row in the appropriate table
             id_ = self.tree.insert ('', 'end', values = line)
 
-            # adjust columns lenghts if necessary
+            # Adjust columns lenghts if necessary
             for i, val in enumerate (line):
                 ilen = tkinter.font.Font().measure (val)
                 if self.tree.column (self.tabcols [i], width = None) < ilen:
@@ -509,6 +520,6 @@ class TableWidget:
 
 if __name__ == '__main__':
     root = ttk.Frame()
-    tkinter.messagebox.showerror ('Fehler',
-        'Sie müssen "Tabellenauswerter.py" starten')
+    tkinter.messagebox.showerror (res.std_error_title,
+        res.wrong_file_started)
     root.destroy()
