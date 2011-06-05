@@ -12,13 +12,11 @@ import html.parser
 import html.entities
 
 import res
+import log
+from misc import *
 
 class TableError (Exception):
-    def __init__ (self, value):
-        self.value = value
-
-    def __str__ (self):
-        return repr (self.value)
+    pass
 
 class Entry:
     def __init__ (self, data = '', image = None, link = None):
@@ -140,7 +138,7 @@ class Table:
 
     def add_header_data (self, data):
         '''Adds new data to the header. This function have to be called, before
-        normal data was added.'''
+        normal data has been added.'''
         if not self.headered:
             self.headered = True
         self.add_data (data)
@@ -173,7 +171,6 @@ class TableRead (html.parser.HTMLParser):
         super().__init__()
         self.stack = []
         self._reset (True)
-        self.row = None
         self.tablelist = []
         self.tmpdat = ''
         self.starttags = {
@@ -198,7 +195,7 @@ class TableRead (html.parser.HTMLParser):
     def __exit__ (self, exc_type, exc_value, traceback):
         self.close()
 
-    def _reset (self, isinit):
+    def _reset (self, isinit = False):
         if isinit:
             self.table = None
         else:
@@ -237,7 +234,7 @@ class TableRead (html.parser.HTMLParser):
             self.table = Table()
         else:
             self.push()
-            self._reset (False)
+            self._reset()
 
     def table_end (self):
         if self.nested:
@@ -268,11 +265,13 @@ class TableRead (html.parser.HTMLParser):
         if self.table is not None:
             if type (self.colspaned) == int:
                 self.tmpdat = self.tmpdat.strip()
-                self.entry.data = self.tmpdat + '1'
-                self.table.add_header_data (
-                    [self.entry if i == 0 else Entry (self.tmpdat + str (i + 1))
-                    for i in range (self.colspaned)]
-                )
+                self.entry.data = self.tmpdat + ' 1'
+                self.table.add_header_data ([
+                    self.entry
+                    if i == 0 else
+                    Entry (self.tmpdat + ' ' + str (i + 1))
+                    for i in range (self.colspaned)
+                ])
                 self.colspaned = False
                 self.tmpdat = ''
                 self.incell = False
@@ -296,7 +295,8 @@ class TableRead (html.parser.HTMLParser):
     def img (self, attrs):
         if self.incell:
             # Todo: Download the actual image from the web page
-            self.tmpdat += res.image_dummy
+            # self.tmpdat += res.image_dummy
+            pass
 
     def a_start (self, attrs):
         if self.incell:
@@ -373,27 +373,15 @@ def filter_trash (tables):
     listlen = len (tables)
     j = 0
     for i in range (listlen):
-        if (tables [j].data in ([], [['']], [''], [['', '', 'No.']]) or
-                len (tables [j].data) <= 3):
+        if len (tables [j].data) <= 3:
             tables.remove (tables [j])
             listlen -= 1
         else:
             j += 1
 
 # This stuff was originally from some demos ####################################
-
-class curry:
-    """handles arguments for callback functions"""
-    def __init__ (self, callback, *args, **kw):
-        self.callback = callback
-        self.args = args
-        self.kw = kw
-
-    def __call__ (self):
-        return self.callback (*self.args, **self.kw)
-
 def sortby (tree, col, descending):
-    """Sort tree contents when a column is clicked on."""
+    '''Sort tree contents when a column is clicked on.'''
 
     # Grab values to sort
     data = [(tree.set (child, col), child) for child in tree.get_children ('')]
@@ -411,7 +399,7 @@ def sortby (tree, col, descending):
                     tmpstr += '.'
                 else:
                     break
-            if tmpstr.endswith ('.'):
+            while tmpstr.endswith ('.'):
                 tmpstr = tmpstr [: -1]
             fval = float (tmpstr)
             ival = int (fval)
@@ -439,6 +427,7 @@ class TableWidget:
         self.tabcols = table.header
         self.tabdata = table.data
         if self.tabcols is None:
+            # The table does not have a header. Make one.
             try:
                 maxlen = max (len (line) for line in self.tabdata)
                 self.tabcols = [
@@ -454,6 +443,8 @@ class TableWidget:
                 tmp.append (self._build_row (row))
             self.tabdata = tmp
             j = 0
+
+            # Delete empty columns
             for i in range (len (self.tabcols)):
                 col = table.get_col (j)
                 if col is not None:
@@ -463,6 +454,7 @@ class TableWidget:
                         table.del_col (j)
                     else:
                         j += 1
+
         self.frame = ttk.Frame (root)
         self._setup_widgets (self.frame)
         self._build_tree()
@@ -475,10 +467,10 @@ class TableWidget:
         return tmp
 
     def _setup_widgets (self, frame):
-        frame.pack (fill = 'both', expand = True)
         self.tree = ttk.Treeview (columns = self.tabcols, show = "headings")
         self.tree.bind ("<MouseWheel>", self.wheelscroll)
 
+        # Setup the scrollbars
         vsb = ttk.Scrollbar (orient = "vertical", command = self.tree.yview)
         hsb = ttk.Scrollbar (orient = "horizontal", command = self.tree.xview)
         self.tree.configure (yscrollcommand = vsb.set, xscrollcommand = hsb.set)
@@ -488,6 +480,7 @@ class TableWidget:
 
         frame.grid_columnconfigure (0, weight = 1)
         frame.grid_rowconfigure (0, weight = 1)
+        frame.pack (fill = 'both', expand = True)
 
     def _build_tree (self):
         for col in self.tabcols:
@@ -519,7 +512,4 @@ class TableWidget:
 ################################################################################
 
 if __name__ == '__main__':
-    root = ttk.Frame()
-    tkinter.messagebox.showerror (res.std_error_title,
-        res.wrong_file_started)
-    root.destroy()
+    error (res.wrong_file_started)

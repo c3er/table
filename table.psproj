@@ -26,14 +26,18 @@ FileName=$[Project-Path]tabellenauswerter\log.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node2]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
+FileName=$[Project-Path]tabellenauswerter\misc.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node3]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node4]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\table.pyw
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=4
+Count=5
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

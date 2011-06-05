@@ -7,24 +7,21 @@
 <node TEXT="Links folgen" ID="ID_1607019111" CREATED="1284004683301" MODIFIED="1284004691517"/>
 <node TEXT="Mehrere HTML Seiten einlesen und in einzelne Tabelle speichern" ID="Freemind_Link_314297537" CREATED="1282951901600" MODIFIED="1282951933477"/>
 </node>
+<node TEXT="Session-Management einbauen" ID="ID_1481060665" CREATED="1291219698796" MODIFIED="1291219712230"/>
 </node>
-<node TEXT="Architektur" POSITION="right" ID="Freemind_Link_1026043641" CREATED="1282952316449" MODIFIED="1282952337394">
-<node TEXT="Logging hinzuf&#xfc;gen" ID="ID_1991519954" CREATED="1283942436205" MODIFIED="1284369584387">
-<richcontent TYPE="NOTE">
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      python_rag - august 2009
-    </p>
-  </body>
-</html></richcontent>
-</node>
+<node TEXT="Architektur" POSITION="right" ID="Freemind_Link_1026043641" CREATED="1282952316449" MODIFIED="1282952337394"/>
+<node TEXT="Unstimmigkeiten" POSITION="right" ID="ID_1866639714" CREATED="1291101587363" MODIFIED="1291101592659">
+<node TEXT="Asian-Modus erzeugt Konsolenfenster" ID="ID_1676187317" CREATED="1291101593939" MODIFIED="1291101613582"/>
 </node>
 <node TEXT="Fehler" POSITION="right" ID="Freemind_Link_1610695100" CREATED="1282952553167" MODIFIED="1283350188541">
 <icon BUILTIN="button_cancel"/>
+</node>
+<node TEXT="Zukunft" POSITION="right" ID="ID_1781117322" CREATED="1305430554828" MODIFIED="1305430560577">
+<node TEXT="Nach entscheidener Weiterentwicklung" ID="ID_149165070" CREATED="1305439721809" MODIFIED="1305439737656">
+<node TEXT="Kontaktieren" ID="ID_927593229" CREATED="1305439739582" MODIFIED="1305439745029">
+<node TEXT="hausburg@beuth-hochschule.de" ID="ID_211715972" CREATED="1305439765886" MODIFIED="1305439768044"/>
+</node>
+</node>
 </node>
 </node>
 </map>
