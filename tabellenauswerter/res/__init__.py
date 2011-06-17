@@ -3,6 +3,7 @@
 
 title = 'Tabellenauswerter'
 default_addr = 'test.html'
+base_addr = 'http://fun2.asianbookie.com/index.cfm?top20=1'
 
 logfile = 'logfile.txt'
 asian_exe = 'asian'
@@ -37,3 +38,10 @@ tab_title = 'Tabelle '
 std_col_label = 'Spalte '
 std_illegal_label = 'Ungültig'
 image_dummy = '<Bild>'
+
+new_session_label = 'Neue Session'
+new_session_one_site_title = 'Einzelne Webseite einlesen'
+addr_website_label = 'Adresse der Webseite'
+base_addr_label = 'Basisadresse'
+helper_label = 'Hilfsprogramm benutzen'
+open_html_label = 'HTML-Datei öffnen'

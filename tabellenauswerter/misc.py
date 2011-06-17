@@ -12,15 +12,24 @@ def error (msg, exc = None):
     log file.
     "msg" shall be string object, which contains the message, which will be
     showen to the user and be noted in the log file.'''
-    # XXX Behandlung von Exception überarbeiten
     tkinter.messagebox.showerror (res.std_error_title, msg)
-    logfunc = log.error if exc is None else log.exception
+
+    if exc is None:
+        logfunc = log.error
+    else:
+        logfunc = log.exception
+        msg = exc
+
     if log.isready():
         logfunc (msg)
     else:
         log.init (res.logfile)
         logfunc (msg)
         log.close()
+
+def setentry (entry, text):
+    entry.delete (0, 'end')
+    entry.insert (0, text)
 
 # This stuff was originally from some demos ####################################
 class curry:

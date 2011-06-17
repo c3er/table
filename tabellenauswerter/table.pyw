@@ -11,9 +11,16 @@ import tkinter.ttk as ttk
 import html.parser
 import html.entities
 
+from functools import wraps
+
 import res
 import log
 from misc import *
+
+'''@wraps (m)
+def modifies (self, *args, **kw):
+    self.modified = True
+    return m (self, *args, **kw)'''
 
 class TableError (Exception):
     pass
@@ -106,6 +113,11 @@ class Table:
     data = property (get_data)
     header = property (get_header)
 
+    def dumb (self, path):
+        '''Saves the table object to a file.
+        The parameter "path" contains the location to the file.'''
+        pass
+
     def add_row (self, row = None):
         '''Appends a row to the table. The optional parameter row must be a
         list or a tuple'''
@@ -166,7 +178,12 @@ class Table:
         self.headered = True
         self._mk_header()
 
+def load (path):
+    pass
+
 class TableRead (html.parser.HTMLParser):
+    '''Internal used parser class to parse the tables from the given HTML.'''
+
     def __init__ (self):
         super().__init__()
         self.stack = []
@@ -418,8 +435,7 @@ def sortby (tree, col, descending):
         tree.move (val [1], '', i)
 
     # Switch the heading so that it will sort in the opposite direction
-    tree.heading (col,
-        command = curry (sortby, tree, col, int (not descending)))
+    tree.heading (col, command = curry (sortby, tree, col, not descending))
 
 class TableWidget:
     def __init__ (self, root, table):
@@ -442,9 +458,9 @@ class TableWidget:
             for row in self.tabdata:
                 tmp.append (self._build_row (row))
             self.tabdata = tmp
-            j = 0
 
             # Delete empty columns
+            j = 0
             for i in range (len (self.tabcols)):
                 col = table.get_col (j)
                 if col is not None:
