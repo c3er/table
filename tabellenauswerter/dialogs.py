@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import subprocess
 import urllib.request
 
 import tkinter
@@ -89,7 +90,7 @@ class _DialogBase (tkinter.Toplevel):
         pass
     ###
     ############################################################################
-    
+
 ################################################################################
 
 class NewDialog (_DialogBase):
@@ -108,17 +109,17 @@ class NewDialog (_DialogBase):
         )
         if fname:
             setentry (self.addr_entry, fname)
-    
+
     def frame_one_website (self, master):
         page = ttk.Frame (master)
         subpage = ttk.Frame (page)
-        
+
         top_frame = ttk.Frame (subpage)
         ttk.Label (top_frame,
             text = res.addr_website_label
         ).pack (side = 'left')
         top_frame.pack (side = 'top', fill = 'x')
-        
+
         middle_frame = ttk.Frame (subpage)
         self.addr_entry = tkinter.Entry (middle_frame, width = 40)
         self.addr_entry.insert (0, res.default_addr)
@@ -129,40 +130,40 @@ class NewDialog (_DialogBase):
             variable = self.helper_flag
         ).pack (side = 'left')
         middle_frame.pack (side = 'top', fill = 'x')
-        
+
         bottom_frame = ttk.Frame (subpage)
         ttk.Button (bottom_frame,
             text = res.open_html_label,
             command = self.open_html,
         ).pack (side = 'left', pady = 5)
         bottom_frame.pack (side = 'top', fill = 'x')
-        
+
         subpage.pack (padx = 5, pady = 5)
         return page
-    
+
     def frame_asianbookie (self, master):
         page = ttk.Frame (master)
         subpage = ttk.Frame (page)
-        
+
         top_frame = ttk.Frame (subpage)
         ttk.Label (top_frame,
             text = res.base_addr_label
         ).pack (side = 'left')
         top_frame.pack (side = 'top', fill = 'x')
-        
+
         bottom_frame = ttk.Frame (subpage)
         self.base_addr_entry = tkinter.Entry (bottom_frame)
         self.base_addr_entry.insert (0, res.base_addr)
         self.base_addr_entry.pack (fill = 'x')
         bottom_frame.pack (side = 'top', fill = 'x')
-        
+
         subpage.pack (padx = 5, pady = 5, fill = 'both')
         return page
-    
+
     @log.logmethod
     def read_one_website (self):
         addr = self.addr_entry.get()
-    
+
         if not addr:
             error (res.addr_empty_error + res.std_error_msg)
             return False
@@ -195,16 +196,16 @@ class NewDialog (_DialogBase):
         else:
             error (res.std_error_msg)
             return False
-    
+
         self.result = table.html2tables (page)
         table.filter_trash (self.result)
         return True
-    
+
     def read_asianbookie (self):
         tkinter.messagebox.showinfo ('Hallo', res.asian_label)
         return True
     ############################################################################
-    
+
     # Inherited from smpldlg.Dialog ############################################
     def body (self, master):
         self.notebook = ttk.Notebook (master)
@@ -215,10 +216,10 @@ class NewDialog (_DialogBase):
             text = res.asian_label
         )
         self.notebook.pack (expand = True, fill = 'both', anchor = 'n')
-        
+
         # Set focus to the address entry
         return self.addr_entry
-    
+
     def validate (self):
         index = self.notebook.index ('current')
         if index == 0:

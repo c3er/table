@@ -5,7 +5,6 @@
 
 DEBUG_ON = True
 
-import subprocess
 import pickle
 
 import tkinter
