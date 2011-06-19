@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''Reads tables from HTML files'''
+'''Reads tables from HTML files
+XXX This comment is not up to date anymore'''
+
+import pickle
 
 import tkinter
 import tkinter.font
@@ -17,28 +20,230 @@ import res
 import log
 from misc import *
 
-'''@wraps (m)
-def modifies (self, *args, **kw):
-    self.modified = True
-    return m (self, *args, **kw)'''
-
 class TableError (Exception):
     pass
 
+class TableReaderBase (html.parser.HTMLParser):
+    def __init__ (self):
+        super().__init__()
+        self.tmpdat = ''
+        self.read_data_flag = False
+        self.starttags = {}
+        self.endtags = {}
+
+    def __enter__ (self):
+        return self.__class__()
+
+    def __exit__ (self, exc_type, exc_value, traceback):
+        self.close()
+    
+    # Inherited from html.parser.HTMLParser ####################################
+    def handle_starttag (self, tag, attrs):
+        try:
+            self.starttags [tag] (attrs)
+        except KeyError:
+            pass
+
+    def handle_startendtag (self, tag, attrs):
+        self.handle_starttag (tag, attrs)
+
+    def handle_endtag (self, tag):
+        try:
+            self.endtags [tag]()
+        except KeyError:
+            pass
+
+    def handle_data (self, data):
+        if self.read_data_flag:
+            self.tmpdat += data
+
+    def handle_charref (self, name):
+        if self.read_data_flag:
+            try:
+                self.tmpdat += chr (int (name))
+            except ValueError:
+                self.tmpdat += '?'
+
+    def handle_entityref (self, name):
+        if self.read_data_flag:
+            self.tmpdat += html.entities.entitydefs [name]
+    ############################################################################
+
+class TableHTMLReader (TableReaderBase):
+    '''Internal used parser class to parse the tables from the given HTML.'''
+
+    def __init__ (self):
+        super().__init__()
+        self.stack = []
+        self._reset (True)
+        self.tablelist = []
+        self.starttags = {
+            'table': self.table_start,
+            'tr': self.tr_start,
+            'td': self.td_start,
+            'th': self.th_start,
+            'a': self.a_start,
+            'img': self.img
+        }
+        self.endtags = {
+            'table': self.table_end,
+            'tr': self.tr_end,
+            'td': self.td_end,
+            'th': self.th_end,
+            'a': self.a_end
+        }
+
+    def get_tables (self):
+        return self.tablelist
+
+    tables = property (get_tables)
+
+    def _reset (self, isinit = False):
+        if isinit:
+            self.table = None
+        else:
+            self.table = Table()
+        self.nested = not isinit
+        self.entry = None
+        self.read_data_flag = False
+        self.colspaned = False
+
+    def push (self):
+        self.stack.append ((
+            self.table,
+            self.entry,
+            self.read_data_flag,
+            self.colspaned,
+            self.nested
+        ))
+
+    def pop (self):
+        (
+            self.table,
+            self.entry,
+            self.read_data_flag,
+            self.colspaned,
+            self.nested
+        ) = self.stack.pop()
+
+    # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
+    def table_start (self, attrs):
+        if self.table is None:
+            self.table = Table()
+        else:
+            self.push()
+            self._reset()
+
+    def table_end (self):
+        if self.nested:
+            self.tablelist.append (self.table)
+            self.pop()
+        elif self.table is not None:
+            self.tablelist.append (self.table)
+            self.table = None
+
+    def tr_start (self, attrs):
+        if self.table is not None:
+            self.table.add_row()
+
+    def tr_end (self):
+        if self.table is not None and self.colspaned:
+            self.table.del_last_row()
+            self.colspaned = False
+
+    def th_start (self, attrs):
+        if self.table is not None and not self.read_data_flag:
+            for param, val in attrs:
+                if param == 'colspan':
+                    self.colspaned = int (val)
+            self.read_data_flag = True
+            self.entry = Entry()
+
+    def th_end (self):
+        if self.table is not None:
+            if type (self.colspaned) == int:
+                self.tmpdat = self.tmpdat.strip()
+                self.entry.data = self.tmpdat + ' 1'
+                self.table.add_header_data ([
+                    self.entry
+                    if i == 0 else
+                    Entry (self.tmpdat + ' ' + str (i + 1))
+                    for i in range (self.colspaned)
+                ])
+                self.colspaned = False
+                self.tmpdat = ''
+                self.read_data_flag = False
+                self.entry = None
+            else:
+                self.add_cell_data (self.table.add_header_data)
+
+    def td_start (self, attrs):
+        if self.table is not None and not self.read_data_flag:
+            for param, val in attrs:
+                if param == 'colspan':
+                    self.colspaned = True
+            if not self.colspaned:
+                self.read_data_flag = True
+                self.entry = Entry()
+
+    def td_end (self):
+        if self.table is not None:
+            self.add_cell_data (self.table.add_data)
+
+    def img (self, attrs):
+        if self.read_data_flag:
+            # Todo: Download the actual image from the web page
+            # self.tmpdat += res.image_dummy
+            pass
+
+    def a_start (self, attrs):
+        if self.read_data_flag:
+            for param, val in attrs:
+                if param == 'href':
+                    self.entry.link = val
+
+    def a_end (self):
+        pass
+    ############################################################################
+
+    # Helper functions #########################################################
+    def add_cell_data (self, func):
+        if self.read_data_flag and not self.colspaned:
+            if type (self.tmpdat) == str:
+                # Keep just one space character between the words
+                tmplist = self.tmpdat.split()
+                self.tmpdat = ''
+                for word in tmplist:
+                    self.tmpdat += word + ' '
+                self.tmpdat = self.tmpdat.strip()
+            self.entry.data = self.tmpdat
+            func (self.entry)
+            self.tmpdat = ''
+            self.read_data_flag = False
+            self.entry = None
+    ############################################################################
+
+class TableFileReader (TableReaderBase):
+    pass
+
 class Entry:
-    def __init__ (self, data = '', image = None, link = None):
+    def __init__ (self, data = '', link = None):
         self.data = data
-        self.image = image
         self.link = link
 
     def __str__ (self):
-        return self.data
+        return str (self.data)
 
     def __repr__ (self):
         return "'" + self.data + "'"
 
     def isempty (self):
         return self.data in ('', None)
+    
+    def dumb (self):
+        '''Returns a string, containing an entry, which can be used to append it
+        to a file.'''
+        pass
 
 class Table:
     def __init__ (self):
@@ -76,7 +281,7 @@ class Table:
                 self._data = self._data [1:]
             self.row -= 1
 
-            # This handles some special conditions, which occurre while working
+            # This handles some special conditions, which occure while working
             # with Tk
             if self._data is not None and len (self._data) > 0:
                 headerlen = len (self._header)
@@ -116,7 +321,9 @@ class Table:
     def dumb (self, path):
         '''Saves the table object to a file.
         The parameter "path" contains the location to the file.'''
-        pass
+        # XXX Just prototype
+        with open (path, 'wb') as f:
+            pickle.dump (self, f)
 
     def add_row (self, row = None):
         '''Appends a row to the table. The optional parameter row must be a
@@ -179,203 +386,17 @@ class Table:
         self._mk_header()
 
 def load (path):
-    pass
-
-class TableRead (html.parser.HTMLParser):
-    '''Internal used parser class to parse the tables from the given HTML.'''
-
-    def __init__ (self):
-        super().__init__()
-        self.stack = []
-        self._reset (True)
-        self.tablelist = []
-        self.tmpdat = ''
-        self.starttags = {
-            'table': self.table_start,
-            'tr': self.tr_start,
-            'td': self.td_start,
-            'th': self.th_start,
-            'a': self.a_start,
-            'img': self.img
-        }
-        self.endtags = {
-            'table': self.table_end,
-            'tr': self.tr_end,
-            'td': self.td_end,
-            'th': self.th_end,
-            'a': self.a_end
-        }
-
-    def __enter__ (self):
-        return TableRead()
-
-    def __exit__ (self, exc_type, exc_value, traceback):
-        self.close()
-
-    def _reset (self, isinit = False):
-        if isinit:
-            self.table = None
-        else:
-            self.table = Table()
-        self.nested = not isinit
-        self.entry = None
-        self.incell = False
-        self.colspaned = False
-
-    def get_tables (self):
-        return self.tablelist
-
-    tables = property (get_tables)
-
-    def push (self):
-        self.stack.append ((
-            self.table,
-            self.entry,
-            self.incell,
-            self.colspaned,
-            self.nested
-        ))
-
-    def pop (self):
-        (
-            self.table,
-            self.entry,
-            self.incell,
-            self.colspaned,
-            self.nested
-        ) = self.stack.pop()
-
-    # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
-    def table_start (self, attrs):
-        if self.table is None:
-            self.table = Table()
-        else:
-            self.push()
-            self._reset()
-
-    def table_end (self):
-        if self.nested:
-            self.tablelist.append (self.table)
-            self.pop()
-        elif self.table is not None:
-            self.tablelist.append (self.table)
-            self.table = None
-
-    def tr_start (self, attrs):
-        if self.table is not None:
-            self.table.add_row()
-
-    def tr_end (self):
-        if self.table is not None and self.colspaned:
-            self.table.del_last_row()
-            self.colspaned = False
-
-    def th_start (self, attrs):
-        if self.table is not None and not self.incell:
-            for param, val in attrs:
-                if param == 'colspan':
-                    self.colspaned = int (val)
-            self.incell = True
-            self.entry = Entry()
-
-    def th_end (self):
-        if self.table is not None:
-            if type (self.colspaned) == int:
-                self.tmpdat = self.tmpdat.strip()
-                self.entry.data = self.tmpdat + ' 1'
-                self.table.add_header_data ([
-                    self.entry
-                    if i == 0 else
-                    Entry (self.tmpdat + ' ' + str (i + 1))
-                    for i in range (self.colspaned)
-                ])
-                self.colspaned = False
-                self.tmpdat = ''
-                self.incell = False
-                self.entry = None
-            else:
-                self.add_cell_data (self.table.add_header_data)
-
-    def td_start (self, attrs):
-        if self.table is not None and not self.incell:
-            for param, val in attrs:
-                if param == 'colspan':
-                    self.colspaned = True
-            if not self.colspaned:
-                self.incell = True
-                self.entry = Entry()
-
-    def td_end (self):
-        if self.table is not None:
-            self.add_cell_data (self.table.add_data)
-
-    def img (self, attrs):
-        if self.incell:
-            # Todo: Download the actual image from the web page
-            # self.tmpdat += res.image_dummy
-            pass
-
-    def a_start (self, attrs):
-        if self.incell:
-            for param, val in attrs:
-                if param == 'href':
-                    self.entry.link = val
-
-    def a_end (self):
-        pass
-    ############################################################################
-
-    # Helper functions #########################################################
-    def add_cell_data (self, func):
-        if self.incell and not self.colspaned:
-            if type (self.tmpdat) == str:
-                # Keep just one space character between the words
-                tmplist = self.tmpdat.split()
-                self.tmpdat = ''
-                for word in tmplist:
-                    self.tmpdat += word + ' '
-                self.tmpdat = self.tmpdat.strip()
-            self.entry.data = self.tmpdat
-            func (self.entry)
-            self.tmpdat = ''
-            self.incell = False
-            self.entry = None
-    ############################################################################
-
-    # Inherited from HTMLParser ################################################
-    def handle_starttag (self, tag, attrs):
-        if tag in self.starttags.keys():
-            self.starttags [tag] (attrs)
-
-    def handle_startendtag (self, tag, attrs):
-        self.handle_starttag (tag, attrs)
-
-    def handle_endtag (self, tag):
-        if tag in self.endtags.keys():
-            self.endtags [tag]()
-
-    def handle_data (self, data):
-        if self.incell:
-            self.tmpdat += data
-
-    def handle_charref (self, name):
-        if self.incell:
-            try:
-                self.tmpdat += chr (int (name))
-            except ValueError:
-                self.tmpdat += '?'
-
-    def handle_entityref (self, name):
-        if self.incell:
-            self.tmpdat += html.entities.entitydefs [name]
-    ############################################################################
+    # XXX Just prototype
+    with open (path, 'rb') as f:
+        t = pickle.load (f)
+    return t
 
 def html2tables (page):
     '''Transforms a HTML page, containing tables, to a list of Table objects
     The parameter "page" has to be a bytes object'''
     page = page.decode ('utf_8', 'ignore').strip()
     linecount = len (page.splitlines())
-    with TableRead() as parser:
+    with TableHTMLReader() as parser:
         parerr = False
         while parser.getpos() [0] < linecount:
             try:

@@ -6,6 +6,13 @@ import tkinter.messagebox
 import res
 import log
 
+def _print_log (msg, exc = None):
+    if exc is None:
+        log.error (msg)
+    else:
+        log.error (msg)
+        log.exception (exc)
+
 def error (msg, exc = None):
     '''The function, which has always be called, if there a foreseen error
     occures. It shows the user an error message box and makes a note in the
@@ -14,17 +21,11 @@ def error (msg, exc = None):
     showen to the user and be noted in the log file.'''
     tkinter.messagebox.showerror (res.std_error_title, msg)
 
-    if exc is None:
-        logfunc = log.error
-    else:
-        logfunc = log.exception
-        msg = exc
-
     if log.isready():
-        logfunc (msg)
+        _print_log (msg, exc)
     else:
         log.init (res.logfile)
-        logfunc (msg)
+        _print_log (msg, exc)
         log.close()
 
 def setentry (entry, text):

@@ -13,6 +13,11 @@ import table
 
 from misc import *
 
+# Normally, this constant should be defined in subprocess.
+# Needed to hide the console window, which would appear under Windows by calling
+# an external command line program.
+STARTF_USESHOWWINDOW = 1
+
 # This stuff was originally from some demos ####################################
 class _DialogBase (tkinter.Toplevel):
     def __init__ (self, parent, title = None):
@@ -90,7 +95,6 @@ class _DialogBase (tkinter.Toplevel):
         pass
     ###
     ############################################################################
-
 ################################################################################
 
 class NewDialog (_DialogBase):
@@ -170,7 +174,14 @@ class NewDialog (_DialogBase):
         elif addr.startswith ('http://'):
             if self.helper_flag.get():
                 try:
-                    page = subprocess.check_output ([res.asian_exe, addr])
+                    # Hide the console window, which would appear under Windows
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
+                    
+                    # Do the actual call
+                    page = subprocess.check_output ([res.asian_exe, addr],
+                        startupinfo = startupinfo
+                    )
                 except subprocess.CalledProcessError as msg:
                     error (res.asian_mode_error + str (msg), msg)
                     return False
@@ -201,6 +212,7 @@ class NewDialog (_DialogBase):
         table.filter_trash (self.result)
         return True
 
+    @log.logmethod
     def read_asianbookie (self):
         tkinter.messagebox.showinfo ('Hallo', res.asian_label)
         return True
@@ -227,3 +239,6 @@ class NewDialog (_DialogBase):
         else:
             return self.read_asianbookie()
     ############################################################################
+
+if __name__ == '__main__':
+    error (res.wrong_file_started)

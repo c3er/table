@@ -26,12 +26,11 @@ filename = None
 save_button = None
 save_as_button = None
 tabcols_button = None
-addr_entry = None
 notebook = None
 
 # Helper functions #############################################################
 def adjust_state():
-    if len (tables) > 0:
+    if tables is not None and len (tables) > 0:
         tabcols_button.config (state = 'normal')
         save_button.config (state = 'normal')
         save_as_button.config (state = 'normal')
@@ -43,11 +42,11 @@ def adjust_state():
 @log.logfunction
 def show_tables():
     global notebook
+    log.debug ('Anzahl der Tabellen: ' + str (len (tables)))
     if notebook is not None:
         notebook.destroy()
     notebook = ttk.Notebook()
     for i, t in enumerate (tables):
-        log.debug (t)
         tw = table.TableWidget (notebook, t)
         notebook.add (tw.frame, text = res.tab_title + str (i + 1))
     notebook.pack (expand = True, fill = 'both', anchor = 'n')
