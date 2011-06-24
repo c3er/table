@@ -19,6 +19,8 @@ import session
 import dialogs
 from misc import *
 
+sess = None
+
 tables = None
 filename = None
 
@@ -80,7 +82,7 @@ def new_session (root):
         show_tables()
 
 @log.logfunction
-def open_session():
+def open_table():
     fname = tkinter.filedialog.askopenfilename (
         filetypes = [(res.tab_file_str, res.tab_file_ext)]
     )
@@ -88,7 +90,7 @@ def open_session():
         open_tabfile (fname)
 
 @log.logfunction
-def save_session_as():
+def save_table_as():
     fname = tkinter.filedialog.asksaveasfilename (
         filetypes = [(res.tab_file_str, res.tab_file_ext)]
     )
@@ -96,12 +98,12 @@ def save_session_as():
         if not fname.endswith (res.tab_file_ext):
             fname += res.tab_file_ext
         setfilename (fname)
-        save_session()
+        save_table()
 
 @log.logfunction
-def save_session():
+def save_table():
     if not filename:
-        save_session_as()
+        save_table_as()
     else:
         try:
             with open (filename, 'wb') as f:
@@ -131,19 +133,19 @@ def toolbar (root):
 
     ttk.Button (frame,
         text = res.open_label,
-        command = open_session
+        command = open_table
     ).pack (side = 'left')
 
     save_button = ttk.Button (frame,
         text = res.save_label,
-        command = save_session,
+        command = save_table,
         state = 'disabled'
     )
     save_button.pack (side = 'left')
 
     save_as_button = ttk.Button (frame,
         text = res.save_as_label,
-        command = save_session_as,
+        command = save_table_as,
         state = 'disabled'
     )
     save_as_button.pack (side = 'left')
@@ -166,15 +168,16 @@ def cmdwidget (root):
 
 def bind_events (root):
     root.bind ('<Control-n>', lambda event: new_session (root))
-    root.bind ('<Control-o>', lambda event: open_session())
-    root.bind ('<Control-s>', lambda event: save_session())
-    root.bind ('<Control-S>', lambda event: save_session_as())
+    root.bind ('<Control-o>', lambda event: open_table())
+    root.bind ('<Control-s>', lambda event: save_table())
+    root.bind ('<Control-S>', lambda event: save_table_as())
 ################################################################################
 
 if __name__ == '__main__':
     # Initializing
     log.init (res.logfile, DEBUG_ON)
     log.info ('###### Anwendung gestartet ######')
+    sess = session.Session()
     root = tkinter.Tk()
     root.wm_title (res.title)
     cmdwidget (root).pack (fill = 'x', anchor = 'n', padx = 2, pady = 2)

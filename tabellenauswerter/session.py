@@ -17,3 +17,13 @@ class TableContainer:
 class Session:
     def __init__ (self):
         self.notebook = None
+        self.tables = None
+        
+    def new (self):
+        pass
+    
+    def save_table (self):
+        pass
+    
+    def save_table_as (self):
+        pass
