@@ -53,22 +53,25 @@ class _DialogBase (tkinter.Toplevel):
         '''Add standard bottun box
         Overwrite, if there are no standard buttons wanted.'''
         box = ttk.Frame (self)
+        
         ttk.Button (box,
             text = "Abbrechen",
             width = 10,
             command = self.cancel
         ).pack (side = 'right', padx = 5, pady = 5)
+        
         ttk.Button (box,
             text = "OK",
             width = 10,
             command = self.ok,
             default = tkinter.ACTIVE
         ).pack (side = 'right', padx = 5, pady = 5)
+        
         self.bind ("<Return>", self.ok)
         self.bind ("<Escape>", self.cancel)
         box.pack (fill = 'x')
 
-    # Standard button behavior
+    # Standard button behavior ###
     def ok (self, event = None):
         if not self.validate():
             self.initial_focus.focus_set()
@@ -85,7 +88,7 @@ class _DialogBase (tkinter.Toplevel):
         self.destroy()
     ###
 
-    # Command hooks
+    # Command hooks ###
     def validate (self):
         # Overwrite
         return True
@@ -120,24 +123,24 @@ class NewDialog (_DialogBase):
 
         top_frame = ttk.Frame (subpage)
         ttk.Label (top_frame,
-            text = res.addr_website_label
+            text = res.ADDR_WEBSITE_LABEL
         ).pack (side = 'left')
         top_frame.pack (side = 'top', fill = 'x')
 
         middle_frame = ttk.Frame (subpage)
         self.addr_entry = tkinter.Entry (middle_frame, width = 40)
-        self.addr_entry.insert (0, res.default_addr)
+        self.addr_entry.insert (0, res.DEFAULT_ADDR)
         self.addr_entry.pack (side = 'left')
         self.helper_flag = tkinter.BooleanVar (master)
         ttk.Checkbutton (middle_frame,
-            text = res.helper_label,
+            text = res.HELPER_LABEL,
             variable = self.helper_flag
         ).pack (side = 'left')
         middle_frame.pack (side = 'top', fill = 'x')
 
         bottom_frame = ttk.Frame (subpage)
         ttk.Button (bottom_frame,
-            text = res.open_html_label,
+            text = res.OPEN_HTML_LABEL,
             command = self.open_html,
         ).pack (side = 'left', pady = 5)
         bottom_frame.pack (side = 'top', fill = 'x')
@@ -151,13 +154,13 @@ class NewDialog (_DialogBase):
 
         top_frame = ttk.Frame (subpage)
         ttk.Label (top_frame,
-            text = res.base_addr_label
+            text = res.BASE_ADDR_LABEL
         ).pack (side = 'left')
         top_frame.pack (side = 'top', fill = 'x')
 
         bottom_frame = ttk.Frame (subpage)
         self.base_addr_entry = tkinter.Entry (bottom_frame)
-        self.base_addr_entry.insert (0, res.base_addr)
+        self.base_addr_entry.insert (0, res.BASE_ADDR)
         self.base_addr_entry.pack (fill = 'x')
         bottom_frame.pack (side = 'top', fill = 'x')
 
@@ -169,7 +172,7 @@ class NewDialog (_DialogBase):
         addr = self.addr_entry.get()
 
         if not addr:
-            error (res.addr_empty_error + res.std_error_msg)
+            error (res.ADDR_EMPTY_ERROR + res.STD_ERROR_MSG)
             return False
         elif addr.startswith ('http://'):
             if self.helper_flag.get():
@@ -179,14 +182,14 @@ class NewDialog (_DialogBase):
                     startupinfo.dwFlags |= STARTF_USESHOWWINDOW
                     
                     # Do the actual call
-                    page = subprocess.check_output ([res.asian_exe, addr],
+                    page = subprocess.check_output ([res.ASIAN_EXE, addr],
                         startupinfo = startupinfo
                     )
                 except subprocess.CalledProcessError as msg:
-                    error (res.asian_mode_error + str (msg), msg)
+                    error (res.ASIAN_MODE_ERROR + str (msg), msg)
                     return False
                 except OSError as msg:
-                    error (res.asian_exe_error + str (msg), msg)
+                    error (res.ASIAN_EXE_ERROR + str (msg), msg)
                     return False
             else:
                 try:
@@ -195,17 +198,17 @@ class NewDialog (_DialogBase):
                     with urllib.request.urlopen (req) as f:
                         page = f.read()
                 except urllib.request.URLError as msg:
-                    error (res.web_read_error + str (msg), msg)
+                    error (res.WEB_READ_ERROR + str (msg), msg)
                     return False
         elif addr.endswith ('.html') or addr.endswith ('.htm'):
             try:
                 with open (addr, 'rb') as f:
                     page = f.read()
             except IOError as msg:
-                error (res.file_open_error + str (msg), msg)
+                error (res.FILE_OPEN_ERROR + str (msg), msg)
                 return False
         else:
-            error (res.std_error_msg)
+            error (res.STD_ERROR_MSG)
             return False
 
         self.result = table.html2tables (page)
@@ -214,7 +217,7 @@ class NewDialog (_DialogBase):
 
     @log.logmethod
     def read_asianbookie (self):
-        tkinter.messagebox.showinfo ('Hallo', res.asian_label)
+        tkinter.messagebox.showinfo ('Hallo', res.ASIAN_LABEL)
         return True
     ############################################################################
 
@@ -222,10 +225,10 @@ class NewDialog (_DialogBase):
     def body (self, master):
         self.notebook = ttk.Notebook (master)
         self.notebook.add (self.frame_one_website (master),
-            text = res.new_session_one_site_title
+            text = res.NEW_SESSION_ONE_SITE_TITLE
         )
         self.notebook.add (self.frame_asianbookie (master),
-            text = res.asian_label
+            text = res.ASIAN_LABEL
         )
         self.notebook.pack (expand = True, fill = 'both', anchor = 'n')
 
@@ -238,7 +241,11 @@ class NewDialog (_DialogBase):
             return self.read_one_website()
         else:
             return self.read_asianbookie()
+        
+    def apply (self):
+        # XXX validate und apply trennen
+        pass
     ############################################################################
 
 if __name__ == '__main__':
-    error (res.wrong_file_started)
+    error (res.WRONG_FILE_STARTED)

@@ -21,130 +21,102 @@ from misc import *
 
 sess = None
 
-tables = None
-filename = None
-
 # GUI elements, which are needed globally
 save_button = None
 save_as_button = None
 tabcols_button = None
-notebook = None
 
 # Helper functions #############################################################
-def adjust_state():
-    if tables is not None and len (tables) > 0:
-        tabcols_button.config (state = 'normal')
-        save_button.config (state = 'normal')
-        save_as_button.config (state = 'normal')
+@log.logfunction
+def adjust_state (sess):
+    if not sess.isempty:
+        save_as_button.config (state = 'enabled')
+        
+        curtab = sess.current_table
+        
+        if curtab.isheadered:
+            tabcols_button.config (state = 'disabled')
+        else:
+            tabcols_button.config (state = 'enabled')
+            
+        if curtab.modified:
+            save_button.config (state = 'enabled')
+        else:
+            save_button.config (state = 'disabled')
     else:
         tabcols_button.config (state = 'disabled')
-        save_button.config (state = 'disabled')
-        save_as_button.config (state = 'disabled')
-
-@log.logfunction
-def show_tables():
-    global notebook
-    log.debug ('Anzahl der Tabellen: ' + str (len (tables)))
-    if notebook is not None:
-        notebook.destroy()
-    notebook = ttk.Notebook()
-    for i, t in enumerate (tables):
-        tw = table.TableWidget (notebook, t)
-        notebook.add (tw.frame, text = res.tab_title + str (i + 1))
-    notebook.pack (expand = True, fill = 'both', anchor = 'n')
-    adjust_state()
-
-def setfilename (fname):
-    global filename
-    if fname is not None:
-        filename = fname
-
-def open_tabfile (fname):
-    global tables
-    try:
-        with open (fname, 'rb') as f:
-            tables = pickle.load (f)
-        setfilename (fname)
-        show_tables()
-    except IOError as msg:
-        error (res.file_open_error + str (msg), msg)
+        tabcols_button.config (state = 'disabled')
+        tabcols_button.config (state = 'disabled')
 ################################################################################
 
-
-
-# Handler functions ############################################################
+# Button handlers ##############################################################
 @log.logfunction
 def new_session (root):
-    global tables
-    nd = dialogs.NewDialog (root, res.new_session_label)
+    nd = dialogs.NewDialog (root, res.NEW_SESSION_LABEL)
     if nd.result:
-        tables = nd.result
-        show_tables()
+        sess.set_tablelist (nd.result)
 
 @log.logfunction
 def open_table():
-    fname = tkinter.filedialog.askopenfilename (
-        filetypes = [(res.tab_file_str, res.tab_file_ext)]
+    path = tkinter.filedialog.askopenfilename (
+        filetypes = [(res.TAB_FILE_STR, res.TAB_FILE_EXT)]
     )
-    if fname:
-        open_tabfile (fname)
+    if path:
+        sess.open_tabfile (path)
 
 @log.logfunction
-def save_table_as():
-    fname = tkinter.filedialog.asksaveasfilename (
-        filetypes = [(res.tab_file_str, res.tab_file_ext)]
+def save_table_as (tab = None):
+    path = tkinter.filedialog.asksaveasfilename (
+        filetypes = [(res.TAB_FILE_STR, res.TAB_FILE_EXT)]
     )
-    if fname:
-        if not fname.endswith (res.tab_file_ext):
-            fname += res.tab_file_ext
-        setfilename (fname)
-        save_table()
+    if path:
+        if not path.endswith (res.TAB_FILE_EXT):
+            path += res.TAB_FILE_EXT
+        tab = sess.current_table if tab is None else tab
+        tab.save (path)
 
 @log.logfunction
-def save_table():
-    if not filename:
+def save_table (tab = None):
+    try:
+        tab = sess.current_table if tab is None else tab
+        tab.save()
+    except session.UnknownPathException:
         save_table_as()
-    else:
-        try:
-            with open (filename, 'wb') as f:
-                pickle.dump (tables, f)
-        except IOError as msg:
-            error (res.file_save_error + str (msg), msg)
 
 @log.logfunction
 def mk_tabcols():
-    index = notebook.index ('current')
-    tables [index].make_header()
-    show_tables()
-    notebook.select (index)
+    sess.current_table.mk_tabcols()
 ################################################################################
+
+#def data
 
 # Build the actual Interface ###################################################
 def toolbar (root):
     global tabcols_button
     global save_button
     global save_as_button
+
     frame = ttk.Frame()
 
     ttk.Button (frame,
-        text = res.new_label,
+        text = res.NEW_LABEL,
         command = curry (new_session, root)
     ).pack (side = 'left')
 
     ttk.Button (frame,
-        text = res.open_label,
+        text = res.OPEN_LABEL,
         command = open_table
     ).pack (side = 'left')
 
     save_button = ttk.Button (frame,
-        text = res.save_label,
+        text = res.SAVE_LABEL,
         command = save_table,
         state = 'disabled'
     )
     save_button.pack (side = 'left')
 
     save_as_button = ttk.Button (frame,
-        text = res.save_as_label,
+        text = res.SAVE_AS_LABEL,
         command = save_table_as,
         state = 'disabled'
     )
@@ -153,7 +125,7 @@ def toolbar (root):
     ttk.Separator (frame, orient = 'vertical').pack (side = 'left', padx = 2)
 
     tabcols_button = ttk.Button (frame,
-        text = res.make_tabcols_label,
+        text = res.MAKE_TABCOLS_LABEL,
         command = mk_tabcols,
         state = 'disabled'
     )
@@ -175,11 +147,11 @@ def bind_events (root):
 
 if __name__ == '__main__':
     # Initializing
-    log.init (res.logfile, DEBUG_ON)
+    log.init (res.LOGFILE, DEBUG_ON)
     log.info ('###### Anwendung gestartet ######')
-    sess = session.Session()
     root = tkinter.Tk()
-    root.wm_title (res.title)
+    sess = session.Session (root, adjust_state)
+    root.wm_title (res.TITLE)
     cmdwidget (root).pack (fill = 'x', anchor = 'n', padx = 2, pady = 2)
     bind_events (root)
 

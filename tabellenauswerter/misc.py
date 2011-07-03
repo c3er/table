@@ -14,17 +14,17 @@ def _print_log (msg, exc = None):
         log.exception (exc)
 
 def error (msg, exc = None):
-    '''The function, which has always be called, if there a foreseen error
+    '''The function, which will be always called, if there a foreseen error
     occures. It shows the user an error message box and makes a note in the
     log file.
     "msg" shall be string object, which contains the message, which will be
     showen to the user and be noted in the log file.'''
-    tkinter.messagebox.showerror (res.std_error_title, msg)
+    tkinter.messagebox.showerror (res.STD_ERROR_TITLE, msg)
 
     if log.isready():
         _print_log (msg, exc)
     else:
-        log.init (res.logfile)
+        log.init (res.LOGFILE)
         _print_log (msg, exc)
         log.close()
 

@@ -193,7 +193,7 @@ class TableHTMLReader (TableReaderBase):
     def img (self, attrs):
         if self.read_data_flag:
             # Todo: Download the actual image from the web page
-            # self.tmpdat += res.image_dummy
+            # self.tmpdat += res.IMAGE_DUMMY
             pass
 
     def a_start (self, attrs):
@@ -224,12 +224,14 @@ class TableHTMLReader (TableReaderBase):
     ############################################################################
 
 class TableFileReader (TableReaderBase):
-    pass
+    def __init__ (self):
+        super().__init__()
 
 class Entry:
     def __init__ (self, data = '', link = None):
         self.data = data
         self.link = link
+        self.olddata = []
 
     def __str__ (self):
         return str (self.data)
@@ -250,7 +252,7 @@ class Table:
         '''Initiate a new empty table object'''
         self._data = []
         self.row = -1
-        self.headered = False
+        self.isheadered = False
         self._header = None
 
     def __str__ (self):
@@ -275,7 +277,7 @@ class Table:
 
     def _mk_header (self):
         '''Internal function to prepare the header'''
-        if self.headered and self._header is None and self._data != []:
+        if self.isheadered and self._header is None and self._data != []:
             self._header = self._data [0]
             if len (self._data) > 0:
                 self._data = self._data [1:]
@@ -289,11 +291,11 @@ class Table:
                 if headerlen < datalen:
                     for i in range (headerlen, datalen):
                         self._header.append (
-                            Entry (res.std_col_label + str (i + 1))
+                            Entry (res.STD_COL_LABEL + str (i + 1))
                         )
             for i in range (len (self._header)):
                 if self._header [i].data == '':
-                    self._header [i] = Entry (res.std_col_label + str (i + 1))
+                    self._header [i] = Entry (res.STD_COL_LABEL + str (i + 1))
 
     def get_data (self):
         self._mk_header()
@@ -328,9 +330,9 @@ class Table:
     def add_row (self, row = None):
         '''Appends a row to the table. The optional parameter row must be a
         list or a tuple'''
-        if type (row) == list:
+        if isinstance (row, list):
             self._data.append (row)
-        elif type (row) == tuple:
+        elif isinstance (row, tuple):
             self._data.append (list (row))
         elif row is not None:
             raise ValueError ('row is neither list nor tuple')
@@ -343,11 +345,11 @@ class Table:
         The table must contain at least one row. The data will be appended to
         the current row. This is also true for list or tuples'''
         if self.row >= 0:
-            if type (data) in (list, tuple):
+            if isinstance (data, list) or isinstance (data, tuple):
                 # A tuple will be transformed automatically to a list if the row
                 # is already a list
                 self._data [self.row] += data
-            elif type (data) == Entry:
+            elif isinstance (data, Entry):
                 self._data [self.row].append (data)
             else:
                 self._data [self.row].append (Entry (data))
@@ -358,8 +360,8 @@ class Table:
     def add_header_data (self, data):
         '''Adds new data to the header. This function have to be called, before
         normal data has been added.'''
-        if not self.headered:
-            self.headered = True
+        if not self.isheadered:
+            self.isheadered = True
         self.add_data (data)
 
     def del_last_row (self):
@@ -382,7 +384,7 @@ class Table:
 
     def make_header (self):
         '''Transforms the first line of the table to the header line'''
-        self.headered = True
+        self.isheadered = True
         self._mk_header()
 
 def load (path):
@@ -468,10 +470,10 @@ class TableWidget:
             try:
                 maxlen = max (len (line) for line in self.tabdata)
                 self.tabcols = [
-                    res.std_col_label + str (i + 1) for i in range (maxlen)
+                    res.STD_COL_LABEL + str (i + 1) for i in range (maxlen)
                 ]
             except ValueError:
-                self.tabcols = [res.std_illegal_label]
+                self.tabcols = [res.STD_ILLEGAL_LABEL]
         else:
             self.tabcols = self._build_row (self.tabcols)
         if self.tabdata is not None:
@@ -514,6 +516,8 @@ class TableWidget:
         self.tree.grid (column = 0, row = 0, sticky = 'nsew', in_ = frame)
         vsb.grid (column = 1, row = 0, sticky = 'ns', in_ = frame)
         hsb.grid (column = 0, row = 1, sticky = 'ew', in_ = frame)
+        
+        ttk.Sizegrip (frame).grid (column = 1, row = 1, sticky = ('s', 'e'))
 
         frame.grid_columnconfigure (0, weight = 1)
         frame.grid_rowconfigure (0, weight = 1)
@@ -549,4 +553,4 @@ class TableWidget:
 ################################################################################
 
 if __name__ == '__main__':
-    error (res.wrong_file_started)
+    error (res.WRONG_FILE_STARTED)
