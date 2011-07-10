@@ -145,9 +145,14 @@ class Session:
         for t in self.tables:
             t.update (True)
             title = t.filename
+            
             if title == res.UNKNOWN_FILE:
                 title += ' ' + str (counter)
                 counter += 1
+                
+            if t.modified:
+                title += '*'
+                
             self.notebook.add (t.frame, text = title)
             
         self.notebook.pack (expand = True, fill = 'both', anchor = 'n')

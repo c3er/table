@@ -5,8 +5,6 @@
 
 DEBUG_ON = True
 
-import pickle
-
 import tkinter
 import tkinter.messagebox
 import tkinter.filedialog
@@ -44,17 +42,37 @@ def adjust_state (sess):
         else:
             save_button.config (state = 'disabled')
     else:
+        # No table loaded yet.
         tabcols_button.config (state = 'disabled')
         tabcols_button.config (state = 'disabled')
         tabcols_button.config (state = 'disabled')
+  
+def avoid_tableloss():
+    if not sess.modified:
+        return True
+    else:
+        for t in sess.tables:
+            if t.modified:
+                result = tkinter.messagebox.askyesnocancel (
+                    res.SAVE_TABLE_TITLE,
+                    res.SAVE_TABLE_QUESTION.format (t.filename)
+                )
+                if result:
+                    # User clicked on "Yes"
+                    save_table (t)
+                elif result is None:
+                    # User clicked on "Cancel"
+                    return False
+        return True
 ################################################################################
 
-# Button handlers ##############################################################
+# Handler functions ############################################################
 @log.logfunction
 def new_session (root):
-    nd = dialogs.NewDialog (root, res.NEW_SESSION_LABEL)
-    if nd.result:
-        sess.set_tablelist (nd.result)
+    if avoid_tableloss():
+        nd = dialogs.NewDialog (root, res.NEW_SESSION_LABEL)
+        if nd.result:
+            sess.set_tablelist (nd.result)
 
 @log.logfunction
 def open_table():
@@ -81,14 +99,17 @@ def save_table (tab = None):
         tab = sess.current_table if tab is None else tab
         tab.save()
     except session.UnknownPathException:
-        save_table_as()
+        save_table_as (tab)
 
 @log.logfunction
 def mk_tabcols():
     sess.current_table.mk_tabcols()
-################################################################################
 
-#def data
+@log.logfunction
+def appclose_callback (root):
+    if avoid_tableloss():
+        root.destroy()
+################################################################################
 
 # Build the actual Interface ###################################################
 def toolbar (root):
@@ -154,6 +175,7 @@ if __name__ == '__main__':
     root.wm_title (res.TITLE)
     cmdwidget (root).pack (fill = 'x', anchor = 'n', padx = 2, pady = 2)
     bind_events (root)
+    root.protocol ('WM_DELETE_WINDOW', curry (appclose_callback, root))
 
     root.mainloop()
 
