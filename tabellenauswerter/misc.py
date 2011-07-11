@@ -7,6 +7,7 @@ import res
 import log
 
 def _print_log (msg, exc = None):
+    '''Used by the error function.'''
     if exc is None:
         log.error (msg)
     else:
@@ -14,11 +15,13 @@ def _print_log (msg, exc = None):
         log.exception (exc)
 
 def error (msg, exc = None):
-    '''The function, which will be always called, if there a foreseen error
+    '''
+    The function, which will be always called, if there a foreseen error
     occures. It shows the user an error message box and makes a note in the
     log file.
     "msg" shall be string object, which contains the message, which will be
-    showen to the user and be noted in the log file.'''
+    showen to the user and be noted in the log file.
+    '''
     tkinter.messagebox.showerror (res.STD_ERROR_TITLE, msg)
 
     if log.isready():
@@ -34,7 +37,7 @@ def setentry (entry, text):
 
 # This stuff was originally from some demos ####################################
 class curry:
-    """Handles arguments for callback functions"""
+    '''Handles arguments for callback functions'''
     def __init__ (self, callback, *args, **kw):
         self.callback = callback
         self.args = args

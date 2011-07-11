@@ -16,8 +16,10 @@ _handler = None
 _debug_on = None
 
 def init (logfile, debug_on = False):
-    '''Sets up the logger.
-    Must be called, before any other function is called.'''
+    '''
+    Sets up the logger.
+    Must be called, before any other function is called.
+    '''
     global _vs_logger
     global _debug_on
     global _handler
@@ -51,31 +53,31 @@ def close():
     _vs_logger = None
 
 def isready():
-    '''Returns the status of the logger'''
+    '''Returns the status of the logger.'''
     return _vs_logger is not None
 
 def info (msg):
-    '''Log message with level info'''
+    '''Log message with level info.'''
     if _vs_logger:
         _vs_logger.info (str (msg))
 
 def debug (msg):
-    '''Log message with level debug'''
+    '''Log message with level debug.'''
     if _debug_on and _vs_logger:
         _vs_logger.debug (str (msg))
 
 def error (msg):
-    '''Log message with level error'''
+    '''Log message with level error.'''
     if _vs_logger:
         _vs_logger.error (str (msg))
 
 def exception (msg):
-    '''Log message with level error plus exception traceback'''
+    '''Log message with level error plus exception traceback.'''
     if _vs_logger:
         _vs_logger.exception (str (msg))
 
 def logfunction (f):
-    '''Creates a decorator to log a function'''
+    '''Creates a decorator to log a function.'''
     @wraps (f)
     def wrapper (*args, **kw):
         debug ("{} called".format (f.__name__))
@@ -83,7 +85,7 @@ def logfunction (f):
     return wrapper
 
 def logmethod (m):
-    "Creates a decorator to log a method"
+    '''Creates a decorator to log a method.'''
     @wraps (m)
     def wrapper (self, *args, **kw):
         debug ("{} in {} called".format (m.__name__, self.__class__.__name__))

@@ -46,12 +46,14 @@ class _DialogBase (tkinter.Toplevel):
     def body (self, master):
         '''Create dialog
         Returns a widget, which should have the focus immediatly. This method
-        should be overwritten.'''
+        should be overwritten.
+        '''
         pass
 
     def buttonbox (self):
-        '''Add standard bottun box
-        Overwrite, if there are no standard buttons wanted.'''
+        '''Add standard button box
+        Overwrite, if there are no standard buttons wanted.
+        '''
         box = ttk.Frame (self)
         
         ttk.Button (box,

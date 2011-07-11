@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 TITLE = 'Tabellenauswerter'
-DEFAULT_ADDR = 'test.html'
+DEFAULT_ADDR = 'simple.html'
 BASE_ADDR = 'http://fun2.asianbookie.com/index.cfm?top20=1'
 
 LOGFILE = 'logfile.txt'
 ASIAN_EXE = 'asian'
 
 TAB_FILE_STR = 'Tabellen Dateien'
-TAB_FILE_EXT = '.tab'
+TAB_FILE_EXT = '.table'
 
 UNKNOWN_FILE = 'Unbekannt'
 

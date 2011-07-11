@@ -14,20 +14,27 @@ import tkinter.ttk as ttk
 import html.parser
 import html.entities
 
-from functools import wraps
-
 import res
 import log
 from misc import *
 
+# Version of the table file.
+CURRENT_FILE_VERSION = '0.1'
+
+class EntryError (Exception):
+    pass
+
 class TableError (Exception):
+    pass
+
+class TableFileError (Exception):
     pass
 
 class TableReaderBase (html.parser.HTMLParser):
     def __init__ (self):
         super().__init__()
         self.tmpdat = ''
-        self.read_data_flag = False
+        self._read_data_flag = False
         self.starttags = {}
         self.endtags = {}
 
@@ -36,6 +43,17 @@ class TableReaderBase (html.parser.HTMLParser):
 
     def __exit__ (self, exc_type, exc_value, traceback):
         self.close()
+        
+    # Properties ###############################################################
+    def get_read_data_flag (self):
+        return self._read_data_flag
+    
+    def set_read_data_flag (self, val):
+        self._read_data_flag = val
+        self.tmpdat = ''
+    
+    read_data_flag = property (get_read_data_flag, set_read_data_flag)
+    ############################################################################
     
     # Inherited from html.parser.HTMLParser ####################################
     def handle_starttag (self, tag, attrs):
@@ -171,7 +189,6 @@ class TableHTMLReader (TableReaderBase):
                     for i in range (self.colspaned)
                 ])
                 self.colspaned = False
-                self.tmpdat = ''
                 self.read_data_flag = False
                 self.entry = None
             else:
@@ -218,7 +235,6 @@ class TableHTMLReader (TableReaderBase):
                 self.tmpdat = self.tmpdat.strip()
             self.entry.data = self.tmpdat
             func (self.entry)
-            self.tmpdat = ''
             self.read_data_flag = False
             self.entry = None
     ############################################################################
@@ -226,10 +242,168 @@ class TableHTMLReader (TableReaderBase):
 class TableFileReader (TableReaderBase):
     def __init__ (self):
         super().__init__()
+        self.table = None
+        self.entry = None
+        self.entrydata = None
+        self.headerflag = False
+        self.isolddata = False
+        self.add_data_func = None
+        self.starttags = {
+            'tablefile': self.tablefile_start,
+            'table': self.table_start,
+            'headerrow': self.headerrow_start,
+            'row': self.row_start,
+            'entry': self.entry_start,
+            'data': self.data_start,
+            'current': self.current_start,
+            'old': self.old_start,
+            'olddata': self.olddata_start,
+            'number': self.number_start,
+            'string': self.string_start,
+            'link': self.link
+        }
+        self.endtags = {
+            'tablefile': self.tablefile_end,
+            'table': self.table_end,
+            'headerrow': self.headerrow_end,
+            'row': self.row_end,
+            'entry': self.entry_end,
+            'data': self.data_end,
+            'current': self.current_end,
+            'old': self.old_end,
+            'olddata': self.olddata_end,
+            'number': self.number_end,
+            'string': self.string_end
+        }
+        
+    # Handler for the tags #####################################################
+    def tablefile_start (self, attrs):
+        if not attrs:
+            raise TableFileError ('No file version found.')
+        
+        version_found = False
+        for attr, val in attrs:
+            if attr == 'version':
+                version_found = True
+                if val not in ('0.0', CURRENT_FILE_VERSION):
+                    raise TableFileError ('Wrong file version.')
+        
+        if not version_found:
+            raise TableFileError ('No file version found.')
+    
+    def tablefile_end (self):
+        pass
+    
+    def table_start (self, attrs):
+        self.table = Table()
+    
+    def table_end (self):
+        pass
+    
+    def headerrow_start (self, attrs):
+        self.headerflag = True
+        self.table.add_row()
+        self.add_data_func = self.table.add_header_data
+    
+    def headerrow_end (self):
+        self.headerflag = False
+        self.add_data_func = self.table.add_data
+    
+    def row_start (self, attrs):
+        self.table.add_row()
+    
+    def row_end (self):
+        pass
+    
+    def entry_start (self, attrs):
+        self.entry = Entry()
+    
+    def entry_end (self):
+        pass
+    
+    def data_start (self, attrs):
+        pass
+    
+    def data_end (self):
+        self.add_data_func (self.entry)
+        print (self.table)
+    
+    def current_start (self, attrs):
+        self.isolddata = False
+        self.entrydata = EntryData()
+    
+    def current_end (self):
+        self.entry.data = self.entrydata
+    
+    def old_start (self, attrs):
+        self.isolddata = True
+    
+    def old_end (self):
+        self.isolddata = False
+    
+    def olddata_start (self, attrs):
+        self.entrydata = EntryData()
+    
+    def olddata_end (self):
+        self.entry.add_olddata (self.entrydata)
+    
+    def number_start (self, attrs):
+        self.read_data_flag = True
+    
+    def number_end (self):
+        self.entrydata.number = str2num (self.tmpdat)
+        self.read_data_flag = False
+    
+    def string_start (self, attrs):
+        self.read_data_flag = True
+    
+    def string_end (self):
+        self.entrydata.string = self.tmpdat
+        self.read_data_flag = False
+    
+    def link (self, attrs):
+        addr_found = True
+        for attr, val in attrs:
+            if attr == 'addr':
+                addr_found = True
+                self.entry.link = val
+                
+        if not addr_found:
+            raise TableFileError ('Link element does not contain an address.')
+    ############################################################################
+    
+class EntryData:
+    def __init__ (self, val = None):
+        self.number = None
+        self.string = ''
+        if val is not None:
+            self.set (val)
+            
+    def __str__ (self):
+        #print ('EntryData.__str__:', self.string)
+        if self.string is None:
+            self.string = ''
+        numstr = str (self.number) if self.number is not None else ''
+        return str (numstr) + self.string
+    
+    def set (self, val):
+        #print ('EntryData.set:', val)
+        if isinstance (val, str):
+            self.number, self.string = split_data (val)
+        elif isinstance (val, EntryData):
+            self.number = val.number
+            self.string = val.string
+        elif isinstance (val, int) or isinstance (val, float):
+            self.number = val
+        else:
+            raise EntryError (
+                "The value must be either of type " +
+                "'EntryData', 'str', 'int' or 'float'."
+            )
 
 class Entry:
     def __init__ (self, data = '', link = None):
-        self.data = data
+        self._data = EntryData (data)
         self.link = link
         self.olddata = []
 
@@ -238,13 +412,42 @@ class Entry:
 
     def __repr__ (self):
         return "'" + self.data + "'"
+    
+    # Properties ###############################################################
+    def get_data (self):
+        return str (self._data)
+    
+    def set_data (self, val):
+        self._data.set (val)
+        
+    def get_number (self):
+        return self._data.number
+    
+    def set_number (self, val):
+        self._data.number = val
+    
+    def get_string (self):
+        return self._data.string
+    
+    def set_string (self, val):
+        self._data.string = val
+        
+    data = property (get_data, set_data)
+    number = property (get_number, set_number)
+    string = property (get_string, set_string)
+    ############################################################################
 
     def isempty (self):
         return self.data in ('', None)
     
+    def add_olddata (self, val):
+        self.olddata.append (EntryData (val))
+    
     def dumb (self):
-        '''Returns a string, containing an entry, which can be used to append it
-        to a file.'''
+        '''
+        Returns a string, containing an entry, which can be used to append it
+        to a file.
+        '''
         pass
 
 class Table:
@@ -297,6 +500,7 @@ class Table:
                 if self._header [i].data == '':
                     self._header [i] = Entry (res.STD_COL_LABEL + str (i + 1))
 
+    # Properties ###############################################################
     def get_data (self):
         self._mk_header()
         return self._data
@@ -319,17 +523,22 @@ class Table:
 
     data = property (get_data)
     header = property (get_header)
+    ############################################################################
 
     def dumb (self, path):
-        '''Saves the table object to a file.
-        The parameter "path" contains the location to the file.'''
+        '''
+        Saves the table object to a file.
+        The parameter "path" contains the location to the file.
+        '''
         # XXX Just prototype
         with open (path, 'wb') as f:
             pickle.dump (self, f)
 
     def add_row (self, row = None):
-        '''Appends a row to the table. The optional parameter row must be a
-        list or a tuple'''
+        '''
+        Appends a row to the table.
+        The optional parameter row must be a list or a tuple.
+        '''
         if isinstance (row, list):
             self._data.append (row)
         elif isinstance (row, tuple):
@@ -341,9 +550,11 @@ class Table:
         self.row += 1
 
     def add_data (self, data):
-        '''Adds new data to the current row.
+        '''
+        Adds new data to the current row.
         The table must contain at least one row. The data will be appended to
-        the current row. This is also true for list or tuples'''
+        the current row. This is also true for list or tuples.
+        '''
         if self.row >= 0:
             if isinstance (data, list) or isinstance (data, tuple):
                 # A tuple will be transformed automatically to a list if the row
@@ -358,8 +569,10 @@ class Table:
                 'Table contains no row where the data could be added')
 
     def add_header_data (self, data):
-        '''Adds new data to the header. This function have to be called, before
-        normal data has been added.'''
+        '''
+        Adds new data to the header.
+        This function have to be called, before normal data has been added.
+        '''
         if not self.isheadered:
             self.isheadered = True
         self.add_data (data)
@@ -373,7 +586,7 @@ class Table:
             raise TableError ('Table contains no row to delete')
 
     def del_col (self, index):
-        '''Deletes a column of the table'''
+        '''Deletes a column of the table.'''
         if self._header is not None:
             self._header.remove (self._header [index])
         if self._data is not None and self._data != []:
@@ -383,41 +596,9 @@ class Table:
             raise TableError ('Error by deleting column')
 
     def make_header (self):
-        '''Transforms the first line of the table to the header line'''
+        '''Transforms the first line of the table to the header line.'''
         self.isheadered = True
         self._mk_header()
-
-def load (path):
-    # XXX Just prototype
-    with open (path, 'rb') as f:
-        t = pickle.load (f)
-    return t
-
-def html2tables (page):
-    '''Transforms a HTML page, containing tables, to a list of Table objects
-    The parameter "page" has to be a bytes object'''
-    page = page.decode ('utf_8', 'ignore').strip()
-    linecount = len (page.splitlines())
-    with TableHTMLReader() as parser:
-        parerr = False
-        while parser.getpos() [0] < linecount:
-            try:
-                parser.feed (page)
-                if not parerr:
-                    break
-            except html.parser.HTMLParseError:
-                parerr = True
-        return parser.tables
-
-def filter_trash (tables):
-    listlen = len (tables)
-    j = 0
-    for i in range (listlen):
-        if len (tables [j].data) <= 3:
-            tables.remove (tables [j])
-            listlen -= 1
-        else:
-            j += 1
 
 # This stuff was originally from some demos ####################################
 def sortby (tree, col, descending):
@@ -429,21 +610,11 @@ def sortby (tree, col, descending):
     # The numeric values should not be sorted alphabetical
     converted = True
     tmpdat = []
+    string = ''
     for val, foo in data:
         if val [0].isdigit():
-            tmpstr = ''
-            for char in val:
-                if char.isdigit() or char == '.':
-                    tmpstr += char
-                elif char == ',':
-                    tmpstr += '.'
-                else:
-                    break
-            while tmpstr.endswith ('.'):
-                tmpstr = tmpstr [: -1]
-            fval = float (tmpstr)
-            ival = int (fval)
-            tmpdat.append (((ival if fval - ival == 0 else fval), foo))
+            number, string = split_data (val)
+            tmpdat.append ((number, foo))
         else:
             converted = False
             break
@@ -451,7 +622,7 @@ def sortby (tree, col, descending):
     # Reorder data
     if converted:
         tmpdat.sort (reverse = not descending)
-        data = [(str (val) + tmpstr, foo) for val, foo in tmpdat]
+        data = [(str (val) + string, foo) for val, foo in tmpdat]
     else:
         data.sort (reverse = descending)
     for i, val in enumerate (data):
@@ -551,6 +722,87 @@ class TableWidget:
         else:
             self.tree.yview ('scroll', 2, 'units')
 ################################################################################
+
+def load (path):
+    with open (path, 'rb') as f:
+        page = f.read().decode ('utf_8', 'ignore').strip()
+        with TableFileReader() as parser:
+            try:
+                parser.feed (page)
+            except html.parser.HTMLParseError as exc:
+                error ('Konnte Datei nich lesen', exc)
+                return None
+            return parser.table
+
+def html2tables (page):
+    '''
+    Transforms a HTML page, containing tables, to a list of Table objects.
+    The parameter "page" has to be a bytes object.
+    '''
+    page = page.decode ('utf_8', 'ignore').strip()
+    linecount = len (page.splitlines())
+    with TableHTMLReader() as parser:
+        parerr = False
+        while parser.getpos() [0] < linecount:
+            try:
+                parser.feed (page)
+                if not parerr:
+                    break
+            except html.parser.HTMLParseError:
+                parerr = True
+        return parser.tables
+
+def filter_trash (tables):
+    listlen = len (tables)
+    j = 0
+    for i in range (listlen):
+        if len (tables [j].data) <= 3:
+            tables.remove (tables [j])
+            listlen -= 1
+        else:
+            j += 1
+            
+def str2num (string):
+    fval = float (string)
+    ival = int (fval)
+    return ival if fval - ival == 0 else fval
+            
+def split_data (data):
+    '''
+    Splits the given data (which shall be a str object) and returns a tupel,
+    containig the number as first element and the rest as second element.
+    If the data does not begin with a number, the first element of the tuple
+    will None.
+    '''
+    number = None
+    string = data
+
+    tmpstr = ''
+    if data is not None:
+        if data != '' and data [0].isdigit():
+            
+            # Extract the number from the data string
+            numstr = ''
+            for i, char in enumerate (data):
+                if char.isdigit() or char == '.':
+                    numstr += char
+                elif char == ',':
+                    numstr += '.'
+                else:
+                    tmpstr = data [i:]
+                    break
+            
+            # The number string may end with dots, which must be deleted.
+            while numstr.endswith ('.'):
+                numstr = numstr [: -1]
+            
+            number = str2num (numstr)
+            string = tmpstr
+    else:
+        string = ''
+
+    #print ('split_data:', 'n:', number, 's:', string)
+    return number, string
 
 if __name__ == '__main__':
     error (res.WRONG_FILE_STARTED)
