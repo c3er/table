@@ -90,21 +90,6 @@
 <node TEXT="Windows-Standard (Endung: &quot;.table&quot;)" ID="ID_221986303" CREATED="1305438116934" MODIFIED="1305441321236"/>
 </node>
 </node>
-<node ID="ID_1005229" CREATED="1305988457874" MODIFIED="1305988471686">
-<richcontent TYPE="NODE">
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <img src="bilder/gui-entwurf/main.png"/>
-  </body>
-</html></richcontent>
-</node>
-</node>
-<node TEXT="Kontextmen&#xfc;" ID="ID_1301888488" CREATED="1305643211658" MODIFIED="1305643219170">
-<node TEXT="Erscheint bei Rechtsklick innerhalb der angezeigten Tabelle" ID="ID_956600456" CREATED="1305643508896" MODIFIED="1305643537086"/>
-<node TEXT="Eintr&#xe4;ge" ID="ID_402708680" CREATED="1305643452665" MODIFIED="1305643458287">
 <node TEXT="Speichern" ID="ID_1931088273" CREATED="1305439876180" MODIFIED="1305439879738">
 <node TEXT="Speichert Tabelle" ID="ID_587849607" CREATED="1305442650494" MODIFIED="1305646502905"/>
 <node TEXT="Wenn Dateiname noch unbekannt ist, wird Speichern-unter-Dialog angezeigt" ID="ID_591250691" CREATED="1305442655599" MODIFIED="1305443032306"/>
@@ -145,6 +130,16 @@
 <node TEXT="Windows-Standard Datei-&#xd6;ffnen (Endung: &quot;.table&quot;)" ID="ID_1591013961" CREATED="1305438116934" MODIFIED="1305648803985"/>
 </node>
 </node>
+<node ID="ID_1005229" CREATED="1305988457874" MODIFIED="1305988471686">
+<richcontent TYPE="NODE">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <img src="bilder/gui-entwurf/main.png"/>
+  </body>
+</html></richcontent>
 </node>
 </node>
 <node TEXT="Sonstiges" ID="ID_732315773" CREATED="1306628438088" MODIFIED="1306628444673">
@@ -224,9 +219,9 @@
 </node>
 </node>
 <node TEXT="old (optional)" ID="ID_1558340703" CREATED="1309646230472" MODIFIED="1309647170662">
-<node TEXT="Umschlie&#xdf;t eine Liste mit den ganzen alten (bzw. urspr&#xfc;nglichen) Daten&#xa;Sieht genauso aus, wie current." ID="ID_1498429863" CREATED="1309646260167" MODIFIED="1310167213229"/>
+<node TEXT="Umschlie&#xdf;t eine Liste mit den ganzen alten (bzw. urspr&#xfc;nglichen) Daten" ID="ID_1498429863" CREATED="1309646260167" MODIFIED="1310605567053"/>
 <node TEXT="olddata" ID="ID_1629018717" CREATED="1309646342879" MODIFIED="1309647047415">
-<node TEXT="Enth&#xe4;lt jeweils einen alten Eintrag (bzw. dessen Daten)" ID="ID_1444158102" CREATED="1309647052992" MODIFIED="1309647123338"/>
+<node TEXT="Enth&#xe4;lt jeweils einen alten Eintrag (bzw. dessen Daten)&#xa;Sieht genauso aus, wie current." ID="ID_1444158102" CREATED="1309647052992" MODIFIED="1310605574885"/>
 </node>
 </node>
 </node>

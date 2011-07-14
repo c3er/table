@@ -23,12 +23,14 @@ sess = None
 save_button = None
 save_as_button = None
 tabcols_button = None
+merge_table_button = None
 
 # Helper functions #############################################################
 @log.logfunction
 def adjust_state (sess):
     if not sess.isempty:
         save_as_button.config (state = 'enabled')
+        merge_table_button.config (state = 'enabled')
         
         curtab = sess.current_table
         
@@ -43,9 +45,10 @@ def adjust_state (sess):
             save_button.config (state = 'disabled')
     else:
         # No table loaded yet.
+        save_button.config (state = 'disabled')
+        save_as_button.config (state = 'disabled')
         tabcols_button.config (state = 'disabled')
-        tabcols_button.config (state = 'disabled')
-        tabcols_button.config (state = 'disabled')
+        merge_table_button.config (state = 'disabled')
   
 def avoid_tableloss():
     if not sess.modified:
@@ -106,6 +109,10 @@ def mk_tabcols():
     sess.current_table.mk_tabcols()
 
 @log.logfunction
+def merge_tables():
+    tkinter.messagebox.showinfo ('Hallo', res.MERGE_TABLES_LABEL)
+
+@log.logfunction
 def appclose_callback (root):
     if avoid_tableloss():
         root.destroy()
@@ -116,6 +123,7 @@ def toolbar (root):
     global tabcols_button
     global save_button
     global save_as_button
+    global merge_table_button
 
     frame = ttk.Frame()
 
@@ -151,6 +159,13 @@ def toolbar (root):
         state = 'disabled'
     )
     tabcols_button.pack (side = 'left')
+
+    merge_table_button = ttk.Button (frame,
+        text = res.MERGE_TABLES_LABEL,
+        command = merge_tables,
+        state = 'disabled'
+    )
+    merge_table_button.pack (side = 'left')
 
     return frame
 

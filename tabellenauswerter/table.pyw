@@ -32,7 +32,7 @@ class TableFileError (Exception):
 
 class TableReaderBase (html.parser.HTMLParser):
     def __init__ (self):
-        super().__init__()
+        super().__init__ (False)
         self.tmpdat = ''
         self._read_data_flag = False
         self.starttags = {}
@@ -73,6 +73,7 @@ class TableReaderBase (html.parser.HTMLParser):
 
     def handle_data (self, data):
         if self.read_data_flag:
+            print (data)
             self.tmpdat += data
 
     def handle_charref (self, name):
@@ -171,9 +172,9 @@ class TableHTMLReader (TableReaderBase):
 
     def th_start (self, attrs):
         if self.table is not None and not self.read_data_flag:
-            for param, val in attrs:
-                if param == 'colspan':
-                    self.colspaned = int (val)
+            val = find_attr (attrs, 'colspan')
+            if val is not None:
+                self.colspaned = int (val)
             self.read_data_flag = True
             self.entry = Entry()
 
@@ -196,9 +197,7 @@ class TableHTMLReader (TableReaderBase):
 
     def td_start (self, attrs):
         if self.table is not None and not self.read_data_flag:
-            for param, val in attrs:
-                if param == 'colspan':
-                    self.colspaned = True
+            self.colspaned = find_attr (attrs, 'colspan') is not None
             if not self.colspaned:
                 self.read_data_flag = True
                 self.entry = Entry()
@@ -215,9 +214,10 @@ class TableHTMLReader (TableReaderBase):
 
     def a_start (self, attrs):
         if self.read_data_flag:
-            for param, val in attrs:
+            '''for param, val in attrs:
                 if param == 'href':
-                    self.entry.link = val
+                    self.entry.link = val'''
+            self.entry.link = find_attr (attrs, 'href')
 
     def a_end (self):
         pass
@@ -280,16 +280,12 @@ class TableFileReader (TableReaderBase):
     def tablefile_start (self, attrs):
         if not attrs:
             raise TableFileError ('No file version found.')
-        
-        version_found = False
-        for attr, val in attrs:
-            if attr == 'version':
-                version_found = True
-                if val not in ('0.0', CURRENT_FILE_VERSION):
-                    raise TableFileError ('Wrong file version.')
-        
-        if not version_found:
+
+        version = find_attr (attrs, 'version')
+        if version is None:
             raise TableFileError ('No file version found.')
+        elif version not in ('0.0', CURRENT_FILE_VERSION):
+            raise TableFileError ('Wrong file version.')
     
     def tablefile_end (self):
         pass
@@ -326,7 +322,7 @@ class TableFileReader (TableReaderBase):
     
     def data_end (self):
         self.add_data_func (self.entry)
-        print (self.table)
+        #print (self.table)
     
     def current_start (self, attrs):
         self.isolddata = False
@@ -351,24 +347,22 @@ class TableFileReader (TableReaderBase):
         self.read_data_flag = True
     
     def number_end (self):
-        self.entrydata.number = str2num (self.tmpdat)
+        tmpdat = self.tmpdat.strip()
+        self.entrydata.number = str2num (tmpdat)
         self.read_data_flag = False
     
     def string_start (self, attrs):
         self.read_data_flag = True
     
     def string_end (self):
-        self.entrydata.string = self.tmpdat
+        self.entrydata.string = self.tmpdat.strip()
         self.read_data_flag = False
     
     def link (self, attrs):
-        addr_found = True
-        for attr, val in attrs:
-            if attr == 'addr':
-                addr_found = True
-                self.entry.link = val
-                
-        if not addr_found:
+        addr = find_attr (attrs, 'addr')
+        if addr is not None:
+            self.entry.link = addr
+        else:
             raise TableFileError ('Link element does not contain an address.')
     ############################################################################
     
@@ -384,7 +378,7 @@ class EntryData:
         if self.string is None:
             self.string = ''
         numstr = str (self.number) if self.number is not None else ''
-        return str (numstr) + self.string
+        return numstr + self.string
     
     def set (self, val):
         #print ('EntryData.set:', val)
@@ -400,6 +394,14 @@ class EntryData:
                 "The value must be either of type " +
                 "'EntryData', 'str', 'int' or 'float'."
             )
+    
+    def dumb (self):
+        output = ''
+        if self.number is not None:
+            output += write_tag ('number', content = self.number)
+        if self.string:
+            output += write_tag ('string', content = self.string)
+        return output
 
 class Entry:
     def __init__ (self, data = '', link = None):
@@ -448,7 +450,22 @@ class Entry:
         Returns a string, containing an entry, which can be used to append it
         to a file.
         '''
-        pass
+        curdatastr = write_tag ('current', content = self._data.dumb())
+        
+        olddatastr = ''
+        if self.olddata:
+            olddata_content = ''
+            for od in self.olddata:
+                olddata_content += write_tag ('olddata', content = od.dumb())
+            olddatastr = write_tag ('old', content = olddata_content)
+            
+        datastr = write_tag ('data', content = curdatastr + olddatastr)
+        
+        linkstr = ''
+        if self.link:
+            linkstr = write_tag ('link', attrs = [('addr', self.link)])
+        
+        return write_tag ('entry', content = datastr + linkstr)
 
 class Table:
     def __init__ (self):
@@ -530,9 +547,30 @@ class Table:
         Saves the table object to a file.
         The parameter "path" contains the location to the file.
         '''
-        # XXX Just prototype
-        with open (path, 'wb') as f:
-            pickle.dump (self, f)
+        headerstr = ''
+        if self.isheadered:
+            header_content = ''
+            for entry in self._header:
+                header_content += entry.dumb()
+            headerstr = write_tag ('headerrow', content = header_content)
+            
+        table_content = headerstr
+        for row in self._data:
+            row_content = ''
+            for entry in row:
+                row_content += entry.dumb()
+            table_content += write_tag ('row', content = row_content)
+            
+        tablestr = write_tag ('table', content = table_content)
+        
+        output = write_tag ('tablefile',
+            attrs = [('version', CURRENT_FILE_VERSION)],
+            content = tablestr
+        )
+        
+        # Do the fucking write.
+        with open (path, 'w') as f:
+            f.write (output)
 
     def add_row (self, row = None):
         '''
@@ -723,6 +761,7 @@ class TableWidget:
             self.tree.yview ('scroll', 2, 'units')
 ################################################################################
 
+# "Public" functions ###########################################################
 def load (path):
     with open (path, 'rb') as f:
         page = f.read().decode ('utf_8', 'ignore').strip()
@@ -751,7 +790,9 @@ def html2tables (page):
             except html.parser.HTMLParseError:
                 parerr = True
         return parser.tables
+################################################################################
 
+# Helper functions #############################################################
 def filter_trash (tables):
     listlen = len (tables)
     j = 0
@@ -766,6 +807,26 @@ def str2num (string):
     fval = float (string)
     ival = int (fval)
     return ival if fval - ival == 0 else fval
+
+def find_attr (attrs, name):
+    for attr, val in attrs:
+        if attr == name:
+            return val
+    return None
+
+def write_tag (tag, *args, attrs = None, content = None):
+    output = '<' + tag
+    
+    if attrs is not None:
+        for attr, val in attrs:
+            output += ' ' + attr + '="' + val + '"'
+
+    if content is not None:
+        output += '>\n' + str (content) + '\n</' + tag + '>\n'
+    else:
+        output += '/>\n'
+    
+    return output
             
 def split_data (data):
     '''
@@ -789,6 +850,7 @@ def split_data (data):
                 elif char == ',':
                     numstr += '.'
                 else:
+                    # tmpstr contains the non numeric rest.
                     tmpstr = data [i:]
                     break
             
@@ -803,6 +865,7 @@ def split_data (data):
 
     #print ('split_data:', 'n:', number, 's:', string)
     return number, string
+################################################################################
 
 if __name__ == '__main__':
     error (res.WRONG_FILE_STARTED)
