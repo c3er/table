@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 TITLE = 'Tabellenauswerter'
-DEFAULT_ADDR = 'simple.html'
+DEFAULT_ADDR = 'test.html'
 BASE_ADDR = 'http://fun2.asianbookie.com/index.cfm?top20=1'
 
 LOGFILE = 'logfile.txt'

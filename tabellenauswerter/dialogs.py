@@ -13,10 +13,13 @@ import table
 
 from misc import *
 
-# Normally, this constant should be defined in subprocess.
-# Needed to hide the console window, which would appear under Windows by calling
-# an external command line program.
-STARTF_USESHOWWINDOW = 1
+Selection = enum (
+    'UNKNOWN',
+    'ONE_WEBSITE',
+    'ONE_WEBSITE_HELPER',
+    'LOCAL_FILE',
+    'ASIANBOOKIE'
+)
 
 # This stuff was originally from some demos ####################################
 class _DialogBase (tkinter.Toplevel):
@@ -108,6 +111,8 @@ class NewDialog (_DialogBase):
         self.addr_entry = None
         self.base_addr_entry = None
         self.helper_flag = None
+        self.selection = None
+        self.addr = None
 
         super().__init__ (parent, title)
 
@@ -170,57 +175,8 @@ class NewDialog (_DialogBase):
         return page
 
     @log.logmethod
-    def read_one_website (self):
-        addr = self.addr_entry.get()
-
-        if not addr:
-            error (res.ADDR_EMPTY_ERROR + res.STD_ERROR_MSG)
-            return False
-        elif addr.startswith ('http://'):
-            if self.helper_flag.get():
-                try:
-                    # Hide the console window, which would appear under Windows
-                    startupinfo = subprocess.STARTUPINFO()
-                    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
-                    
-                    # Do the actual call
-                    page = subprocess.check_output ([res.ASIAN_EXE, addr],
-                        startupinfo = startupinfo
-                    )
-                except subprocess.CalledProcessError as msg:
-                    error (res.ASIAN_MODE_ERROR + str (msg), msg)
-                    return False
-                except OSError as msg:
-                    error (res.ASIAN_EXE_ERROR + str (msg), msg)
-                    return False
-            else:
-                try:
-                    req = urllib.request.Request (addr)
-                    req.add_header ('User-agent', 'Mozilla/5.0')
-                    with urllib.request.urlopen (req) as f:
-                        page = f.read()
-                except urllib.request.URLError as msg:
-                    error (res.WEB_READ_ERROR + str (msg), msg)
-                    return False
-        elif addr.endswith ('.html') or addr.endswith ('.htm'):
-            try:
-                with open (addr, 'rb') as f:
-                    page = f.read()
-            except IOError as msg:
-                error (res.FILE_OPEN_ERROR + str (msg), msg)
-                return False
-        else:
-            error (res.STD_ERROR_MSG)
-            return False
-
-        self.result = table.html2tables (page)
-        table.filter_trash (self.result)
-        return True
-
-    @log.logmethod
     def read_asianbookie (self):
         tkinter.messagebox.showinfo ('Hallo', res.ASIAN_LABEL)
-        return True
     ############################################################################
 
     # Inherited from smpldlg.Dialog ############################################
@@ -240,13 +196,62 @@ class NewDialog (_DialogBase):
     def validate (self):
         index = self.notebook.index ('current')
         if index == 0:
-            return self.read_one_website()
+            self.addr = self.addr_entry.get()
+
+            if not self.addr:
+                error (res.ADDR_EMPTY_ERROR + res.STD_ERROR_MSG)
+                return False
+            elif self.addr.startswith ('http://'):
+                if self.helper_flag.get():
+                    self.selection = Selection.ONE_WEBSITE_HELPER
+                else:
+                    self.selection = Selection.ONE_WEBSITE
+            elif self.addr.endswith ('.html') or self.addr.endswith ('.htm'):
+                self.selection = Selection.LOCAL_FILE
+            else:
+                error (res.STD_ERROR_MSG)
+                return False
+            
+            return True
         else:
-            return self.read_asianbookie()
+            self.addr = self.base_addr_entry.get()
+            return self.addr == res.BASE_ADDR
         
     def apply (self):
-        # XXX validate und apply trennen
-        pass
+        if self.selection == Selection.ONE_WEBSITE:
+            try:
+                req = urllib.request.Request (self.addr)
+                req.add_header ('User-agent', 'Mozilla/5.0')
+                with urllib.request.urlopen (req) as f:
+                    page = f.read()
+            except urllib.request.URLError as msg:
+                error (res.WEB_READ_ERROR + str (msg), msg)
+                return
+        elif self.selection == Selection.ONE_WEBSITE_HELPER:
+            try:
+                page = cmdcall (res.ASIAN_EXE, self.addr)
+            except subprocess.CalledProcessError as msg:
+                error (res.ASIAN_MODE_ERROR + str (msg), msg)
+                return
+            except OSError as msg:
+                error (res.ASIAN_EXE_ERROR + str (msg), msg)
+                return
+        elif self.selection == Selection.LOCAL_FILE:
+            try:
+                with open (self.addr, 'rb') as f:
+                    page = f.read()
+            except IOError as msg:
+                error (res.FILE_OPEN_ERROR + str (msg), msg)
+                return False
+        elif self.selection == Selection.ASIANBOOKIE:
+            self.read_asianbookie()
+            return
+        else:
+            error (res.STD_ERROR_MSG)
+            return
+        
+        self.result = table.html2tables (page)
+        table.filter_trash (self.result)
     ############################################################################
 
 if __name__ == '__main__':

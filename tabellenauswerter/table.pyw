@@ -19,7 +19,7 @@ import log
 from misc import *
 
 # Version of the table file.
-CURRENT_FILE_VERSION = '0.1'
+CURRENT_FILE_VERSION = '0.2'
 
 class EntryError (Exception):
     pass
@@ -32,7 +32,7 @@ class TableFileError (Exception):
 
 class TableReaderBase (html.parser.HTMLParser):
     def __init__ (self):
-        super().__init__ (False)
+        super().__init__()
         self.tmpdat = ''
         self._read_data_flag = False
         self.starttags = {}
@@ -73,7 +73,7 @@ class TableReaderBase (html.parser.HTMLParser):
 
     def handle_data (self, data):
         if self.read_data_flag:
-            print (data)
+            #print (data)
             self.tmpdat += data
 
     def handle_charref (self, name):
@@ -112,10 +112,12 @@ class TableHTMLReader (TableReaderBase):
             'a': self.a_end
         }
 
+    # Properties ###############################################################
     def get_tables (self):
         return self.tablelist
 
     tables = property (get_tables)
+    ############################################################################
 
     def _reset (self, isinit = False):
         if isinit:
@@ -285,7 +287,9 @@ class TableFileReader (TableReaderBase):
         if version is None:
             raise TableFileError ('No file version found.')
         elif version not in ('0.0', CURRENT_FILE_VERSION):
-            raise TableFileError ('Wrong file version.')
+            raise TableFileError (
+                'Wrong file version. The found version is {}.'.format (version)
+            )
     
     def tablefile_end (self):
         pass
@@ -303,10 +307,10 @@ class TableFileReader (TableReaderBase):
     
     def headerrow_end (self):
         self.headerflag = False
-        self.add_data_func = self.table.add_data
     
     def row_start (self, attrs):
         self.table.add_row()
+        self.add_data_func = self.table.add_data
     
     def row_end (self):
         pass
@@ -400,7 +404,7 @@ class EntryData:
         if self.number is not None:
             output += write_tag ('number', content = self.number)
         if self.string:
-            output += write_tag ('string', content = self.string)
+            output += write_tag ('string', content = encode_string(self.string))
         return output
 
 class Entry:
@@ -825,6 +829,20 @@ def write_tag (tag, *args, attrs = None, content = None):
         output += '>\n' + str (content) + '\n</' + tag + '>\n'
     else:
         output += '/>\n'
+    
+    return output
+
+def encode_string (string):
+    whitelist = [chr (i) for i in range (39, 127)]
+    whitelist.remove ('<')
+    whitelist.remove ('>')
+    
+    output = ''
+    for s in string:
+        if s in whitelist:
+            output += s
+        else:
+            output += '&#' + str (ord (s)) + ';'
     
     return output
             

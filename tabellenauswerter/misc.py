@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import subprocess
 import tkinter.messagebox
 
 import res
 import log
+
+# Normally, this constant should be defined in subprocess.
+# Needed to hide the console window, which would appear under Windows by calling
+# an external command line program.
+STARTF_USESHOWWINDOW = 1
 
 def _print_log (msg, exc = None):
     '''Used by the error function.'''
@@ -34,6 +40,16 @@ def error (msg, exc = None):
 def setentry (entry, text):
     entry.delete (0, 'end')
     entry.insert (0, text)
+    
+def cmdcall (cmd, *args):
+    # Hide the console window, which would appear under Windows
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
+    
+    # Do the actual call
+    calllist = [cmd]
+    calllist.append (args)
+    return subprocess.check_output (calllist, startupinfo = startupinfo)
 
 # This stuff was originally from some demos ####################################
 class curry:
@@ -45,4 +61,8 @@ class curry:
 
     def __call__ (self):
         return self.callback (*self.args, **self.kw)
+    
+def enum (*sequential, **named):
+    enums = dict (zip (sequential, range (len (sequential))), **named)
+    return type ('Enum', (), enums)
 ################################################################################

@@ -66,6 +66,7 @@ def avoid_tableloss():
                 elif result is None:
                     # User clicked on "Cancel"
                     return False
+                # Do nothing, if the user clicked on "No"
         return True
 ################################################################################
 
