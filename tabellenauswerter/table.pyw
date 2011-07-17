@@ -384,6 +384,12 @@ class EntryData:
         numstr = str (self.number) if self.number is not None else ''
         return numstr + self.string
     
+    def __eq__ (self, other):
+        if other is not None and isinstance (other, EntryData):
+            return self.number == other.number and self.string == other.string
+        else:
+            return False
+    
     def set (self, val):
         #print ('EntryData.set:', val)
         if isinstance (val, str):
@@ -418,6 +424,13 @@ class Entry:
 
     def __repr__ (self):
         return "'" + self.data + "'"
+    
+    def __eq__ (self, other):
+        # self.olddata will be ignored...
+        if other is not None and isinstance (other, Entry):
+            return self._data == other._data and self.link == other.link
+        else:
+            return False
     
     # Properties ###############################################################
     def get_data (self):
@@ -498,6 +511,20 @@ class Table:
             if self._data.index (row) < limit:
                 string += ', '
         return string + ']'
+    
+    def __eq__ (self, other):
+        if other is not None and isinstance (other, Table):
+            if len (self._data) != len (other._data):
+                return False
+            for myrow, otherrow in self._data, other._data:
+                if len (myrow) != len (otherrow):
+                    return False
+                for myentry, otherentry in myrow, otherrow:
+                    if myentry != otherentry:
+                        return False
+            return True
+        else:
+            return False
 
     def _mk_header (self):
         '''Internal function to prepare the header'''
@@ -798,14 +825,12 @@ def html2tables (page):
 
 # Helper functions #############################################################
 def filter_trash (tables):
-    listlen = len (tables)
-    j = 0
-    for i in range (listlen):
-        if len (tables [j].data) <= 3:
-            tables.remove (tables [j])
-            listlen -= 1
-        else:
-            j += 1
+    result = []
+    for t in tables:
+        if len (t.data) > 3 and t not in result:
+            result.append (t)
+    return result
+        
             
 def str2num (string):
     fval = float (string)

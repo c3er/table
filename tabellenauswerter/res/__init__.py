@@ -53,3 +53,8 @@ ADDR_WEBSITE_LABEL = 'Adresse der Webseite'
 BASE_ADDR_LABEL = 'Basisadresse'
 HELPER_LABEL = 'Hilfsprogramm benutzen'
 OPEN_HTML_LABEL = 'HTML-Datei öffnen'
+
+ASIAN_READING_MSG = '''Asianbookie wird eingelesen.
+
+Diese Operation kann eine Weile dauern. Wenn es abgebrochen wird,
+muss es wieder von vorne angefangen werden!'''

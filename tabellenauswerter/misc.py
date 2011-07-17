@@ -46,9 +46,11 @@ def cmdcall (cmd, *args):
     startupinfo = subprocess.STARTUPINFO()
     startupinfo.dwFlags |= STARTF_USESHOWWINDOW
     
-    # Do the actual call
+    # Build the command
     calllist = [cmd]
     calllist.append (args)
+    
+    # Do the actual call
     return subprocess.check_output (calllist, startupinfo = startupinfo)
 
 # This stuff was originally from some demos ####################################

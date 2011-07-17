@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import threading
 import subprocess
 import urllib.request
 
@@ -25,18 +26,22 @@ Selection = enum (
 class _DialogBase (tkinter.Toplevel):
     def __init__ (self, parent, title = None):
         super().__init__ (parent)
+        
         self.transient (parent)
         if title:
             self.title (title)
         self.parent = parent
         self.result = None
+        
         body = ttk.Frame (self)
         self.initial_focus = self.body (body)
         body.pack (padx = 5, pady = 5)
+        
         self.buttonbox()
         self.grab_set()
         if not self.initial_focus:
             self.initial_focus = self
+            
         self.protocol ("WM_DELETE_WINDOW", self.cancel)
         self.geometry ("+{}+{}".format (
             parent.winfo_rootx() + 50,
@@ -47,14 +52,16 @@ class _DialogBase (tkinter.Toplevel):
 
     # Methods to overwrite #####################################################
     def body (self, master):
-        '''Create dialog
+        '''
+        Create dialog
         Returns a widget, which should have the focus immediatly. This method
         should be overwritten.
         '''
         pass
 
     def buttonbox (self):
-        '''Add standard button box
+        '''
+        Add standard button box
         Overwrite, if there are no standard buttons wanted.
         '''
         box = ttk.Frame (self)
@@ -176,7 +183,13 @@ class NewDialog (_DialogBase):
 
     @log.logmethod
     def read_asianbookie (self):
-        tkinter.messagebox.showinfo ('Hallo', res.ASIAN_LABEL)
+        dir = tkinter.filedialog.askdirectory()
+        
+        if dir:
+            ad = AsianDialog (self.parent, self.addr, dir, res.ASIAN_LABEL)
+            self.result = ad.result
+        else:
+            self.cancel()
     ############################################################################
 
     # Inherited from smpldlg.Dialog ############################################
@@ -215,6 +228,7 @@ class NewDialog (_DialogBase):
             return True
         else:
             self.addr = self.base_addr_entry.get()
+            self.selection = Selection.ASIANBOOKIE
             return self.addr == res.BASE_ADDR
         
     def apply (self):
@@ -227,6 +241,7 @@ class NewDialog (_DialogBase):
             except urllib.request.URLError as msg:
                 error (res.WEB_READ_ERROR + str (msg), msg)
                 return
+            
         elif self.selection == Selection.ONE_WEBSITE_HELPER:
             try:
                 page = cmdcall (res.ASIAN_EXE, self.addr)
@@ -236,6 +251,7 @@ class NewDialog (_DialogBase):
             except OSError as msg:
                 error (res.ASIAN_EXE_ERROR + str (msg), msg)
                 return
+            
         elif self.selection == Selection.LOCAL_FILE:
             try:
                 with open (self.addr, 'rb') as f:
@@ -243,16 +259,93 @@ class NewDialog (_DialogBase):
             except IOError as msg:
                 error (res.FILE_OPEN_ERROR + str (msg), msg)
                 return False
+            
         elif self.selection == Selection.ASIANBOOKIE:
             self.read_asianbookie()
             return
+        
         else:
             error (res.STD_ERROR_MSG)
             return
         
         self.result = table.html2tables (page)
-        table.filter_trash (self.result)
+        self.result = table.filter_trash (self.result)
     ############################################################################
+
+# Stuff to read in the whole table from Asianbookie ############################
+class PageReceivedEvent:
+    def __init__ (self, src, data):
+        self.source = src
+        self.data = data
+
+class PageReceivedEventMulticaster:
+    def __init__ (self):
+        self.listeners = []
+    
+    def add (self, listener):
+        if listener not in self.listeners:
+            self.listeners.append (listener)
+            
+    def remove (self, listener):
+        self.listeners.remove (listener)
+        
+    def update (self, event):
+        for l in self.listeners:
+            l.update (event)
+
+class AsianWorker (threading.Thread):
+    def __init__ (self, workdir):
+        super().__init__()
+        self.running = True
+        self.workdir = workdir
+        self.multicaster = PageReceivedEventMulticaster()
+
+    def run (self):
+        i = 0
+        while self.running:
+            i += 1
+            self.multicaster.update (PageReceivedEvent (self, i))
+    
+    def stopworker (self):
+        self.running = False
+        
+    def addlistener (self, obj):
+        self.multicaster.add (obj)
+
+class AsianDialog (_DialogBase):
+    def __init__  (self, parent, addr, workdir, title = None):
+        self.addr = addr
+        self.workdir = workdir
+        
+        self.asianworker = AsianWorker (workdir)
+        self.asianworker.addlistener (self)
+        self.asianworker.start()
+        
+        super().__init__ (parent, title)
+
+    def buttonbox (self):
+        box = ttk.Frame (self)
+        
+        ttk.Button (box,
+            text = "Abbrechen",
+            width = 10,
+            command = self.stopwork
+        ).pack (padx = 5, pady = 5)
+        
+        self.bind ("<Escape>", self.stopwork)
+        box.pack (fill = 'x')
+        
+    def body (self, master):
+        ttk.Label (master, text = res.ASIAN_READING_MSG).pack (side = 'top')
+        #ttk.Label (master, text = 'Hallo Welt!2').pack (side = 'top')
+        
+    def stopwork (self):
+        self.asianworker.stopworker()
+        self.cancel()
+        
+    def update (self, event):
+        print (event.data)
+################################################################################
 
 if __name__ == '__main__':
     error (res.WRONG_FILE_STARTED)
