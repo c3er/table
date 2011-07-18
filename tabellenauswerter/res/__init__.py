@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 TITLE = 'Tabellenauswerter'
-DEFAULT_ADDR = 'test.html'
+DEFAULT_ADDR = 'test2.html'
 BASE_ADDR = 'http://fun2.asianbookie.com/index.cfm?top20=1'
 
 LOGFILE = 'logfile.txt'
@@ -20,6 +20,7 @@ STD_ERROR_MSG = (
 )
 FILE_OPEN_ERROR = 'Datei konnte nicht geöffnet werden\n'
 FILE_SAVE_ERROR = 'Datei konnte nicht gespeichert werden\n'
+FILE_READ_ERROR = 'Konnte Datei nicht lesen'
 ADDR_EMPTY_ERROR = 'Bitte Adresse eingeben\n'
 ASIAN_MODE_ERROR = 'Asian-Modus gescheitert\n'
 ASIAN_EXE_ERROR = ASIAN_EXE + '.exe konnte nicht aufgerufen werden\n'
@@ -58,3 +59,9 @@ ASIAN_READING_MSG = '''Asianbookie wird eingelesen.
 
 Diese Operation kann eine Weile dauern. Wenn es abgebrochen wird,
 muss es wieder von vorne angefangen werden!'''
+
+ASIAN_PHASE = 'Phase {} von 2:\n'
+ASIAN_PHASE_EXPLANATION = (
+    'Seite {} wird eingelesen',
+    'Tabelle wird zusammengefügt'
+)

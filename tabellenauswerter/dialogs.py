@@ -1,9 +1,13 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import threading
 import subprocess
+
+import threading
+import queue
+
 import urllib.request
+import urllib.parse
 
 import tkinter
 import tkinter.ttk as ttk
@@ -184,6 +188,7 @@ class NewDialog (_DialogBase):
     @log.logmethod
     def read_asianbookie (self):
         dir = tkinter.filedialog.askdirectory()
+        #dir = 'bla'
         
         if dir:
             ad = AsianDialog (self.parent, self.addr, dir, res.ASIAN_LABEL)
@@ -273,53 +278,65 @@ class NewDialog (_DialogBase):
     ############################################################################
 
 # Stuff to read in the whole table from Asianbookie ############################
-class PageReceivedEvent:
-    def __init__ (self, src, data):
-        self.source = src
-        self.data = data
-
-class PageReceivedEventMulticaster:
-    def __init__ (self):
-        self.listeners = []
-    
-    def add (self, listener):
-        if listener not in self.listeners:
-            self.listeners.append (listener)
-            
-    def remove (self, listener):
-        self.listeners.remove (listener)
-        
-    def update (self, event):
-        for l in self.listeners:
-            l.update (event)
+class Event:
+    def __init__ (self, stop = False, phase = 0, count = 0, result = None):
+        self.stop = stop
+        self.phase = phase
+        self.count = count
+        self.result = result
 
 class AsianWorker (threading.Thread):
-    def __init__ (self, workdir):
+    def __init__ (self, workdir, baseaddr):
         super().__init__()
         self.running = True
         self.workdir = workdir
-        self.multicaster = PageReceivedEventMulticaster()
+        self.baseaddr = baseaddr
+        self.outqueue = queue.Queue (1)
+        
+    def get_event (self):
+        try:
+            event = self.outqueue.get_nowait()
+        except queue.Empty:
+            event = None
+        return event
+    
+    event = property (get_event)
+    
+    def send_event (self, val):
+        try:
+            self.outqueue.put_nowait (val)
+        except queue.Full:
+            pass
 
     def run (self):
         i = 0
+        phase = 0
         while self.running:
-            i += 1
-            self.multicaster.update (PageReceivedEvent (self, i))
+            if phase == 0:
+                i += 1
+                
+                self.send_event (Event (phase = phase, count = i))
+            elif phase == 1:
+                pass
+            else:
+                self.stopworker()
     
     def stopworker (self):
         self.running = False
-        
-    def addlistener (self, obj):
-        self.multicaster.add (obj)
+        self.send_event (Event (stop = True))
 
 class AsianDialog (_DialogBase):
     def __init__  (self, parent, addr, workdir, title = None):
+        self.parent = parent
         self.addr = addr
         self.workdir = workdir
+        self.labelvar = tkinter.StringVar()
+        self.labelvar.set ('bla')
         
-        self.asianworker = AsianWorker (workdir)
-        self.asianworker.addlistener (self)
+        self.asianworker = AsianWorker (workdir, addr)
         self.asianworker.start()
+        
+        parent.after (100, self.update)
         
         super().__init__ (parent, title)
 
@@ -337,14 +354,25 @@ class AsianDialog (_DialogBase):
         
     def body (self, master):
         ttk.Label (master, text = res.ASIAN_READING_MSG).pack (side = 'top')
-        #ttk.Label (master, text = 'Hallo Welt!2').pack (side = 'top')
+        ttk.Label (master, textvariable = self.labelvar).pack (side = 'top')
         
     def stopwork (self):
         self.asianworker.stopworker()
         self.cancel()
         
-    def update (self, event):
-        print (event.data)
+    def update (self):
+        event = self.asianworker.event
+        
+        if event is not None:
+            print (event.count, event.phase)
+            explenation = res.ASIAN_PHASE_EXPLANATION [event.phase]
+            if event.phase == 0:
+                explenation = explenation.format (event.count)
+            phase_str = res.ASIAN_PHASE.format (event.phase + 1)
+            self.labelvar.set (phase_str + explenation)
+        
+        if event is None or not event.stop:
+            self.parent.after (250, self.update)
 ################################################################################
 
 if __name__ == '__main__':

@@ -516,11 +516,13 @@ class Table:
         if other is not None and isinstance (other, Table):
             if len (self._data) != len (other._data):
                 return False
-            for myrow, otherrow in self._data, other._data:
-                if len (myrow) != len (otherrow):
+            for i in range (len (self._data)):
+                if len (self._data [i]) != len (other._data [i]):
+                    # Are the rows different?
                     return False
-                for myentry, otherentry in myrow, otherrow:
-                    if myentry != otherentry:
+                for j in range (len (self._data [i])):
+                    if self._data [i] [j] != other._data [i] [j]:
+                        # Are the entries different?
                         return False
             return True
         else:
@@ -800,7 +802,7 @@ def load (path):
             try:
                 parser.feed (page)
             except html.parser.HTMLParseError as exc:
-                error ('Konnte Datei nich lesen', exc)
+                error (res.FILE_READ_ERROR, exc)
                 return None
             return parser.table
 
