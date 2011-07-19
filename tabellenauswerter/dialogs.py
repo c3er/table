@@ -332,8 +332,8 @@ class AsianWorker (threading.Thread):
                     
                     # XXX In der fertigen Version muss die erste (richtige)
                     # Reihe genommen werden...
-                    #entry = tab.data [0] [2]
-                    entry = tab.lastrow [2]
+                    entry = tab.data [0] [2]
+                    #entry = tab.lastrow [2]
                     
                     print (entry.data, entry.link)
                     
@@ -345,8 +345,8 @@ class AsianWorker (threading.Thread):
                     tab = tables [1]
                     tab.make_header()
                     
-                    entry = tab.data [0] [2]
-                    #entry = tab.lastrow [2]
+                    #entry = tab.data [0] [2]
+                    entry = tab.lastrow [2]
                     
                     print (entry.data, entry.link)
                     
