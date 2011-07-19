@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import subprocess
 
 import threading
@@ -191,8 +192,9 @@ class NewDialog (_DialogBase):
         #dir = 'bla'
         
         if dir:
+            # self.addr is the base address
             ad = AsianDialog (self.parent, self.addr, dir, res.ASIAN_LABEL)
-            self.result = ad.result
+            self.result = [ad.result]
         else:
             self.cancel()
     ############################################################################
@@ -291,7 +293,8 @@ class AsianWorker (threading.Thread):
         self.running = True
         self.workdir = workdir
         self.baseaddr = baseaddr
-        self.outqueue = queue.Queue (1)
+        self.url = None
+        self.outqueue = queue.Queue()
         
     def get_event (self):
         try:
@@ -303,21 +306,73 @@ class AsianWorker (threading.Thread):
     event = property (get_event)
     
     def send_event (self, val):
-        try:
-            self.outqueue.put_nowait (val)
-        except queue.Full:
-            pass
+        self.outqueue.put (val)
+        
+    def request_tables (self, addr):
+        page = cmdcall (res.ASIAN_EXE, addr)
+        return table.filter_trash (table.html2tables (page))
 
     def run (self):
+        # XXX VERY UGLY
+        
         i = 0
         phase = 0
+        addr = self.baseaddr
+        tab = None
+        lasttab = None
+        firstloop = True
+        
         while self.running:
             if phase == 0:
-                i += 1
-                
-                self.send_event (Event (phase = phase, count = i))
+                if firstloop:
+                    firstloop = False
+                    tables = self.request_tables (addr)
+                    tab = tables [0]
+                    tab.make_header()
+                    
+                    # XXX In der fertigen Version muss die erste (richtige)
+                    # Reihe genommen werden...
+                    #entry = tab.data [0] [2]
+                    entry = tab.lastrow [2]
+                    
+                    print (entry.data, entry.link)
+                    
+                    addr = urllib.parse.urljoin (addr, entry.link)
+                else:
+                    i += 1
+                    
+                    tables = self.request_tables (addr)
+                    tab = tables [1]
+                    tab.make_header()
+                    
+                    entry = tab.data [0] [2]
+                    #entry = tab.lastrow [2]
+                    
+                    print (entry.data, entry.link)
+                    
+                    if tab != lasttab:
+                        tab.dumb (os.path.join (self.workdir, 
+                            str (i) + res.TAB_FILE_EXT)
+                        )
+                        addr = urllib.parse.urljoin (addr, entry.link)
+                        self.send_event (Event (phase = phase, count = i))
+                    else:
+                        phase = 1
+                    
+                    lasttab = tab
             elif phase == 1:
-                pass
+                tab = None
+                nexttab = None
+                filelist = os.listdir (self.workdir)
+                for f in filelist:
+                    if tab is None:
+                        tab = table.load (os.path.join (self.workdir, f))
+                    else:
+                        nexttab = table.load (os.path.join (self.workdir, f))
+                        tab.concat (nexttab)
+                phase = 2
+                self.send_event (Event (result = tab, phase = phase))
+                #self.stopworker()
             else:
                 self.stopworker()
     
@@ -331,7 +386,7 @@ class AsianDialog (_DialogBase):
         self.addr = addr
         self.workdir = workdir
         self.labelvar = tkinter.StringVar()
-        self.labelvar.set ('bla')
+        self.labelvar.set ('')
         
         self.asianworker = AsianWorker (workdir, addr)
         self.asianworker.start()
@@ -365,11 +420,19 @@ class AsianDialog (_DialogBase):
         
         if event is not None:
             print (event.count, event.phase)
+
             explenation = res.ASIAN_PHASE_EXPLANATION [event.phase]
             if event.phase == 0:
-                explenation = explenation.format (event.count)
+                explenation = explenation.format (event.count + 1)
+
             phase_str = res.ASIAN_PHASE.format (event.phase + 1)
             self.labelvar.set (phase_str + explenation)
+            
+            if event.result is not None:
+                self.result = event.result
+            
+            if event.stop:
+                self.stopwork()
         
         if event is None or not event.stop:
             self.parent.after (250, self.update)

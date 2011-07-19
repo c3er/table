@@ -63,5 +63,6 @@ muss es wieder von vorne angefangen werden!'''
 ASIAN_PHASE = 'Phase {} von 2:\n'
 ASIAN_PHASE_EXPLANATION = (
     'Seite {} wird eingelesen',
-    'Tabelle wird zusammengefügt'
+    'Tabelle wird zusammengefügt',
+    'Ende'
 )

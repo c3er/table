@@ -30,7 +30,7 @@ merge_table_button = None
 def adjust_state (sess):
     if not sess.isempty:
         save_as_button.config (state = 'enabled')
-        merge_table_button.config (state = 'enabled')
+        #merge_table_button.config (state = 'enabled')
         
         curtab = sess.current_table
         

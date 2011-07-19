@@ -517,12 +517,12 @@ class Table:
             if len (self._data) != len (other._data):
                 return False
             for i in range (len (self._data)):
+                # Are the rows different?
                 if len (self._data [i]) != len (other._data [i]):
-                    # Are the rows different?
                     return False
                 for j in range (len (self._data [i])):
+                    # Are the entries different?
                     if self._data [i] [j] != other._data [i] [j]:
-                        # Are the entries different?
                         return False
             return True
         else:
@@ -558,6 +558,14 @@ class Table:
     def get_header (self):
         self._mk_header()
         return self._header
+    
+    def get_lastrow (self):
+        return self._data [len (self._data) - 1]
+
+    data = property (get_data)
+    header = property (get_header)
+    lastrow = property (get_lastrow)
+    ############################################################################
 
     def get_col (self, index):
         col = []
@@ -570,10 +578,6 @@ class Table:
                 row.append (Entry())
                 col.append (row [index])
         return col
-
-    data = property (get_data)
-    header = property (get_header)
-    ############################################################################
 
     def dumb (self, path):
         '''
@@ -670,6 +674,11 @@ class Table:
         '''Transforms the first line of the table to the header line.'''
         self.isheadered = True
         self._mk_header()
+        
+    def concat (self, other):
+        for row in other.data:
+            if row not in self.data:
+                self.add_row (row)
 
 # This stuff was originally from some demos ####################################
 def sortby (tree, col, descending):
