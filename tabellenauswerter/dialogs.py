@@ -194,7 +194,7 @@ class NewDialog (_DialogBase):
         if dir:
             # self.addr is the base address
             ad = AsianDialog (self.parent, self.addr, dir, res.ASIAN_LABEL)
-            self.result = [ad.result]
+            self.result = [ad.result] if ad.result is not None else None
         else:
             self.cancel()
     ############################################################################
@@ -309,7 +309,7 @@ class AsianWorker (threading.Thread):
         self.outqueue.put (val)
         
     def request_tables (self, addr):
-        page = cmdcall (res.ASIAN_EXE, addr)
+        page = cmdcall (res.ASIAN_EXE, '"' + addr + '"')
         return table.filter_trash (table.html2tables (page))
 
     def run (self):
@@ -342,24 +342,29 @@ class AsianWorker (threading.Thread):
                     i += 1
                     
                     tables = self.request_tables (addr)
-                    tab = tables [1]
-                    tab.make_header()
+                    succeeded = len (tables) > 0
+                    if succeeded:
+                        lasttab = tab
+                        tab = tables [1]
                     
-                    #entry = tab.data [0] [2]
-                    entry = tab.lastrow [2]
+                        tab.make_header()
+                        
+                        #entry = tab.data [0] [2]
+                        entry = tab.lastrow [2]
+                    else:
+                        entry = tab.data [len (tab.data) - 2] [2]
                     
                     print (entry.data, entry.link)
                     
-                    if tab != lasttab:
+                    if tab != lasttab and entry.link:
                         tab.dumb (os.path.join (self.workdir, 
                             str (i) + res.TAB_FILE_EXT)
                         )
                         addr = urllib.parse.urljoin (addr, entry.link)
+                        print (addr)
                         self.send_event (Event (phase = phase, count = i))
                     else:
                         phase = 1
-                    
-                    lasttab = tab
             elif phase == 1:
                 tab = None
                 nexttab = None
