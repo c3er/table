@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Mediator between the GUI and the data.'''
+
 import os
 
 import tkinter

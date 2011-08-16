@@ -90,6 +90,12 @@ class _DialogBase (tkinter.Toplevel):
 
     # Standard button behavior ###
     def ok (self, event = None):
+        '''
+        Execute the validate function and if it returns False, it will just set
+        the focus right and return.
+        If validate returns True, then the apply function will be called and the
+        dialog will be closed.
+        '''
         if not self.validate():
             self.initial_focus.focus_set()
             return
@@ -99,19 +105,26 @@ class _DialogBase (tkinter.Toplevel):
         self.cancel()
 
     def cancel (self, event = None):
-        # Give focus back to the parent window
+        '''Give focus back to the parent window and close the dialog.'''
         self.parent.focus_set()
-
         self.destroy()
     ###
 
     # Command hooks ###
     def validate (self):
-        # Overwrite
+        '''
+        Overwrite.
+        Validate the input. If the function returns false, the dialog will stay
+        open.
+        '''
         return True
 
     def apply (self):
-        # Overwrite
+        '''
+        Overwrite.
+        Process the input. This function will be called, after the dialog was
+        closed.
+        '''
         pass
     ###
     ############################################################################
@@ -135,7 +148,9 @@ class NewDialog (_DialogBase):
         )
         if fname:
             setentry (self.addr_entry, fname)
+    ############################################################################
 
+    # Definition of the appearence #############################################
     def frame_one_website (self, master):
         page = ttk.Frame (master)
         subpage = ttk.Frame (page)
@@ -185,6 +200,7 @@ class NewDialog (_DialogBase):
 
         subpage.pack (padx = 5, pady = 5, fill = 'both')
         return page
+    ############################################################################
 
     @log.logmethod
     def read_asianbookie (self):
@@ -199,7 +215,7 @@ class NewDialog (_DialogBase):
             self.cancel()
     ############################################################################
 
-    # Inherited from smpldlg.Dialog ############################################
+    # Inherited from _DialogBase ###############################################
     def body (self, master):
         self.notebook = ttk.Notebook (master)
         self.notebook.add (self.frame_one_website (master),

@@ -7,11 +7,6 @@ import tkinter.messagebox
 import res
 import log
 
-# Normally, this constant should be defined in subprocess.
-# Needed to hide the console window, which would appear under Windows by calling
-# an external command line program.
-STARTF_USESHOWWINDOW = 1
-
 def _print_log (msg, exc = None):
     '''Used by the error function.'''
     if exc is None:
@@ -40,6 +35,11 @@ def error (msg, exc = None):
 def setentry (entry, text):
     entry.delete (0, 'end')
     entry.insert (0, text)
+
+# Normally, this constant should be defined in subprocess.
+# Needed to hide the console window, which would appear under Windows by calling
+# an external command line program.
+STARTF_USESHOWWINDOW = 1
     
 def cmdcall (cmd, *args):
     # Hide the console window, which would appear under Windows

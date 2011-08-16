@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''Reads tables from HTML files'''
+'''
+This file consists of the definition of the main window and is supposed to be
+executed by the user.
+'''
 
 DEBUG_ON = True
 
@@ -10,7 +13,6 @@ import tkinter.messagebox
 import tkinter.filedialog
 import tkinter.ttk as ttk
 
-import table
 import log
 import res
 import session
@@ -51,6 +53,11 @@ def adjust_state (sess):
         merge_table_button.config (state = 'disabled')
   
 def avoid_tableloss():
+    '''
+    Ask the user for every table, which is modified, if he wants to save it.
+    If the user only clicks on "Yes" or "No", the function returns True.
+    If the user clicks on any dialog on "Cancel", the function returns False.
+    '''
     if not sess.modified:
         return True
     else:
@@ -77,6 +84,7 @@ def new_session (root):
         nd = dialogs.NewDialog (root, res.NEW_SESSION_LABEL)
         if nd.result:
             sess.set_tablelist (nd.result)
+        # XXX Fehlermeldung ausgeben, wenn keine Tabellen erkannt wurden.
 
 @log.logfunction
 def open_table():
@@ -121,6 +129,7 @@ def appclose_callback (root):
 
 # Build the actual Interface ###################################################
 def toolbar (root):
+    '''Build the toolbar, which consists of an horicontal row of buttons.'''
     global tabcols_button
     global save_button
     global save_as_button
@@ -171,6 +180,7 @@ def toolbar (root):
     return frame
 
 def cmdwidget (root):
+    '''Container for the elements, which appear at application start.'''
     frame = ttk.Frame (root)
     toolbar (root).pack (anchor = 'n', fill = 'x', padx = 2, pady = 2)
     return frame

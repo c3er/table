@@ -216,9 +216,6 @@ class TableHTMLReader (TableReaderBase):
 
     def a_start (self, attrs):
         if self.read_data_flag:
-            '''for param, val in attrs:
-                if param == 'href':
-                    self.entry.link = val'''
             self.entry.link = find_attr (attrs, 'href')
 
     def a_end (self):
@@ -426,7 +423,7 @@ class Entry:
         return "'" + self.data + "'"
     
     def __eq__ (self, other):
-        # self.olddata will be ignored...
+        # "self.olddata" will be ignored...
         if other is not None and isinstance (other, Entry):
             return self._data == other._data and self.link == other.link
         else:
@@ -692,8 +689,8 @@ def sortby (tree, col, descending):
     tmpdat = []
     string = ''
     for val, foo in data:
-        if val [0].isdigit():
-            number, string = split_data (val)
+        number, string = split_data (val)
+        if number is not None:
             tmpdat.append ((number, foo))
         else:
             converted = False
@@ -836,13 +833,13 @@ def html2tables (page):
 
 # Helper functions #############################################################
 def filter_trash (tables):
+    '''Filter the tables, which seem to contain nothing of interest.'''
     result = []
     for t in tables:
         if len (t.data) > 3 and t not in result:
             result.append (t)
     return result
         
-            
 def str2num (string):
     fval = float (string)
     ival = int (fval)
@@ -894,17 +891,22 @@ def split_data (data):
 
     tmpstr = ''
     if data is not None:
-        if data != '' and data [0].isdigit():
+        #print ('1:', data)
+        data = data.strip()
+        if data != '' and (data [0].isdigit() or data [0] == '-'):
             
             # Extract the number from the data string
             numstr = ''
             for i, char in enumerate (data):
-                if char.isdigit() or char == '.':
+                if char.isdigit() or char in ('.', '-'):
                     numstr += char
                 elif char == ',':
                     numstr += '.'
+                elif char == ' ':
+                    # Just suppress space characters
+                    continue
                 else:
-                    # tmpstr contains the non numeric rest.
+                    # "tmpstr" contains the non numeric rest.
                     tmpstr = data [i:]
                     break
             
@@ -912,6 +914,7 @@ def split_data (data):
             while numstr.endswith ('.'):
                 numstr = numstr [: -1]
             
+            #print ('2:', numstr)
             number = str2num (numstr)
             string = tmpstr
     else:
