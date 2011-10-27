@@ -5,96 +5,95 @@ WARNING: You must use the "Quit" button; other methods of exiting are not
 hooked to App.quit() -- they don't close down the calc thread.
 '''
 
-from tkinter import Tk, Frame, Button, Entry, Canvas, Text
-from tkinter import LEFT, DISABLED, NORMAL, RIDGE, END
+import tkinter
 import threading
 import queue
 
 class Token:
-    '''Data class'''
-    def __init__(self):
+    '''Data class. Kinda ugly and primitive.'''
+    def __init__ (self):
         self.cancel = None
-        self.done = None
-        self.halt = None
+        self.done = False
+        self.halt = False
         self.percent = None
         self.quit = None
         self.start = None
         self.total = None
         self.value = None
 
-class Fib(threading.Thread):
+class Fib (threading.Thread):
     def __init__ (self):
-        threading.Thread.__init__ (self)
-        self.inputQueue = queue.Queue()
-        self.outputQueue = queue.Queue (1)
-        self.currCalc = None
-        self.calcQueue = []
-        self.hasWork = None
+        super().__init__()
+        self.in_queue = queue.Queue()
+        self.out_queue = queue.Queue (1)
+        self.curr_calc = None
+        self.calc_stack = []
+        self.haswork = False
 
     def run (self):
-        while 1:
-            if self.calcQueue:
-                self.currCalc = self.calcQueue.pop (0)
+        while True:
+            if self.calc_stack:
+                self.curr_calc = self.calc_stack.pop (0)
             else:
-                self.hasWork = None
+                self.haswork = None
                 
                 # Block until the first value comes in.
-                self.currCalc = self.inputQueue.get()
+                self.curr_calc = self.in_queue.get()
                 
-                self.hasWork = 1
+                self.haswork = True
                 
-            if self.currCalc.quit:
+            if self.curr_calc.quit:
                 return
-            if self.currCalc.value:
+            if self.curr_calc.value:
                 self.calc()
 
     def calc (self):
-        currCalc = self.currCalc
-        value = currCalc.value
+        curr_calc = self.curr_calc
+        value = curr_calc.value
         token = Token()
         token.start = 1
         token.value = value
-        self.queueUpdate (token, 1)
+        self.queueUpdate (token, True)
         fib = {0: 1, 1: 1}
         for i in range (2, value + 1):
             try:
-                token = self.inputQueue.get_nowait()
+                token = self.in_queue.get_nowait()
                 if token.halt:
-                    self.calcQueue = []
+                    self.calc_stack = []
                     self.queueUpdate (token, 1)
                     return
-                self.calcQueue.append (token)
+                self.calc_stack.append (token)
             except queue.Empty:
                 pass
             fib [i] = fib [i - 1] + fib [i - 2]
-            currCalc.percent = 1.0 * i / value
-            self.queueUpdate (currCalc)
-        currCalc.total = fib [value]
-        currCalc.done = 1
-        self.queueUpdate (currCalc, 1)
+            curr_calc.percent = 1.0 * i / value
+            self.queueUpdate (curr_calc)
+        curr_calc.total = fib [value]
+        curr_calc.done = True
+        self.queueUpdate (curr_calc, 1)
     
     def put (self, value):
-        self.inputQueue.put (value)
+        self.in_queue.put (value)
 
-    def queueUpdate (self, token, blocking = 0):
+    def queueUpdate (self, token, blocking = False):
         if blocking:
-            self.outputQueue.put (token)
+            self.out_queue.put (token)
         else:
             try:
-                self.outputQueue.put_nowait (token)
+                self.out_queue.put_nowait (token)
             except queue.Full:
                 pass
     
     def getStatus (self):
         try:
-            token = self.outputQueue.get_nowait()
+            token = self.out_queue.get_nowait()
         except queue.Empty:
             token = None
         return token
 
     # This is technically not completely thread-safe
     def outputPending (self):
-        return self.hasWork or (not self.outputQueue.empty())
+        return self.haswork or (not self.out_queue.empty())
 
 class App:
     def __init__ (self, master):
@@ -109,53 +108,53 @@ class App:
         bigFont = ('Helvetica', 34)
         smallFont = ('Times', 26)
         
-        frame = Frame(master)
+        frame = tkinter.Frame (master)
         frame.pack()
-        tmpFrame = Frame(frame)
+        tmpFrame = tkinter.Frame (frame)
         tmpFrame.pack()
         
-        calc = Button (tmpFrame,
+        calc = tkinter.Button (tmpFrame,
             text = 'Fibonacci',
             command = self.startCalc,
             font=bigFont
         )
-        calc.pack (side = LEFT)
+        calc.pack (side = tkinter.LEFT)
         
-        stop = Button (tmpFrame,
+        stop = tkinter.Button (tmpFrame,
             text = 'Stop',
             command = self.stopCalc,
             font = bigFont
         )
-        stop.pack (side = LEFT)
+        stop.pack (side = tkinter.LEFT)
         
-        quit = Button (tmpFrame,
+        quit = tkinter.Button (tmpFrame,
             text = 'Quit',
             command = self.quit,
             font = bigFont
         )
         quit.pack()
         
-        self.entry = Entry (frame, font = bigFont)
+        self.entry = tkinter.Entry (frame, font = bigFont)
         self.entry.pack()
         
         self.progressWidth = 400
         self.progressHeight = 25
-        self.canvas = Canvas (frame,
+        self.canvas = tkinter.Canvas (frame,
             width = self.progressWidth, 
             height = self.progressHeight,
             borderwidth = 1,
-            relief = RIDGE
+            relief = tkinter.RIDGE
         )
         self.canvas.pack()
         self.progressBar = self.canvas.create_rectangle (0, 0, 0, 0,
             fill = 'black'
         )
         
-        self.output = Text (frame,
+        self.output = tkinter.Text (frame,
             font = smallFont,
             height = 12,
             width = 55,
-            state = DISABLED)
+            state = tkinter.DISABLED)
         self.output.pack()
 
     def startCalc (self):
@@ -210,16 +209,16 @@ class App:
         self.calcThread.put (token)
         token = Token()
         token.quit = 1
-        self.calcThread.put(token)
+        self.calcThread.put (token)
         self.checkCalc()
         self.calcThread.join()
-        self.master.quit()
+        self.master.destroy()
 
     def display (self, value):
-        self.output.configure (state = NORMAL)
-        self.output.delete (1.0, END)
-        self.output.insert (END, value)
-        self.output.configure (state = DISABLED)
+        self.output.configure (state = tkinter.NORMAL)
+        self.output.delete (1.0, tkinter.END)
+        self.output.insert (tkinter.END, value)
+        self.output.configure (state = tkinter.DISABLED)
         self.master.update_idletasks()
 
     def updateBar (self, percent):
@@ -228,6 +227,6 @@ class App:
         self.canvas.coords (self.progressBar, 0, 0, width, height)
         self.master.update_idletasks()
 
-root = Tk()
+root = tkinter.Tk()
 app = App (root)
 root.mainloop()

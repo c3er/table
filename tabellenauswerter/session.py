@@ -33,7 +33,12 @@ class TableContainer:
         
     # Properties ############################################################### 
     def get_filename (self):
-        return os.path.basename (self.path) if self.path else res.UNKNOWN_FILE
+        if self.path:
+            return os.path.basename (self.path)
+        else:
+            return (
+                res.UNKNOWN_FILE + ' ' + str (self.session.tables.index (self))
+            )
     
     def get_isheadered (self):
         return self.data.isheadered
@@ -65,11 +70,12 @@ class TableContainer:
         else:
             if self.frame:
                 self.frame.destroy()
-            self.tablewidget = table.TableWidget (
-                self.session.notebook,
-                self.data
-            )
-            self.frame = self.tablewidget.frame
+            if self.data is not None:
+                self.tablewidget = table.TableWidget (
+                    self.session.notebook,
+                    self.data
+                )
+                self.frame = self.tablewidget.frame
 
 class Session:
     def __init__ (self, root, state_handler):
@@ -119,16 +125,19 @@ class Session:
         for t in self.tables:
             if t.path == path:
                 return self.tables.index (t)
+            
+        # No table found, which has the given path.
         return -1
     
     def open_tabfile (self, path):
         tindex = self.get_table_index (path)
         if tindex == -1:
             tab = table.load (path)
-            tc = TableContainer (tab, self, path)
-            self.tables.append (tc)
-            self.update()
-            self.notebook.select (len (self.tables) - 1)
+            if tab is not None:
+                tc = TableContainer (tab, self, path)
+                self.tables.append (tc)
+                self.update()
+                self.notebook.select (len (self.tables) - 1)
         else:
             self.notebook.select (tindex)
     
@@ -139,29 +148,28 @@ class Session:
         
         if self.notebook is not None:
             if not isnew:
+                # If the session is newly created,
+                # then there will be no current index
                 index = self.notebook.index ('current')
             self.notebook.destroy()
         self.notebook = ttk.Notebook()
         
-        counter = 1
         for t in self.tables:
             t.update (True)
-            title = t.filename
-            
-            if title == res.UNKNOWN_FILE:
-                title += ' ' + str (counter)
-                counter += 1
-                
-            if t.modified:
-                title += '*'
-                
-            self.notebook.add (t.frame, text = title)
-            
-        self.notebook.pack (expand = True, fill = 'both', anchor = 'n')
-        self.notebook.select (index)
-        self.notebook.bind (
-            '<<NotebookTabChanged>>',
-            lambda event: self.state_handler (self)
-        )
+            if t.data is not None:
+                title = t.filename
+                    
+                if t.modified:
+                    title += '*'
+                    
+                self.notebook.add (t.frame, text = title)
+        
+        if len (self.tables) > 0:
+            self.notebook.pack (expand = True, fill = 'both', anchor = 'n')
+            self.notebook.select (index)
+            self.notebook.bind (
+                '<<NotebookTabChanged>>',
+                lambda event: self.state_handler (self)
+            )
         
         self.state_handler (self)

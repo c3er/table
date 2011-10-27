@@ -4,7 +4,7 @@
 '''Reads tables from HTML files
 XXX This comment is not up to date anymore'''
 
-import pickle
+import sys
 
 import tkinter
 import tkinter.font
@@ -349,7 +349,15 @@ class TableFileReader (TableReaderBase):
     
     def number_end (self):
         tmpdat = self.tmpdat.strip()
-        self.entrydata.number = str2num (tmpdat)
+        
+        try:
+            self.entrydata.number = str2num (tmpdat)
+        except ValueError:
+            tb = sys.exc_info() [2]
+            raise TableFileError (
+                'Number could not be recognized.'
+            ).with_traceback (tb)
+
         self.read_data_flag = False
     
     def string_start (self, attrs):
@@ -526,7 +534,7 @@ class Table:
             return False
 
     def _mk_header (self):
-        '''Internal function to prepare the header'''
+        '''Internal function for adding a header to the table.'''
         if self.isheadered and self._header is None and self._data != []:
             self._header = self._data [0]
             if len (self._data) > 0:
@@ -638,7 +646,8 @@ class Table:
                 self._data [self.row].append (Entry (data))
         else:
             raise TableError (
-                'Table contains no row where the data could be added')
+                'Table contains no row where the data could be added'
+            )
 
     def add_header_data (self, data):
         '''
@@ -713,6 +722,7 @@ class TableWidget:
         self.tree = None
         self.tabcols = table.header
         self.tabdata = table.data
+        
         if self.tabcols is None:
             # The table does not have a header. Make one.
             try:
@@ -724,6 +734,7 @@ class TableWidget:
                 self.tabcols = [res.STD_ILLEGAL_LABEL]
         else:
             self.tabcols = self._build_row (self.tabcols)
+            
         if self.tabdata is not None:
             tmp = []
             for row in self.tabdata:
@@ -731,6 +742,7 @@ class TableWidget:
             self.tabdata = tmp
 
             # Delete empty columns
+            # XXX Should be done in the Table class!
             j = 0
             for i in range (len (self.tabcols)):
                 col = table.get_col (j)
@@ -747,6 +759,10 @@ class TableWidget:
         self._build_tree()
 
     def _build_row (self, row):
+        '''
+        Replace empty entries with entries, which consist of a space character.
+        Needed for representing of the header of the table.
+        '''
         tmp = []
         for entry in row:
             entry = ' ' if entry.isempty() else str (entry)
@@ -781,7 +797,8 @@ class TableWidget:
             # XXX tkinter.font.Font().measure expected args are incorrect
             # according to the Tk docs
             self.tree.column (col,
-                width = tkinter.font.Font().measure (str (col)))
+                width = tkinter.font.Font().measure (str (col))
+            )
 
         for line in self.tabdata:
             # XXX Link this ID to the appropriate row in the appropriate table
@@ -802,12 +819,19 @@ class TableWidget:
 
 # "Public" functions ###########################################################
 def load (path):
+    '''
+    Loads a table file from the given path.
+    It returns a Table object.
+    '''
     with open (path, 'rb') as f:
         page = f.read().decode ('utf_8', 'ignore').strip()
         with TableFileReader() as parser:
             try:
                 parser.feed (page)
             except html.parser.HTMLParseError as exc:
+                error (res.FILE_READ_ERROR, exc)
+                return None
+            except TableFileError as exc:
                 error (res.FILE_READ_ERROR, exc)
                 return None
             return parser.table
@@ -852,6 +876,17 @@ def find_attr (attrs, name):
     return None
 
 def write_tag (tag, *args, attrs = None, content = None):
+    '''
+    Writes a tag, following the XML syntax.
+    
+    Parameters:
+        "tag" contains the name of the tag.
+        "attrs" shall be a list, containing tuples in the form "(attr, val)".
+        The first element is the name of the attribute and the second is its
+        value.
+        "content" contains the whole content between start and end tag. If its
+        value is None, the resulting tag will be a start/end tag.
+    '''
     output = '<' + tag
     
     if attrs is not None:
@@ -884,7 +919,7 @@ def split_data (data):
     Splits the given data (which shall be a str object) and returns a tupel,
     containig the number as first element and the rest as second element.
     If the data does not begin with a number, the first element of the tuple
-    will None.
+    will be None.
     '''
     number = None
     string = data
@@ -903,7 +938,7 @@ def split_data (data):
                 elif char == ',':
                     numstr += '.'
                 elif char == ' ':
-                    # Just suppress space characters
+                    # Suppress space characters
                     continue
                 else:
                     # "tmpstr" contains the non numeric rest.
@@ -915,8 +950,13 @@ def split_data (data):
                 numstr = numstr [: -1]
             
             #print ('2:', numstr)
-            number = str2num (numstr)
-            string = tmpstr
+            
+            # The resulting numstr can still contain an illegal value...
+            try:
+                number = str2num (numstr)
+                string = tmpstr
+            except ValueError:
+                string = data
     else:
         string = ''
 

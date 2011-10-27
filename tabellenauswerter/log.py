@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''This is 'my_logger' module, which is imported into all
-the other modules of my application.
+'''
+This is 'my_logger' module, which is imported into all the other modules of my
+application.
 
 Copied from "The Python Rag" - August 2009'''
 

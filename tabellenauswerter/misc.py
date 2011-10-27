@@ -23,7 +23,8 @@ def error (msg, exc = None):
     "msg" shall be string object, which contains the message, which will be
     showen to the user and be noted in the log file.
     '''
-    tkinter.messagebox.showerror (res.STD_ERROR_TITLE, msg)
+    excmsg = '\n' + str (exc) if exc is not None else ''
+    tkinter.messagebox.showerror (res.STD_ERROR_TITLE, msg + excmsg)
 
     if log.isready():
         _print_log (msg, exc)
@@ -55,7 +56,7 @@ def cmdcall (cmd, *args):
 
 # This stuff was originally from some demos ####################################
 class curry:
-    '''Handles arguments for callback functions'''
+    '''Handles arguments for callback functions.'''
     def __init__ (self, callback, *args, **kw):
         self.callback = callback
         self.args = args

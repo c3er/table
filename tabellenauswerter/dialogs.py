@@ -155,29 +155,36 @@ class NewDialog (_DialogBase):
         page = ttk.Frame (master)
         subpage = ttk.Frame (page)
 
+        ########################################################################
         top_frame = ttk.Frame (subpage)
-        ttk.Label (top_frame,
-            text = res.ADDR_WEBSITE_LABEL
-        ).pack (side = 'left')
+        ttk.Label (top_frame, text = res.ADDR_WEBSITE_LABEL).pack(side = 'left')
         top_frame.pack (side = 'top', fill = 'x')
+        ########################################################################
 
+        ########################################################################
         middle_frame = ttk.Frame (subpage)
+        
         self.addr_entry = tkinter.Entry (middle_frame, width = 40)
         self.addr_entry.insert (0, res.DEFAULT_ADDR)
         self.addr_entry.pack (side = 'left')
+        
         self.helper_flag = tkinter.BooleanVar (master)
         ttk.Checkbutton (middle_frame,
             text = res.HELPER_LABEL,
             variable = self.helper_flag
         ).pack (side = 'left')
+        
         middle_frame.pack (side = 'top', fill = 'x')
+        ########################################################################
 
+        ########################################################################
         bottom_frame = ttk.Frame (subpage)
         ttk.Button (bottom_frame,
             text = res.OPEN_HTML_LABEL,
             command = self.open_html,
         ).pack (side = 'left', pady = 5)
         bottom_frame.pack (side = 'top', fill = 'x')
+        ########################################################################
 
         subpage.pack (padx = 5, pady = 5)
         return page
@@ -208,7 +215,7 @@ class NewDialog (_DialogBase):
         #dir = 'bla'
         
         if dir:
-            # self.addr is the base address
+            # "self.addr" is the base address
             ad = AsianDialog (self.parent, self.addr, dir, res.ASIAN_LABEL)
             self.result = [ad.result] if ad.result is not None else None
         else:
@@ -281,7 +288,7 @@ class NewDialog (_DialogBase):
                     page = f.read()
             except IOError as msg:
                 error (res.FILE_OPEN_ERROR + str (msg), msg)
-                return False
+                return
             
         elif self.selection == Selection.ASIANBOOKIE:
             self.read_asianbookie()
@@ -329,7 +336,7 @@ class AsianWorker (threading.Thread):
         return table.filter_trash (table.html2tables (page))
 
     def run (self):
-        # XXX VERY UGLY
+        # XXX VERY UGLY!!!
         
         i = 0
         phase = 0
@@ -358,7 +365,14 @@ class AsianWorker (threading.Thread):
                     i += 1
                     
                     tables = self.request_tables (addr)
-                    succeeded = len (tables) > 0
+                    
+                    if len (tables) > 0:
+                        succeeded = True
+                        row_offset = 1
+                    else:
+                        succeeded = False
+                        row_offset += 1
+                    
                     if succeeded:
                         lasttab = tab
                         tab = tables [1]
@@ -366,14 +380,13 @@ class AsianWorker (threading.Thread):
                         tab.make_header()
                         
                         #entry = tab.data [0] [2]
-                        entry = tab.lastrow [2]
-                    else:
-                        entry = tab.data [len (tab.data) - 2] [2]
+                    entry = tab.data [len (tab.data) - row_offset] [2]
                     
                     print (entry.data, entry.link)
                     
                     if tab != lasttab and entry.link:
-                        tab.dumb (os.path.join (self.workdir, 
+                        tab.dumb (os.path.join (
+                            self.workdir, 
                             str (i) + res.TAB_FILE_EXT)
                         )
                         addr = urllib.parse.urljoin (addr, entry.link)
@@ -381,6 +394,7 @@ class AsianWorker (threading.Thread):
                         self.send_event (Event (phase = phase, count = i))
                     else:
                         phase = 1
+                        print (phase)
             elif phase == 1:
                 tab = None
                 nexttab = None
