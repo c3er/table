@@ -58,12 +58,12 @@ class TableReaderBase(html.parser.HTMLParser):
     # Inherited from html.parser.HTMLParser ####################################
     def handle_starttag(self, tag, attrs):
         try:
-            self.starttags [tag] (attrs)
+            self.starttags[tag](attrs)
         except KeyError:
             pass
 
     def handle_startendtag(self, tag, attrs):
-        self.handle_starttag (tag, attrs)
+        self.handle_starttag(tag, attrs)
 
     def handle_endtag(self, tag):
         try:
@@ -356,7 +356,7 @@ class TableFileReader(TableReaderBase):
             tb = sys.exc_info()[2]
             raise TableFileError(
                 'Number could not be recognized.'
-            ).with_traceback (tb)
+            ).with_traceback(tb)
 
         self.read_data_flag = False
     
@@ -743,6 +743,7 @@ class TableWidget:
 
             # Delete empty columns
             # XXX Should be done in the Table class!
+            # XXX 2: On which fucking place?
             j = 0
             for i in range(len(self.tabcols)):
                 col = table.get_col(j)
@@ -826,10 +827,7 @@ def load(path):
         with TableFileReader() as parser:
             try:
                 parser.feed(page)
-            except html.parser.HTMLParseError as exc:
-                error(res.FILE_READ_ERROR, exc)
-                return None
-            except TableFileError as exc:
+            except (html.parser.HTMLParseError, TableFileError) as exc:
                 error(res.FILE_READ_ERROR, exc)
                 return None
             return parser.table

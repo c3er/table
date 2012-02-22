@@ -84,7 +84,8 @@ def new_session(root):
         nd = dialogs.NewDialog(root, res.NEW_SESSION_LABEL)
         if nd.result:
             sess.set_tablelist(nd.result)
-        # XXX Fehlermeldung ausgeben, wenn keine Tabellen erkannt wurden.
+        else:
+            tkinter.messagebox.showwarning(res.TITLE, res.NO_TABLE_ERROR)
 
 @log.logfunction
 def open_table():
@@ -127,7 +128,7 @@ def appclose_callback(root):
         root.destroy()
 ################################################################################
 
-# Build the actual Interface ###################################################
+# Build the actual interface ###################################################
 def toolbar(root):
     '''Build the toolbar, which consists of an horicontal row of buttons.'''
     global tabcols_button

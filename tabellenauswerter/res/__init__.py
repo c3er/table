@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 TITLE = 'Tabellenauswerter'
-DEFAULT_ADDR = 'test2.html'
+DEFAULT_ADDR = 'test-data/test.html'
 BASE_ADDR = 'http://fun2.asianbookie.com/index.cfm?top20=1'
 
 LOGFILE = 'logfile.txt'
@@ -29,6 +29,7 @@ WRONG_FILE_STARTED = 'Sie müssen "Tabellenauswerter.py" starten'
 SESSION_NOTEBOOK_ERROR = (
     'There is no Notebook element, where a table could be selected'
 )
+NO_TABLE_ERROR = 'Es konnte keine Tabelle erkannt werden'
 
 SAVE_TABLE_TITLE = 'Tabelle speichern'
 SAVE_TABLE_QUESTION = 'Soll die Tabelle "{}" gespeichert werden?'

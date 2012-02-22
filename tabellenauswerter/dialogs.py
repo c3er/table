@@ -249,11 +249,13 @@ class NewDialog(_DialogBase):
                     self.selection = Selection.ONE_WEBSITE_HELPER
                 else:
                     self.selection = Selection.ONE_WEBSITE
-            elif self.addr.endswith('.html') or self.addr.endswith('.htm'):
-                self.selection = Selection.LOCAL_FILE
             else:
-                error(res.STD_ERROR_MSG)
-                return False
+                fname = self.addr.lower()
+                if fname.endswith('.html') or fname.endswith('.htm'):
+                    self.selection = Selection.LOCAL_FILE
+                else:
+                    error(res.STD_ERROR_MSG)
+                    return False
             
             return True
         else:
@@ -303,6 +305,12 @@ class NewDialog(_DialogBase):
     ############################################################################
 
 # Stuff to read in the whole table from Asianbookie ############################
+class Token:
+    def __init__(self, data = None, stop = False, exc = None):
+        self.data = data
+        self.stop = stop
+        self.exc = exc
+
 class Event:
     def __init__(self, stop = False, phase = 0, count = 0, result = None):
         self.stop = stop
@@ -318,7 +326,9 @@ class AsianWorker(threading.Thread):
         self.baseaddr = baseaddr
         self.url = None
         self.outqueue = queue.Queue()
+        self.inqueue = queue.Queue()
         
+    # Properties ###############################################################
     def get_event(self):
         try:
             event = self.outqueue.get_nowait()
@@ -327,6 +337,7 @@ class AsianWorker(threading.Thread):
         return event
     
     event = property(get_event)
+    ############################################################################
     
     def send_event(self, val):
         self.outqueue.put(val)
@@ -355,8 +366,8 @@ class AsianWorker(threading.Thread):
                     
                     # XXX In der fertigen Version muss die erste (richtige)
                     # Reihe genommen werden...
-                    entry = tab.data[0][2]
-                    #entry = tab.lastrow[2]
+                    #entry = tab.data[0][2]
+                    entry = tab.lastrow[2]
                     
                     print(entry.data, entry.link)
                     
@@ -366,7 +377,7 @@ class AsianWorker(threading.Thread):
                     
                     tables = self.request_tables(addr)
                     
-                    if len(tables) > 0:
+                    '''if len(tables) > 0:
                         succeeded = True
                         row_offset = 1
                     else:
@@ -379,13 +390,19 @@ class AsianWorker(threading.Thread):
                     
                         tab.make_header()
                         
-                        #entry = tab.data[0][2]
-                    entry = tab.data [len(tab.data) - row_offset][2]
+                    entry = tab.data[len(tab.data) - row_offset][2]'''
+                    
+                    try:
+                        tab = tables[1]
+                        #print(tab)
+                        entry = tab.data[1][2]
+                    except IndexError:
+                        tab = lasttab
                     
                     print(entry.data, entry.link)
                     
                     if tab != lasttab and entry.link:
-                        tab.dumb (os.path.join(
+                        tab.dumb(os.path.join(
                             self.workdir, 
                             str(i) + res.TAB_FILE_EXT)
                         )
@@ -400,14 +417,14 @@ class AsianWorker(threading.Thread):
                 nexttab = None
                 filelist = os.listdir(self.workdir)
                 for f in filelist:
+                    path = os.path.join(self.workdir, f)
                     if tab is None:
-                        tab = table.load(os.path.join (self.workdir, f))
+                        tab = table.load(path)
                     else:
-                        nexttab = table.load (os.path.join (self.workdir, f))
+                        nexttab = table.load(path)
                         tab.concat(nexttab)
                 phase = 2
                 self.send_event(Event(result = tab, phase = phase))
-                #self.stopworker()
             else:
                 self.stopworker()
     
@@ -443,8 +460,8 @@ class AsianDialog(_DialogBase):
         box.pack(fill = 'x')
         
     def body(self, master):
-        ttk.Label(master, text = res.ASIAN_READING_MSG).pack (side = 'top')
-        ttk.Label(master, textvariable = self.labelvar).pack (side = 'top')
+        ttk.Label(master, text = res.ASIAN_READING_MSG).pack(side = 'top')
+        ttk.Label(master, textvariable = self.labelvar).pack(side = 'top')
         
     def stopwork(self):
         self.asianworker.stopworker()
@@ -470,7 +487,7 @@ class AsianDialog(_DialogBase):
                 self.stopwork()
         
         if event is None or not event.stop:
-            self.parent.after(250, self.update)
+            self.parent.after(100, self.update)
 ################################################################################
 
 if __name__ == '__main__':

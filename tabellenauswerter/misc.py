@@ -21,7 +21,7 @@ def error(msg, exc = None):
     occures. It shows the user an error message box and makes a note in the
     log file.
     "msg" shall be string object, which contains the message, which will be
-    showen to the user and be noted in the log file.
+    shown to the user and be noted in the log file.
     '''
     excmsg = '\n' + str(exc) if exc is not None else ''
     tkinter.messagebox.showerror(res.STD_ERROR_TITLE, msg + excmsg)
