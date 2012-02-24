@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import subprocess
 
@@ -36,6 +37,7 @@ class _DialogBase(tkinter.Toplevel):
         if title:
             self.title(title)
         self.parent = parent
+        self.canceled = False
         self.result = None
         
         body = ttk.Frame(self)
@@ -54,6 +56,11 @@ class _DialogBase(tkinter.Toplevel):
         )
         self.initial_focus.focus_set()
         self.wait_window(self)
+        
+    def close(self, event = None):
+        '''Give focus back to the parent window and close the dialog.'''
+        self.parent.focus_set()
+        self.destroy()
 
     # Methods to overwrite #####################################################
     def body(self, master):
@@ -102,12 +109,12 @@ class _DialogBase(tkinter.Toplevel):
         self.withdraw()
         self.update_idletasks()
         self.apply()
-        self.cancel()
+        self.close()
 
     def cancel(self, event = None):
-        '''Give focus back to the parent window and close the dialog.'''
-        self.parent.focus_set()
-        self.destroy()
+        '''Performs an Abortion of the dialog.'''
+        self.canceled = True
+        self.close(event)
     ###
 
     # Command hooks ###
@@ -194,9 +201,7 @@ class NewDialog(_DialogBase):
         subpage = ttk.Frame(page)
 
         top_frame = ttk.Frame(subpage)
-        ttk.Label(top_frame,
-            text = res.BASE_ADDR_LABEL
-        ).pack(side = 'left')
+        ttk.Label(top_frame, text = res.BASE_ADDR_LABEL).pack(side = 'left')
         top_frame.pack(side = 'top', fill = 'x')
 
         bottom_frame = ttk.Frame(subpage)
@@ -212,7 +217,6 @@ class NewDialog(_DialogBase):
     @log.logmethod
     def read_asianbookie(self):
         dir = tkinter.filedialog.askdirectory()
-        #dir = 'bla'
         
         if dir:
             # "self.addr" is the base address
@@ -297,7 +301,7 @@ class NewDialog(_DialogBase):
             return
         
         else:
-            error (res.STD_ERROR_MSG)
+            error(res.STD_ERROR_MSG)
             return
         
         self.result = table.html2tables(page)
@@ -305,48 +309,62 @@ class NewDialog(_DialogBase):
     ############################################################################
 
 # Stuff to read in the whole table from Asianbookie ############################
-class Token:
+class DataToken:
+    def __init__(self, result = None, phase = 0, count = 0):
+        self.result = result
+        self.phase = phase
+        self.count = count
+
+class Event:
     def __init__(self, data = None, stop = False, exc = None):
         self.data = data
         self.stop = stop
         self.exc = exc
 
-class Event:
-    def __init__(self, stop = False, phase = 0, count = 0, result = None):
-        self.stop = stop
-        self.phase = phase
-        self.count = count
-        self.result = result
-
 class AsianWorker(threading.Thread):
     def __init__(self, workdir, baseaddr):
         super().__init__()
-        self.running = True
+        self._running = True
+        self.running_mutex = threading.Lock()
         self.workdir = workdir
         self.baseaddr = baseaddr
-        self.url = None
         self.outqueue = queue.Queue()
-        self.inqueue = queue.Queue()
         
     # Properties ###############################################################
     def get_event(self):
-        try:
-            event = self.outqueue.get_nowait()
-        except queue.Empty:
-            event = None
-        return event
+        return self.get_elem(self.outqueue)
+    
+    def get_running(self):
+        self.running_mutex.acquire()
+        val = self._running
+        self.running_mutex.release()
+        return val
+    
+    def set_running(self, val):
+        self.running_mutex.acquire()
+        self._running = val
+        self.running_mutex.release()
     
     event = property(get_event)
+    running = property(get_running, set_running)
     ############################################################################
     
-    def send_event(self, val):
-        self.outqueue.put(val)
+    # For internal use #########################################################
+    def get_elem(self, q):
+        try:
+            elem = q.get_nowait()
+        except queue.Empty:
+            elem = None
+        return elem
+    
+    def send_event(self, data = None, stop = False, exc = None):
+        self.outqueue.put(Event(data, stop, exc))
         
     def request_tables(self, addr):
         page = cmdcall(res.ASIAN_EXE, '"' + addr + '"')
         return table.filter_trash(table.html2tables(page))
-
-    def run(self):
+        
+    def do_work(self):
         # XXX VERY UGLY!!!
         
         i = 0
@@ -393,6 +411,7 @@ class AsianWorker(threading.Thread):
                     entry = tab.data[len(tab.data) - row_offset][2]'''
                     
                     try:
+                        lasttab = tab
                         tab = tables[1]
                         #print(tab)
                         entry = tab.data[1][2]
@@ -408,7 +427,9 @@ class AsianWorker(threading.Thread):
                         )
                         addr = urllib.parse.urljoin(addr, entry.link)
                         print(addr)
-                        self.send_event(Event(phase = phase, count = i))
+                        self.send_event(
+                            data = DataToken(phase = phase, count = i)
+                        )
                     else:
                         phase = 1
                         print(phase)
@@ -424,16 +445,24 @@ class AsianWorker(threading.Thread):
                         nexttab = table.load(path)
                         tab.concat(nexttab)
                 phase = 2
-                self.send_event(Event(result = tab, phase = phase))
+                self.send_event(data = DataToken(result = tab, phase = phase))
             else:
                 self.stopworker()
     
+    def run(self):
+        try:
+            self.do_work()
+        except Exception as exc:
+            self.send_event(stop = True, exc = exc)
+            raise exc
+    ############################################################################
+    
     def stopworker(self):
         self.running = False
-        self.send_event(Event(stop = True))
+        self.send_event(stop = True)
 
 class AsianDialog(_DialogBase):
-    def __init__ (self, parent, addr, workdir, title = None):
+    def __init__(self, parent, addr, workdir, title = None):
         self.parent = parent
         self.addr = addr
         self.workdir = workdir
@@ -443,7 +472,7 @@ class AsianDialog(_DialogBase):
         self.asianworker = AsianWorker(workdir, addr)
         self.asianworker.start()
         
-        parent.after(100, self.update)
+        parent.after(100, self.worker_handler)
         
         super().__init__(parent, title)
 
@@ -467,27 +496,36 @@ class AsianDialog(_DialogBase):
         self.asianworker.stopworker()
         self.cancel()
         
-    def update(self):
+    def update(self, data):
+        print(data.count, data.phase)
+
+        explenation = res.ASIAN_PHASE_EXPLANATION[data.phase]
+        if data.phase == 0:
+            explenation = explenation.format(data.count + 1)
+
+        phase_str = res.ASIAN_PHASE.format(data.phase + 1)
+        self.labelvar.set(phase_str + explenation)
+        
+        if data.result is not None:
+            self.result = data.result
+        
+    def worker_handler(self):
         event = self.asianworker.event
         
         if event is not None:
-            print(event.count, event.phase)
-
-            explenation = res.ASIAN_PHASE_EXPLANATION[event.phase]
-            if event.phase == 0:
-                explenation = explenation.format(event.count + 1)
-
-            phase_str = res.ASIAN_PHASE.format(event.phase + 1)
-            self.labelvar.set(phase_str + explenation)
-            
-            if event.result is not None:
-                self.result = event.result
-            
+            if event.data is not None:
+                self.update(event.data)
+            if event.exc is not None:
+                tkinter.messagebox.showerror(
+                    res.TITLE,
+                    res.ASIANBOOKIE_ERROR + str(event.exc)
+                )
+                self.stopwork()
             if event.stop:
                 self.stopwork()
         
         if event is None or not event.stop:
-            self.parent.after(100, self.update)
+            self.parent.after(100, self.worker_handler)
 ################################################################################
 
 if __name__ == '__main__':

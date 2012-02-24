@@ -743,7 +743,7 @@ class TableWidget:
 
             # Delete empty columns
             # XXX Should be done in the Table class!
-            # XXX 2: On which fucking place?
+            # XXX In make_header method
             j = 0
             for i in range(len(self.tabcols)):
                 col = table.get_col(j)
@@ -814,41 +814,6 @@ class TableWidget:
             self.tree.yview('scroll', -2, 'units')
         else:
             self.tree.yview('scroll', 2, 'units')
-################################################################################
-
-# "Public" functions ###########################################################
-def load(path):
-    '''
-    Loads a table file from the given path.
-    It returns a Table object.
-    '''
-    with open(path, 'rb') as f:
-        page = f.read().decode('utf_8', 'ignore').strip()
-        with TableFileReader() as parser:
-            try:
-                parser.feed(page)
-            except (html.parser.HTMLParseError, TableFileError) as exc:
-                error(res.FILE_READ_ERROR, exc)
-                return None
-            return parser.table
-
-def html2tables(page):
-    '''
-    Transforms a HTML page, containing tables, to a list of Table objects.
-    The parameter "page" has to be a bytes object.
-    '''
-    page = page.decode('utf_8', 'ignore').strip()
-    linecount = len(page.splitlines())
-    with TableHTMLReader() as parser:
-        parerr = False
-        while parser.getpos()[0] < linecount:
-            try:
-                parser.feed(page)
-                if not parerr:
-                    break
-            except html.parser.HTMLParseError:
-                parerr = True
-        return parser.tables
 ################################################################################
 
 # Helper functions #############################################################
@@ -958,6 +923,41 @@ def split_data(data):
 
     #print ('split_data:', 'n:', number, 's:', string)
     return number, string
+################################################################################
+
+# "Public" functions ###########################################################
+def load(path):
+    '''
+    Loads a table file from the given path.
+    It returns a Table object.
+    '''
+    with open(path, 'rb') as f:
+        page = f.read().decode('utf_8', 'ignore').strip()
+        with TableFileReader() as parser:
+            try:
+                parser.feed(page)
+            except (html.parser.HTMLParseError, TableFileError) as exc:
+                error(res.FILE_READ_ERROR, exc)
+                return None
+            return parser.table
+
+def html2tables(page):
+    '''
+    Transforms a HTML page, containing tables, to a list of Table objects.
+    The parameter "page" has to be a bytes object.
+    '''
+    page = page.decode('utf_8', 'ignore').strip()
+    linecount = len(page.splitlines())
+    with TableHTMLReader() as parser:
+        parerr = False
+        while parser.getpos()[0] < linecount:
+            try:
+                parser.feed(page)
+                if not parerr:
+                    break
+            except html.parser.HTMLParseError:
+                parerr = True
+        return parser.tables
 ################################################################################
 
 if __name__ == '__main__':

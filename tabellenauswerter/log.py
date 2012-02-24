@@ -5,7 +5,8 @@
 This is 'my_logger' module, which is imported into all the other modules of my
 application.
 
-Copied from "The Python Rag" - August 2009'''
+Copied from "The Python Rag" - August 2009
+'''
 
 import logging
 import logging.handlers

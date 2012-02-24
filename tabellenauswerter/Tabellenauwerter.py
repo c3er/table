@@ -84,7 +84,7 @@ def new_session(root):
         nd = dialogs.NewDialog(root, res.NEW_SESSION_LABEL)
         if nd.result:
             sess.set_tablelist(nd.result)
-        else:
+        elif not nd.canceled:
             tkinter.messagebox.showwarning(res.TITLE, res.NO_TABLE_ERROR)
 
 @log.logfunction

@@ -30,6 +30,7 @@ SESSION_NOTEBOOK_ERROR = (
     'There is no Notebook element, where a table could be selected'
 )
 NO_TABLE_ERROR = 'Es konnte keine Tabelle erkannt werden'
+ASIANBOOKIE_ERROR = 'Asianbookie konnte nicht eingelesen werden.\n'
 
 SAVE_TABLE_TITLE = 'Tabelle speichern'
 SAVE_TABLE_QUESTION = 'Soll die Tabelle "{}" gespeichert werden?'
