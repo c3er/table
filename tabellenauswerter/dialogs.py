@@ -373,6 +373,7 @@ class AsianWorker(threading.Thread):
         tab = None
         lasttab = None
         firstloop = True
+        row_offset = 1
         
         while self.running:
             if phase == 0:
@@ -384,8 +385,8 @@ class AsianWorker(threading.Thread):
                     
                     # XXX In der fertigen Version muss die erste (richtige)
                     # Reihe genommen werden...
-                    #entry = tab.data[0][2]
-                    entry = tab.lastrow[2]
+                    entry = tab.data[0][2]
+                    #entry = tab.lastrow[2]
                     
                     print(entry.data, entry.link)
                     
@@ -395,28 +396,25 @@ class AsianWorker(threading.Thread):
                     
                     tables = self.request_tables(addr)
                     
-                    '''if len(tables) > 0:
-                        succeeded = True
+                    if len(tables) > 0:
                         row_offset = 1
-                    else:
-                        succeeded = False
-                        row_offset += 1
-                    
-                    if succeeded:
+                        
                         lasttab = tab
                         tab = tables[1]
                     
                         tab.make_header()
+                    else:
+                        row_offset += 1
                         
-                    entry = tab.data[len(tab.data) - row_offset][2]'''
+                    entry = tab.data[len(tab.data) - row_offset][2]
                     
-                    try:
+                    '''try:
                         lasttab = tab
                         tab = tables[1]
                         #print(tab)
                         entry = tab.data[1][2]
                     except IndexError:
-                        tab = lasttab
+                        tab = lasttab'''
                     
                     print(entry.data, entry.link)
                     

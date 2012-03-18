@@ -141,7 +141,7 @@ class Session:
     
     @log.logmethod
     def update(self, isnew = False):
-        log.debug ('Anzahl der Tabellen: ' + str(len(self.tables)))
+        log.debug('Anzahl der Tabellen: ' + str(len(self.tables)))
         index = 0
         
         if self.notebook is not None:
