@@ -21,13 +21,13 @@ from misc import *
 # Version of the table file.
 CURRENT_FILE_VERSION = '0.2'
 
-class EntryError(Exception):
-    pass
-
 class TableError(Exception):
     pass
 
-class TableFileError(Exception):
+class EntryError(TableError):
+    pass
+
+class TableFileError(TableError):
     pass
 
 class TableReaderBase(html.parser.HTMLParser):
@@ -489,6 +489,15 @@ class Entry:
         
         return write_tag('entry', content = datastr + linkstr)
 
+class Row:
+    def __init__(self, table):
+        pass
+    
+class HeaderRow(Row):
+    def __init__(self, table):
+        super().__init__()
+        # XXX
+
 class Table:
     def __init__(self):
         '''Initiate a new empty table object'''
@@ -541,8 +550,12 @@ class Table:
                 self._data = self._data[1:]
             self.row -= 1
 
+            ####################################################################
             # This handles some special conditions, which occure while working
             # with Tk
+            
+            # The header is shorter then the data
+            # -> Append additional header entries to make it fit to the data
             if self._data is not None and len(self._data) > 0:
                 headerlen = len(self._header)
                 datalen = len(self._data[0])
@@ -551,9 +564,24 @@ class Table:
                         self._header.append(
                             Entry(res.STD_COL_LABEL + str(i + 1))
                         )
+                        
+            # There are empty entries in the header
             for i in range(len(self._header)):
-                if self._header [i].data == '':
-                    self._header [i] = Entry(res.STD_COL_LABEL + str(i + 1))
+                if self._header[i].data == '':
+                    self._header[i] = Entry(res.STD_COL_LABEL + str(i + 1))
+                    
+            # Delete empty columns
+            j = 0
+            for i in range(len(self._header)):
+                col = self.get_col(j)
+                if col is not None:
+                    col = [str(entry) for entry in col]
+                    collen = len(col) - 1
+                    if col[1:] == ['' for k in range(collen)]:
+                        self.del_col(j)
+                    else:
+                        j += 1
+            ####################################################################
 
     # Properties ###############################################################
     def get_data(self):
@@ -652,7 +680,7 @@ class Table:
     def add_header_data(self, data):
         '''
         Adds new data to the header.
-        This function have to be called, before normal data has been added.
+        This function has to be called, before normal data has been added.
         '''
         if not self.isheadered:
             self.isheadered = True
@@ -738,22 +766,8 @@ class TableWidget:
         if self.tabdata is not None:
             tmp = []
             for row in self.tabdata:
-                tmp.append(self._build_row (row))
+                tmp.append(self._build_row(row))
             self.tabdata = tmp
-
-            # Delete empty columns
-            # XXX Should be done in the Table class!
-            # XXX In make_header method
-            j = 0
-            for i in range(len(self.tabcols)):
-                col = table.get_col(j)
-                if col is not None:
-                    col = [str(entry) for entry in col]
-                    collen = len(col) - 1
-                    if col[1:] == ['' for k in range(collen)]:
-                        table.del_col(j)
-                    else:
-                        j += 1
 
         self.frame = ttk.Frame(root)
         self._setup_widgets(self.frame)
@@ -762,7 +776,7 @@ class TableWidget:
     def _build_row(self, row):
         '''
         Replace empty entries with entries, which consist of a space character.
-        Needed for representing of the header of the table.
+        Needed for representing the header of the table.
         '''
         tmp = []
         for entry in row:

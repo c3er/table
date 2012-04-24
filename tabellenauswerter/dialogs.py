@@ -151,7 +151,7 @@ class NewDialog(_DialogBase):
     # Helper functions #########################################################
     def open_html(self):
         fname = tkinter.filedialog.askopenfilename (
-            filetypes = [('HTML-Dateien', '*.htm;*.html')]
+            filetypes = [(res.HTML_FILE_STR, res.HTML_FILE_EXT)]
         )
         if fname:
             setentry(self.addr_entry, fname)
@@ -216,11 +216,11 @@ class NewDialog(_DialogBase):
 
     @log.logmethod
     def read_asianbookie(self):
-        dir = tkinter.filedialog.askdirectory()
+        path = tkinter.filedialog.askdirectory()
         
-        if dir:
+        if path:
             # "self.addr" is the base address
-            ad = AsianDialog(self.parent, self.addr, dir, res.ASIAN_LABEL)
+            ad = AsianDialog(self.parent, self.addr, path, res.ASIAN_LABEL)
             self.result = [ad.result] if ad.result is not None else None
         else:
             self.cancel()
@@ -246,7 +246,7 @@ class NewDialog(_DialogBase):
             self.addr = self.addr_entry.get()
 
             if not self.addr:
-                error (res.ADDR_EMPTY_ERROR + res.STD_ERROR_MSG)
+                error(res.ADDR_EMPTY_ERROR + res.STD_ERROR_MSG)
                 return False
             elif self.addr.startswith('http://'):
                 if self.helper_flag.get():
@@ -267,7 +267,7 @@ class NewDialog(_DialogBase):
             self.selection = Selection.ASIANBOOKIE
             return self.addr == res.BASE_ADDR
         
-    def apply (self):
+    def apply(self):
         if self.selection == Selection.ONE_WEBSITE:
             try:
                 req = urllib.request.Request(self.addr)

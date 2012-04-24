@@ -103,13 +103,15 @@ def save_table_as(tab = None):
     if path:
         if not path.endswith(res.TAB_FILE_EXT):
             path += res.TAB_FILE_EXT
-        tab = sess.current_table if tab is None else tab
+        if tab is None:
+            tab = sess.current_table
         tab.save(path)
 
 @log.logfunction
 def save_table(tab = None):
     try:
-        tab = sess.current_table if tab is None else tab
+        if tab is None:
+            tab = sess.current_table
         tab.save()
     except session.UnknownPathException:
         save_table_as(tab)
@@ -140,7 +142,7 @@ def toolbar(root):
 
     ttk.Button(frame,
         text = res.NEW_LABEL,
-        command = curry (new_session, root)
+        command = curry(new_session, root)
     ).pack(side = 'left')
 
     ttk.Button(frame,
@@ -155,7 +157,7 @@ def toolbar(root):
     )
     save_button.pack(side = 'left')
 
-    save_as_button = ttk.Button (frame,
+    save_as_button = ttk.Button(frame,
         text = res.SAVE_AS_LABEL,
         command = save_table_as,
         state = 'disabled'
@@ -183,7 +185,7 @@ def toolbar(root):
 def cmdwidget(root):
     '''Container for the elements, which appear at application start.'''
     frame = ttk.Frame(root)
-    toolbar (root).pack(anchor = 'n', fill = 'x', padx = 2, pady = 2)
+    toolbar(root).pack(anchor = 'n', fill = 'x', padx = 2, pady = 2)
     return frame
 
 def bind_events(root):
@@ -191,6 +193,7 @@ def bind_events(root):
     root.bind('<Control-o>', lambda event: open_table())
     root.bind('<Control-s>', lambda event: save_table())
     root.bind('<Control-S>', lambda event: save_table_as())
+    root.protocol('WM_DELETE_WINDOW', curry(appclose_callback, root))
 ################################################################################
 
 if __name__ == '__main__':
@@ -202,7 +205,6 @@ if __name__ == '__main__':
     root.wm_title(res.TITLE)
     cmdwidget(root).pack(fill = 'x', anchor = 'n', padx = 2, pady = 2)
     bind_events(root)
-    root.protocol('WM_DELETE_WINDOW', curry(appclose_callback, root))
 
     root.mainloop()
 

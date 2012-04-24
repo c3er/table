@@ -11,6 +11,9 @@ ASIAN_EXE = 'asian'
 TAB_FILE_STR = 'Tabellen Dateien'
 TAB_FILE_EXT = '.table'
 
+HTML_FILE_STR = 'HTML-Dateien'
+HTML_FILE_EXT = '*.htm;*.html'
+
 UNKNOWN_FILE = 'Unbekannt'
 
 STD_ERROR_TITLE = 'Fehler'
