@@ -395,6 +395,9 @@ class EntryData:
         else:
             return False
     
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
     def set(self, val):
         #print('EntryData.set:', val)
         if isinstance(val, str):
@@ -437,6 +440,9 @@ class Entry:
         else:
             return False
     
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
     # Properties ###############################################################
     def get_data(self):
         return str(self._data)
@@ -468,8 +474,7 @@ class Entry:
         self.olddata.append(EntryData(val))
     
     def dumb(self):
-        '''
-        Returns a string, containing an entry, which can be used to append it
+        '''Returns a string, containing an entry, which can be used to append it
         to a file.
         '''
         curdatastr = write_tag('current', content = self._data.dumb())
@@ -488,17 +493,89 @@ class Entry:
             linkstr = write_tag('link', attrs = [('addr', self.link)])
         
         return write_tag('entry', content = datastr + linkstr)
-
-class Row:
-    def __init__(self, table):
-        pass
     
-class HeaderRow(Row):
-    def __init__(self, table):
-        super().__init__()
-        # XXX
+class Row:
+    # Magic methods ############################################################
+    def __init__(self, table, data = []):
+        self.table = table
+        self.index = 0
+        
+        if isinstance(data, list):
+            self.data = data
+        elif isinstance(data, tuple):
+            self.data = list(data)
+        elif isinstance(data, Row):
+            self.data = data.data
+        else:
+            raise TypeError(
+                '"data" must be either of type "list", "tuple" or "Row"'
+            )
+        
+    def __eq__(self, other):
+        return self.data == other.data
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __iter__(self):
+        self.index = 0
+        return self
+    
+    def __next__(self):
+        if index < len(self.data):
+            val = self.data[self.index]
+            self.index += 1
+            return val
+        else:
+            raise StopIteration()
+    
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.data[key]
+        elif isinstance(key, str):
+            for i, entry in enumerate(self.table.header):
+                if entry == key:
+                    return self.data[i]
+            raise KeyError()
+        else:
+            raise TypeError('The key must be either of type "int" or "str"')
+    
+    def __setitem__(self, key, val):
+        if isinstance(key, int):
+            self.data[key] = val
+        elif isinstance(key, str):
+            for i, entry in enumerate(self.table.header):
+                if entry == key:
+                    self.data[i] = val
+                    return
+            raise KeyError()
+        else:
+            raise TypeError('The key must be either of type "int" or "str"')
+    
+    def __contains__(self, item):
+        return item in self.data
+    
+    def __len__(self):
+        return len(self.data)
+    
+    def __str__(self):
+        return str(self.data)
+    ############################################################################
+    
+    def append(self, val):
+        self.data.append(val)
+        
+    def remove(self, item):
+        self.data.remove(item)
+    
+    def dumb(self):
+        content = ''
+        for entry in self.data:
+            content += entry.dumb()
+        return content
 
 class Table:
+    # Magic methods ############################################################
     def __init__(self):
         '''Initiate a new empty table object'''
         self._data = []
@@ -541,6 +618,10 @@ class Table:
             return True
         else:
             return False
+        
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    ############################################################################
 
     def _mk_header(self):
         '''Internal function for adding a header to the table.'''
@@ -613,8 +694,7 @@ class Table:
         return col
 
     def dumb(self, path):
-        '''
-        Saves the table object to a file.
+        '''Saves the table object to a file.
         The parameter "path" contains the location to the file.
         '''
         headerstr = ''
@@ -643,8 +723,7 @@ class Table:
             f.write(output)
 
     def add_row(self, row = None):
-        '''
-        Appends a row to the table.
+        '''Appends a row to the table.
         The optional parameter row must be a list or a tuple.
         '''
         if isinstance(row, list):
@@ -652,14 +731,13 @@ class Table:
         elif isinstance(row, tuple):
             self._data.append(list(row))
         elif row is not None:
-            raise ValueError('row is neither list nor tuple')
+            raise TypeError('"row" is neither list nor tuple')
         else:
             self._data.append([])
         self.row += 1
 
     def add_data(self, data):
-        '''
-        Adds new data to the current row.
+        '''Adds new data to the current row.
         The table must contain at least one row. The data will be appended to
         the current row. This is also true for list or tuples.
         '''
@@ -678,8 +756,7 @@ class Table:
             )
 
     def add_header_data(self, data):
-        '''
-        Adds new data to the header.
+        '''Adds new data to the header.
         This function has to be called, before normal data has been added.
         '''
         if not self.isheadered:
@@ -697,7 +774,7 @@ class Table:
     def del_col(self, index):
         '''Deletes a column of the table.'''
         if self._header is not None:
-            self._header.remove(self._header [index])
+            self._header.remove(self._header[index])
         if self._data is not None and self._data != []:
             for row in self._data:
                 row.remove(row[index])
@@ -712,7 +789,11 @@ class Table:
     def concat(self, other):
         for row in other.data:
             if row not in self.data:
-                self.add_row (row)
+                self.add_row(row)
+                
+    def merge(self, other):
+        # XXX Ugly: Specific for Asianbookie!
+        pass
 
 # This stuff was originally from some demos ####################################
 def sortby(tree, col, descending):
@@ -774,8 +855,8 @@ class TableWidget:
         self._build_tree()
 
     def _build_row(self, row):
-        '''
-        Replace empty entries with entries, which consist of a space character.
+        '''Replace empty entries with entries, which consist of a space
+        character.
         Needed for representing the header of the table.
         '''
         tmp = []
@@ -789,14 +870,20 @@ class TableWidget:
         self.tree.bind("<MouseWheel>", self.wheelscroll)
 
         # Setup the scrollbars
-        vsb = ttk.Scrollbar(orient = "vertical", command = self.tree.yview)
-        hsb = ttk.Scrollbar(orient = "horizontal", command = self.tree.xview)
+        vsb = AutoScrollbar(frame,
+            orient = "vertical",
+            command = self.tree.yview
+        )
+        hsb = AutoScrollbar(frame,
+            orient = "horizontal",
+            command = self.tree.xview
+        )
         self.tree.configure(yscrollcommand = vsb.set, xscrollcommand = hsb.set)
         self.tree.grid(column = 0, row = 0, sticky = 'nsew', in_ = frame)
-        vsb.grid(column = 1, row = 0, sticky = 'ns', in_ = frame)
-        hsb.grid(column = 0, row = 1, sticky = 'ew', in_ = frame)
+        vsb.grid(column = 1, row = 0, sticky = 'ns')
+        hsb.grid(column = 0, row = 1, sticky = 'ew')
         
-        ttk.Sizegrip(frame).grid(column = 1, row = 1, sticky = ('s', 'e'))
+        #ttk.Sizegrip(frame).grid(column = 1, row = 1, sticky = ('s', 'e'))
 
         frame.grid_columnconfigure(0, weight = 1)
         frame.grid_rowconfigure(0, weight = 1)
@@ -851,8 +938,7 @@ def find_attr(attrs, name):
     return None
 
 def write_tag(tag, *args, attrs = None, content = None):
-    '''
-    Writes a tag, following the XML syntax.
+    '''Writes a tag, following the XML syntax.
     
     Parameters:
         "tag" contains the name of the tag.
@@ -890,8 +976,7 @@ def encode_string(string):
     return output
             
 def split_data(data):
-    '''
-    Splits the given data (which shall be a str object) and returns a tupel,
+    '''Splits the given data (which shall be a str object) and returns a tupel,
     containig the number as first element and the rest as second element.
     If the data does not begin with a number, the first element of the tuple
     will be None.
@@ -941,8 +1026,7 @@ def split_data(data):
 
 # "Public" functions ###########################################################
 def load(path):
-    '''
-    Loads a table file from the given path.
+    '''Loads a table file from the given path.
     It returns a Table object.
     '''
     with open(path, 'rb') as f:
@@ -956,8 +1040,7 @@ def load(path):
             return parser.table
 
 def html2tables(page):
-    '''
-    Transforms a HTML page, containing tables, to a list of Table objects.
+    '''Transforms a HTML page, containing tables, to a list of Table objects.
     The parameter "page" has to be a bytes object.
     '''
     page = page.decode('utf_8', 'ignore').strip()

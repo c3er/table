@@ -64,16 +64,14 @@ class _DialogBase(tkinter.Toplevel):
 
     # Methods to overwrite #####################################################
     def body(self, master):
-        '''
-        Create dialog
+        '''Create dialog
         Returns a widget, which should have the focus immediatly. This method
         should be overwritten.
         '''
         pass
 
     def buttonbox(self):
-        '''
-        Add standard button box
+        '''Add standard button box
         Overwrite, if there are no standard buttons wanted.
         '''
         box = ttk.Frame(self)
@@ -97,9 +95,8 @@ class _DialogBase(tkinter.Toplevel):
 
     # Standard button behavior ###
     def ok(self, event = None):
-        '''
-        Execute the validate function and if it returns False, it will just set
-        the focus right and return.
+        '''Execute the validate function and if it returns False, it will just
+        set the focus right and return.
         If validate returns True, then the apply function will be called and the
         dialog will be closed.
         '''
@@ -119,16 +116,14 @@ class _DialogBase(tkinter.Toplevel):
 
     # Command hooks ###
     def validate(self):
-        '''
-        Overwrite.
+        '''Overwrite.
         Validate the input. If the function returns false, the dialog will stay
         open.
         '''
         return True
 
     def apply(self):
-        '''
-        Overwrite.
+        '''Overwrite.
         Process the input. This function will be called, after the dialog was
         closed.
         '''
@@ -380,13 +375,13 @@ class AsianWorker(threading.Thread):
                 if firstloop:
                     firstloop = False
                     tables = self.request_tables(addr)
-                    tab = tables[0]
+                    tab = tables[1]
                     tab.make_header()
                     
                     # XXX In der fertigen Version muss die erste (richtige)
                     # Reihe genommen werden...
-                    entry = tab.data[0][2]
-                    #entry = tab.lastrow[2]
+                    entry = tab.data[0][1]
+                    #entry = tab.lastrow[1]
                     
                     print(entry.data, entry.link)
                     
@@ -406,13 +401,14 @@ class AsianWorker(threading.Thread):
                     else:
                         row_offset += 1
                         
-                    entry = tab.data[len(tab.data) - row_offset][2]
+                    entry = tab.data[len(tab.data) - row_offset][1]
                     
                     '''try:
                         lasttab = tab
                         tab = tables[1]
+                        tab.make_header()
                         #print(tab)
-                        entry = tab.data[1][2]
+                        entry = tab.data[0][1]
                     except IndexError:
                         tab = lasttab'''
                     

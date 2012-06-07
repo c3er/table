@@ -3,6 +3,7 @@
 
 import subprocess
 import tkinter.messagebox
+import tkinter.ttk as ttk
 
 import res
 import log
@@ -16,8 +17,7 @@ def _print_log(msg, exc = None):
         log.exception(exc)
 
 def error(msg, exc = None):
-    '''
-    The function, which will be always called, if there a foreseen error
+    '''The function, which will be always called, if there a foreseen error
     occures. It shows the user an error message box and makes a note in the
     log file.
     "msg" shall be string object, which contains the message, which will be
@@ -55,6 +55,24 @@ def cmdcall(cmd, *args):
     return subprocess.check_output(calllist, startupinfo = startupinfo)
 
 # This stuff was originally from some demos ####################################
+class AutoScrollbar(ttk.Scrollbar):
+    '''A scrollbar that hides itself if it's not needed.
+    Only works if you use the grid geometry manager.'''
+    
+    def set(self, lo, hi):
+        if float(lo) <= 0.0 and float(hi) >= 1.0:
+            # grid_remove is currently missing from Tkinter!
+            self.tk.call("grid", "remove", self)
+        else:
+            self.grid()
+        ttk.Scrollbar.set(self, lo, hi)
+        
+    def pack(self, **kw):
+        raise TclError("Can not use pack with this widget")
+    
+    def place(self, **kw):
+        raise TclError("Can not use place with this widget")
+
 class curry:
     '''Handles arguments for callback functions.'''
     def __init__(self, callback, *args, **kw):

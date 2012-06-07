@@ -27,8 +27,8 @@ class TableContainer:
         self.frame = None
         self.path = path
         
-        # If there is a path then the table was loaded from a file and it is not
-        # modified yet.
+        # If there is a path then the table was loaded
+        # from a file and it is not modified yet.
         self.modified = path is None
         
     # Properties ############################################################### 
@@ -44,6 +44,11 @@ class TableContainer:
     filename = property(get_filename)
     isheadered = property(get_isheadered)
     ############################################################################
+    
+    def _basic_wrapper(self, func):
+        func()
+        self.modified = True
+        self.update()
         
     def save(self, path = None):
         if path is not None:
@@ -57,12 +62,17 @@ class TableContainer:
             self.session.update()
             
     def mk_tabcols(self):
-        self.data.make_header()
-        self.modified = True
-        self.update()
+        self._basic_wrapper(self.data.make_header)
+                
+    def merge(self, other):
+        self._basic_wrapper(curry(self.data.merge, other))
 
     @log.logmethod
     def update(self, session_update = False):
+        '''Regenerates the view of the table.
+        The parameter "session_update" will be set to "True", if this function
+        is called in the update method of the a "Session" object.
+        '''
         if not session_update:
             self.session.update()
         else:
@@ -81,6 +91,7 @@ class Session:
         self.notebook = None
         self.tables = []
         self.state_handler = state_handler
+        self.update(True)
        
     # Properties ############################################################### 
     def get_modified(self):
@@ -93,13 +104,12 @@ class Session:
     
     def get_current_table(self):
         if self.notebook:
-            index = self.notebook.index('current')
-            return self.tables[index]
+            return self.tables[self.notebook.index('current')]
         else:
             raise SessionError(res.SESSION_NOTEBOOK_ERROR)
         
     def get_isempty(self):
-        return self.tables is None or len(self.tables) == 0
+        return not self.tables
     
     modified = property(get_modified)
     current_table = property(get_current_table)
@@ -138,6 +148,11 @@ class Session:
                 self.notebook.select(len(self.tables) - 1)
         else:
             self.notebook.select(tindex)
+            
+    def merge_tables(self, path):
+        tab = table.load(path)
+        tc = self.current_table
+        tc.merge(tab)
     
     @log.logmethod
     def update(self, isnew = False):
@@ -145,10 +160,18 @@ class Session:
         index = 0
         
         if self.notebook is not None:
+            # If the session is newly created,
+            # then there will be no current index
             if not isnew:
-                # If the session is newly created,
-                # then there will be no current index
                 index = self.notebook.index('current')
+                
+                # An empty string is not a valid value for the
+                # method "select" of the class "ttk.Notebook".
+                if index == '':
+                    index = 0
+                    
+                #print('index: "{}"'.format(index), type(index))
+                
             self.notebook.destroy()
         self.notebook = ttk.Notebook()
         

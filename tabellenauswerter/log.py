@@ -18,8 +18,7 @@ _handler = None
 _debug_on = None
 
 def init(logfile, debug_on = False):
-    '''
-    Sets up the logger.
+    '''Sets up the logger.
     Must be called, before any other function is called.
     '''
     global _vs_logger

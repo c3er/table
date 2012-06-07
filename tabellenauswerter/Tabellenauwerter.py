@@ -28,33 +28,38 @@ tabcols_button = None
 merge_table_button = None
 
 # Helper functions #############################################################
+def disable(button):
+    button.config(state = 'disabled')
+
+def enable(button):
+    button.config(state = 'enabled')
+
 @log.logfunction
 def adjust_state(sess):
     if not sess.isempty:
-        save_as_button.config(state = 'enabled')
-        #merge_table_button.config(state = 'enabled')
+        enable(save_as_button)
+        #enable(merge_table_button)
         
         curtab = sess.current_table
         
         if curtab.isheadered:
-            tabcols_button.config(state = 'disabled')
+            disable(tabcols_button)
         else:
-            tabcols_button.config(state = 'enabled')
+            enable(tabcols_button)
             
         if curtab.modified:
-            save_button.config(state = 'enabled')
+            enable(save_button)
         else:
-            save_button.config(state = 'disabled')
+            disable(save_button)
     else:
         # No table loaded yet.
-        save_button.config(state = 'disabled')
-        save_as_button.config(state = 'disabled')
-        tabcols_button.config(state = 'disabled')
-        merge_table_button.config(state = 'disabled')
+        disable(save_button)
+        disable(save_as_button)
+        disable(tabcols_button)
+        disable(merge_table_button)
   
 def avoid_tableloss():
-    '''
-    Ask the user for every table, which is modified, if he wants to save it.
+    '''Ask the user for every table, which is modified, if he wants to save it.
     If the user only clicks on "Yes" or "No", the function returns True.
     If the user clicks on any dialog on "Cancel", the function returns False.
     '''
@@ -75,6 +80,11 @@ def avoid_tableloss():
                     return False
                 # Do nothing, if the user clicked on "No"
         return True
+    
+def create_button(frame, label, command):
+    button = ttk.Button(frame, text = label, command = command)
+    button.pack(side = 'left')
+    return button
 ################################################################################
 
 # Handler functions ############################################################
@@ -122,7 +132,11 @@ def mk_tabcols():
 
 @log.logfunction
 def merge_tables():
-    tkinter.messagebox.showinfo('Hallo', res.MERGE_TABLES_LABEL)
+    path = tkinter.filedialog.askopenfilename(
+        filetypes = [(res.TAB_FILE_STR, res.TAB_FILE_EXT)]
+    )
+    if path:
+        sess.merge_tables(path)
 
 @log.logfunction
 def appclose_callback(root):
@@ -140,46 +154,19 @@ def toolbar(root):
 
     frame = ttk.Frame()
 
-    ttk.Button(frame,
-        text = res.NEW_LABEL,
-        command = curry(new_session, root)
-    ).pack(side = 'left')
-
-    ttk.Button(frame,
-        text = res.OPEN_LABEL,
-        command = open_table
-    ).pack(side = 'left')
-
-    save_button = ttk.Button(frame,
-        text = res.SAVE_LABEL,
-        command = save_table,
-        state = 'disabled'
-    )
-    save_button.pack(side = 'left')
-
-    save_as_button = ttk.Button(frame,
-        text = res.SAVE_AS_LABEL,
-        command = save_table_as,
-        state = 'disabled'
-    )
-    save_as_button.pack(side = 'left')
+    create_button(frame, res.NEW_LABEL, curry(new_session, root))
+    create_button(frame, res.OPEN_LABEL, open_table)
+    save_button = create_button(frame, res.SAVE_LABEL, save_table)
+    save_as_button = create_button(frame, res.SAVE_AS_LABEL, save_table_as)
 
     ttk.Separator(frame, orient = 'vertical').pack(side = 'left', padx = 2)
 
-    tabcols_button = ttk.Button(frame,
-        text = res.MAKE_TABCOLS_LABEL,
-        command = mk_tabcols,
-        state = 'disabled'
+    tabcols_button = create_button(frame, res.MAKE_TABCOLS_LABEL, mk_tabcols)
+    merge_table_button = create_button(frame,
+        res.MERGE_TABLES_LABEL,
+        merge_tables
     )
-    tabcols_button.pack(side = 'left')
-
-    merge_table_button = ttk.Button(frame,
-        text = res.MERGE_TABLES_LABEL,
-        command = merge_tables,
-        state = 'disabled'
-    )
-    merge_table_button.pack(side = 'left')
-
+    
     return frame
 
 def cmdwidget(root):
@@ -201,10 +188,10 @@ if __name__ == '__main__':
     log.init(res.LOGFILE, DEBUG_ON)
     log.info('###### Anwendung gestartet ######')
     root = tkinter.Tk()
-    sess = session.Session(root, adjust_state)
     root.wm_title(res.TITLE)
     cmdwidget(root).pack(fill = 'x', anchor = 'n', padx = 2, pady = 2)
     bind_events(root)
+    sess = session.Session(root, adjust_state)
 
     root.mainloop()
 
