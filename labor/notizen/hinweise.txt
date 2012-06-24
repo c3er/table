@@ -1,0 +1,31 @@
+Asianbookie
+Web-Seite, dessen Daten der Kunde auslesen will. Die Daten, die ihn interessieren, sind über den folgenden Link zu erreichen:
+http://fun2.asianbookie.com/index.cfm?top20=1
+
+Basisadresse
+Die Adresse, die unter "Asianbookie" erwähnt wurde.
+
+Python
+Eine interpretierte Programmiersprache, d.h. Programme, die in dieser Sprache geschrieben wurden, funktionieren i.a. nur mit der Laufzeitumgebung. Diese Laufzeitumgebung und weitere Informationen erhält man unter dieser Adresse:
+http://www.python.org/
+
+PyScripter
+Kostenlose Entwicklungsumgebung für die Programmiersprache Python. Kann unter dieser Adresse heruntergeladen werden:
+http://code.google.com/p/pyscripter/
+
+HTML
+Hyper Text Markup Language - Eine s.g. Auszeichnungssprache (d.h. es enthält nur Formatierungsanweisungen und wird deswegen nicht als Programmiersprache bezeichnet), die dafür benutzt wird, Web-Seiten zu gestalten.
+
+URL
+Uniform Resource Locator - Anderes Wort für "Internetadresse". Eine vollständige URL besteht immer aus den verwendeten Protokoll (z.B. HTTP) und die vollständige Adresse zu der Ressource.
+Ein Beispiel: http://www.beispiel.de/pfad/zur/datei.html
+Die meisten Browser haben bestimmte Konventionen implementiert, mit deren Hilfe unvollständige Adressen vervollständigt werden. Z.B. aus "www.beispiel.de" wird "http://www.beispiel.de/index.html".
+
+Textbox
+Element in grafischen Oberflächen, mit deren Hilfe vom Benutzer kleinere Mengen Text eingegeben werden kann.
+
+Checkbox
+Element in grafischen Oberflächen, mit dessen Hilfe der Benutzer Häkchen setzen kann.
+
+Reiterelement
+Element in grafischen Oberflächen, mit dessen Hilfe mehrere Elemente in einer gemeinsamen Fläche angeordnet werden können. Es wird immer nur ein Element gleichzeitig angezeigt. Das Wort "Reiterelement" wird hier auch für die Schaltelemente benutzt, mit deren Hilfe der Benutzer zwischen den Elementen wechseln kann.

@@ -1,0 +1,9 @@
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.exe
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.pdb
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\WindowsFormsApplication2.Form1.resources
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\WindowsFormsApplication2.Properties.Resources.resources
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\WindowsFormsApplication2.exe
+C:\Users\FlipperX\Desktop\tmp\usb-8gb\tfh\pmg\labor\guis\WindowsFormsApplication1\WindowsFormsApplication2\obj\x86\Debug\WindowsFormsApplication2.pdb

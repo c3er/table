@@ -1,0 +1,29 @@
+[17:21:13] immanuel42: http://fun2.asianbookie.com/index.cfm?top20=1
+[17:23:10] immanuel42: ok also dass ist die Seite
+[17:25:03] immanuel42: es haben 9505 Tipper an der 29. Championship
+			teilgenommen, und spätestens am 10.Juni, also einen Tag
+			vor Beginn der 30. Championship wird man nur noch die
+			besten 20 nachgucken können
+[17:27:14] immanuel42: wenn man sich manuell durchklicken würde, müsste man auf
+			den 50-ten(patrickkeh) klicken und dann kommen der 51.
+			52. und 53 die man dann manuell in ne wörd datei
+			kopieren könnte
+[17:27:47] immanuel42: dann auf den 53. klicken und des kommen nummer 54. 55.
+			und 56 und so weiter
+[17:29:20] immanuel42: ich habs in der harz4 maßnahme lezte woche eine Stunde
+			lang getestet und man schafft so etwa 1500 tipper mit
+			ihrer tippbilanz(rechts daneben) zu erfassen
+[17:30:23] immanuel42: bei 10€ die Stunde für irgend nen Kijiji- Jobber würde
+			mich das also 60-70€ kosten das manuell von jemanden
+			machen zu lassen
+[17:31:04] immanuel42: nur dass ein programm natürlich wiederverwertbar wäre für
+			die nächste championship!
+[18:05:39] Christian: so bin zu hause
+[18:05:41] Christian: hab es mir jetzt angeguckt. ich werde dich im laufe des
+			wochenendes kontaktieren, um dir zu sagen, wann ungefähr
+			du mit dem ersten prototypen rechnen kannst.
+[18:06:41] immanuel42: k (y)
+[18:09:07] Christian: aber es wird wohl ne weile dauern. ich werde ab nächste
+			woche arbeiten (als programmierer) und uni hab ich ja
+			auch noch. muss sehen, wann ich für dich zeit finden
+			kann.

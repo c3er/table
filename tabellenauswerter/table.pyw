@@ -5,6 +5,7 @@
 XXX This comment is not up to date anymore'''
 
 import sys
+import collections
 
 import tkinter
 import tkinter.font
@@ -494,40 +495,10 @@ class Entry:
         
         return write_tag('entry', content = datastr + linkstr)
     
-class Row:
-    # Magic methods ############################################################
-    def __init__(self, table, data = []):
+class TableRow(collections.UserList):
+    def __init__(self, table, initlist = None):
+        super().__init__(initlist)
         self.table = table
-        self.index = 0
-        
-        if isinstance(data, list):
-            self.data = data
-        elif isinstance(data, tuple):
-            self.data = list(data)
-        elif isinstance(data, Row):
-            self.data = data.data
-        else:
-            raise TypeError(
-                '"data" must be either of type "list", "tuple" or "Row"'
-            )
-        
-    def __eq__(self, other):
-        return self.data == other.data
-    
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    
-    def __iter__(self):
-        self.index = 0
-        return self
-    
-    def __next__(self):
-        if index < len(self.data):
-            val = self.data[self.index]
-            self.index += 1
-            return val
-        else:
-            raise StopIteration()
     
     def __getitem__(self, key):
         if isinstance(key, int):
@@ -551,22 +522,12 @@ class Row:
             raise KeyError()
         else:
             raise TypeError('The key must be either of type "int" or "str"')
-    
-    def __contains__(self, item):
-        return item in self.data
-    
-    def __len__(self):
-        return len(self.data)
-    
+        
     def __str__(self):
         return str(self.data)
-    ############################################################################
     
-    def append(self, val):
-        self.data.append(val)
-        
-    def remove(self, item):
-        self.data.remove(item)
+    def __repr__(self):
+        return '[' + ', '.join(self.data) + ']'
     
     def dumb(self):
         content = ''

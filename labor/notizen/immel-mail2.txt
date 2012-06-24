@@ -1,0 +1,212 @@
+ups, mein Fehler, ich meinte Juni!
+-im Idealfall sollten die W D L -Spalten auch zusammengerechnet werden. Aber wie gesagt: wenn das ein großer zusätzlicher Aufwand ist, dann lass sie einfach ganz weg. Am wichtigsten ist ganz klar die Balance
+-------- Original-Nachricht --------
+> > Datum: Tue, 17 May 2011 19:01:08 +0200
+> > Von: Christian Dreier <cdreier84@googlemail.com>
+> > An: Immanuel Hintz <ImmanuelHintz@gmx.de>
+> > Betreff: Re: Dein Programm
+> > Meinst du eigentlich Juni oder Juli (letzteres wäre unpraktisch)?
+> > 
+> > Willst du diese zusätzlichen Spalten auch irgendwie zusammengerechnet
+> > bekommen 
+> > oder sollen die Werte aus den Seasons einzeln aufgeführt werden?
+> > 
+> > 
+> > Am 17.05.2011 18:53, schrieb Immanuel Hintz:
+>> > > hey,
+>> > >
+>> > > zu 1: die drei Spalten neben Tippername(W,D,L) wären praktisch. Aber
+> > wenns das ein zu großer Aufwand ist dann nur Tippername und Balance. Die
+> > "Win" und "Profit" Zeile brauch ich nicht.
+>> > >
+>> > > zu2: nee konnt ich auch nicht finden auf der Seite. normalerweise
+> > beginnt die nächste Season immer so ne Woche nach Ende der ersten. ALso sollte
+> > die andere irgendwann im Juli anfangen schätz ich. Es wird wahrscheinlich
+> > auf der Seite stehen sobald diese Season vorbei ist. Aber ich dachte
+> > brauchst mit dem Programm eh noch Zeit bis nach dem Ende dieser Season?
+>> > > -------- Original-Nachricht --------
+>>> > >> Datum: Tue, 17 May 2011 15:29:19 +0200
+>>> > >> Von: Christian Dreier<cdreier84@googlemail.com>
+>>> > >> An: Immanuel Hintz<ImmanuelHintz@gmx.de>
+>>> > >> Betreff: Re: Dein Programm
+>> > >
+>>> > >> Hi,
+>>> > >>
+>>> > >> diesmal habe ich zwei Fragen:
+>>> > >>
+>>> > >> 1. Sollen in der Tabelle, welche die Daten über mehrere Seasons
+> > enthält,
+>>> > >> alle
+>>> > >> Spalten enthalten oder sollen da nur der Name der "Tipsters" und die
+>>> > >> zusammengerechnete Balance gespeichert werden?
+>>> > >>
+>>> > >> 2. Die Season endet ja am 28. Mai. Weißt du, wann denn die nächste
+>>> > >> Season wieder
+>>> > >> beginnt?
+>>> > >>
+>>> > >> Grüße aus dem schönen (wenn auch heute etwas grauen) Berlin
+>>> > >>
+>>> > >>
+>>> > >> Am 15.05.2011 16:06, schrieb Immanuel Hintz:
+>>>> > >>> alle user. ich hab ja schon vor die seite die nächste Jahre
+>>> > >> abzuspeichern. und je mehr Daten desto besser!
+>>>> > >>> -------- Original-Nachricht --------
+>>>>> > >>>> Datum: Sun, 15 May 2011 08:52:35 +0200
+>>>>> > >>>> Von: Christian Dreier<cdreier84@googlemail.com>
+>>>>> > >>>> An: Immanuel Hintz<ImmanuelHintz@gmx.de>
+>>>>> > >>>> Betreff: Re: Dein Programm
+>>>> > >>>
+>>>>> > >>>> Hi,
+>>>>> > >>>>
+>>>>> > >>>> wenn da später die Seasons zusammengerechnet werden, sollen da
+> > *alle*
+>>>>> > >>>> User
+>>>>> > >>>> aufgeführt werden (also auch die, die nur an einer Season
+> > teilgenommen
+>>>>> > >>>> haben),
+>>>>> > >>>> oder sollen nur die User aufgeführt werden, die an jeder Season
+>>>>> > >>>> teilgenommen haben?
+>>>>> > >>>>
+>>>>> > >>>>
+>>>>> > >>>> Am 10.05.2011 23:22, schrieb Immanuel Hintz:
+>>>>>> > >>>>> korrekt. ne genaue entwicklung der Balance interessiert mich nicht.
+>>> > >> Ich
+>>>>> > >>>> will nur die ENdbalance aller Tipps wissen die ich von dem jeweiligen
+>>>>> > >>>> Spieler gespeichert hab
+>>>>>> > >>>>> -------- Original-Nachricht --------
+>>>>>>> > >>>>>> Datum: Tue, 10 May 2011 21:20:19 +0200
+>>>>>>> > >>>>>> Von: Christian Dreier<cdreier84@googlemail.com>
+>>>>>>> > >>>>>> An: Immanuel Hintz<ImmanuelHintz@gmx.de>
+>>>>>>> > >>>>>> Betreff: Re: Dein Programm
+>>>>>> > >>>>>
+>>>>>>> > >>>>>> Hi,
+>>>>>>> > >>>>>>
+>>>>>>> > >>>>>> habe ich dich richtig verstanden, wenn ich glaube, dass du nur eine
+>>>>> > >>>> reine
+>>>>>>> > >>>>>> Addition der Balance machen willst (mit Berücksichtigung der
+>>>>> > >>>> eventuellen
+>>>>>>> > >>>>>> Minuswerte)?
+>>>>>>> > >>>>>>
+>>>>>>> > >>>>>> Gruß
+>>>>>>> > >>>>>> Christian
+>>>>>>> > >>>>>>
+>>>>>>> > >>>>>>
+>>>>>>> > >>>>>> Am 08.05.2011 02:25, schrieb Immanuel Hintz:
+>>>>>>>> > >>>>>>> hey,ja wenn was wichtig ist schick es mir lieber immer per an
+> > diese
+>>>>>>> > >>>>>> mail.skype hat keine hohe priorität für mich:)
+>>>>>>>> > >>>>>>>
+>>>>>>>> > >>>>>>> also zu 1: nur einmal am Ende der Season. Also das nächste Ende
+>>> > >> wäre
+>>>>>>> > >>>>>> der 28.Mai. SObald die Seite die letzten Tipps ausgewertet hat
+> > amEnde
+>>>>> > >>>> der
+>>>>>>> > >>>>>> Season will ich das Programm starten damit es mir die Balance aller
+>>>>>>> > >>>>>> teilgenommenen Spieler speichert
+>>>>>>>> > >>>>>>>
+>>>>>>>> > >>>>>>> 2:nee ne zeitliche Entwicklung ist egal.Irgendwelche an
+> > irgendwelche
+>>>>>>> > >>>>>> "Leistungskurven" glaube ich bei Tippern nicht. Mich interessiert
+> > nur
+>>>>> > >>>> wie sie
+>>>>>>> > >>>>>> sich nach mehreren tausend,besser noch nach 10,000+ Wetten
+> > geschlagen
+>>>>>>> > >>>>>> haben. Deswegen will ich die Tipper auch über mehrere Seasons
+>>>>> > >>>> beobachten. Denn
+>>>>>>> > >>>>>> bei den paar Tippern die ich manuell beobachte hab ich bisher
+>>>>> > >>>> ausnahmlos
+>>>>>>> > >>>>>> festgestellt dass sie ihre Gewinne aus vorigen Seasons fast
+> > komplett
+>>> > >> in
+>>>>>>> > >>>>>> verluste umgemünzt haben in den folgenden Seasons.
+>>>>>>>> > >>>>>>>      Ich will ein paar season lang alle Tipper speichern, und dann
+>>> > >> wärs
+>>>>>>> > >>>>>> praktisch wenn mir das Programm die Gesamtbalance aller der Tipper
+>>>>>>> > >>>>>> zusammenrechnet.
+>>>>>>>> > >>>>>>> Also wenn user "backkom" in der 33. season ne Balance von
+> > +3,000,000
+>>>>>>> > >>>>>> erreicht, in der 34. dann z.B. -2,500,000  und in der 35.
+> > +1,000,000
+>>>>>>>> > >>>>>>> dann soll mir das programm die Balances aller seasons
+>>> > >> zusammenrechnen.
+>>>>>>> > >>>>>> In dem Fall wäre das dann ne Gesamtbalance von +1,500,000.
+>>>>>>>> > >>>>>>> Also das Programm nimmt sich z.B. jeden Tipper der 33. Season
+>>> > >> einzeln
+>>>>>>> > >>>>>> vor, und „merkt“ sich erstmal die Balance die er in der 33.
+>>> > >> Season
+>>>>> > >>>> hat.
+>>>>>>> > >>>>>> Dann schaut es in die Liste der Tipper der 34. und 35.season nach
+> > ob
+>>>>> > >>>> der
+>>>>>>> > >>>>>> Tipper da auch teilgenommen hat. Falls ja, addiert oder subtrahiert
+>>> > >> es
+>>>>> > >>>> die
+>>>>>>> > >>>>>> Balances aus den andren Seasons dazu, falls nein zeigt es mir die
+>>> > >> eben
+>>>>> > >>>> nur die
+>>>>>>> > >>>>>> Balance aus Season 33 als Gesamtbalance an. Das programm müsste
+>>> > >> dafür
+>>>>>>> > >>>>>> also auch das Minuszeichen vor den Balances der user erkennen die
+> > im
+>>>>>>> > >>>>>> Minusbereich sind, und dann wissen dass es hier subtrahieren und
+>>> > >> nicht
+>>>>> > >>>> addieren
+>>>>>>> > >>>>>> muss.
+>>>>>>>> > >>>>>>> Aber viel wichtiger ist eh erstmal dass ich mit dem Proggi am Ende
+>>>>> > >>>> jeder
+>>>>>>> > >>>>>> Season die ca. 8-12tausend teilgenommen Tipper samt ihrer
+> > jeweiligen
+>>>>>>> > >>>>>> Balances abspeichern kann. Die Auswertung der Daten werd ich dann
+> > ja
+>>> > >> eh
+>>>>> > >>>> erst in
+>>>>>>> > >>>>>> nem Jahr oder so machen nachdem ich mindestens drei komplette
+> > Seasons
+>>>>>>> > >>>>>> abgespeichert hab. Bis dahin hab ich dann hoffentlich auch endlich
+>>>>> > >>>> meinen Arsch
+>>>>>>> > >>>>>> hochgekriegt, programmieren gelernt und kann es eventuell schon
+>>> > >> selber
+>>>>>>> > >>>>>> machen,lol
+>>>>>>>> > >>>>>>> Also wenn das Zusammenrechnen kein feature ist das man im
+>>> > >> Handumdrehen
+>>>>>>> > >>>>>> einfügen kann, lass das einfach aus, das hat noch Zeit?
+>>>>>>>> > >>>>>>>
+>>>>>>>> > >>>>>>> -------- Original-Nachricht --------
+>>>>>>>>> > >>>>>>>> Datum: Sun, 08 May 2011 01:21:23 +0200
+>>>>>>>>> > >>>>>>>> Von: Christian Dreier<cdreier84@googlemail.com>
+>>>>>>>>> > >>>>>>>> An: Immanuel Hintz<ImmanuelHintz@gmx.de>
+>>>>>>>>> > >>>>>>>> Betreff: Re: Dein Programm
+>>>>>>>> > >>>>>>>
+>>>>>>>>> > >>>>>>>> Hi,
+>>>>>>>>> > >>>>>>>>
+>>>>>>>>> > >>>>>>>> habe versucht dich über Skype zu erreichen. Hoffe, du kannst mir
+>>> > >> die
+>>>>>>>>> > >>>>>>>> Fragen bis
+>>>>>>>>> > >>>>>>>> morgen beantworten... :)
+>>>>>>>>> > >>>>>>>>
+>>>>>>>>> > >>>>>>>> 1. willste die daten nur einmal, oder mehmals pro season
+> > speichern
+>>>>>>> > >>>>>> (wenn
+>>>>>>>>> > >>>>>>>> letzteres der fall wäre müsste ich auch noch wissen, wie ich
+> > das
+>>>>>>>>> > >>>>>>>> berücksichtigen
+>>>>>>>>> > >>>>>>>> soll)?
+>>>>>>>>> > >>>>>>>>
+>>>>>>>>> > >>>>>>>> 2. du hast ja geschrieben, dass du die durchschnittliche balance
+>>>>> > >>>> über
+>>>>>>>>> > >>>>>>>> mehrere
+>>>>>>>>> > >>>>>>>> seasons erfassen willst. soll von meinem programm auch eine
+>>> > >> zeitlich
+>>>>>>>>> > >>>>>>>> entwicklung
+>>>>>>>>> > >>>>>>>> sichtbar gemacht werden, oder soll nur der reine
+> > durchschnittswert
+>>>>>>>>> > >>>>>>>> dargestellt
+>>>>>>>>> > >>>>>>>> werden?
+>>>>>>>>> > >>>>>>>>
+>>>>>>>>> > >>>>>>>> Bis denn
+>>>>>>>>> > >>>>>>>> Christian
+>>>>>>>> > >>>>>>>
+>>>>>> > >>>>>
+>>>> > >>>
+>> > >
+-- NEU: FreePhone - kostenlos mobil telefonieren und surfen! Jetzt informieren: http://www.gmx.net/de/go/freephone 

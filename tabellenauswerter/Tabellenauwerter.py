@@ -33,30 +33,6 @@ def disable(button):
 
 def enable(button):
     button.config(state = 'enabled')
-
-@log.logfunction
-def adjust_state(sess):
-    if not sess.isempty:
-        enable(save_as_button)
-        #enable(merge_table_button)
-        
-        curtab = sess.current_table
-        
-        if curtab.isheadered:
-            disable(tabcols_button)
-        else:
-            enable(tabcols_button)
-            
-        if curtab.modified:
-            enable(save_button)
-        else:
-            disable(save_button)
-    else:
-        # No table loaded yet.
-        disable(save_button)
-        disable(save_as_button)
-        disable(tabcols_button)
-        disable(merge_table_button)
   
 def avoid_tableloss():
     '''Ask the user for every table, which is modified, if he wants to save it.
@@ -88,6 +64,30 @@ def create_button(frame, label, command):
 ################################################################################
 
 # Handler functions ############################################################
+@log.logfunction
+def adjust_state(sess):
+    if not sess.isempty:
+        enable(save_as_button)
+        #enable(merge_table_button)
+        
+        curtab = sess.current_table
+        
+        if curtab.isheadered:
+            disable(tabcols_button)
+        else:
+            enable(tabcols_button)
+            
+        if curtab.modified:
+            enable(save_button)
+        else:
+            disable(save_button)
+    else:
+        # No table loaded yet.
+        disable(save_button)
+        disable(save_as_button)
+        disable(tabcols_button)
+        disable(merge_table_button)
+
 @log.logfunction
 def new_session(root):
     if avoid_tableloss():

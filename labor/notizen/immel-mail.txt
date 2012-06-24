@@ -1,0 +1,68 @@
+hey,
+
+ok also die Seite um die es hauptsächlich geht ist asianbookie.com
+der genaue link:
+
+http://fun2.asianbookie.com/index.cfm?top20=1
+da will ich nach jeder Season-die i.d.R. 3 Monate dauert alle 8000-10000 Tipper samt ihrer Balance abspeichern um die über Jahre zu beobachten und die guten rauszufiltern.
+Wenn ich die Seite in dein Proggi eingeben kommt leider nix brauchbares raus(siehe sreen) aber ich bin mir gar nicht mehr sicher ob ich dich gebeten habe das proggi für betexplorer oder für asianbookie zu schreiben.-jedenfalls brauch ich es für asianbookie und nicht für betexplorer.
+anyway wir sehn uns wohl eh gleich und besprechen da das weitere Vorgehen.
+
+immel
+
+-------- Original-Nachricht --------
+> > Datum: Thu, 05 Aug 2010 22:56:00 +0200
+> > Von: Christian Dreier <cdreier@gmx.net>
+> > An: Immanuel Hintz <ImmanuelHintz@gmx.de>
+> > Betreff: Dein Programm
+> > Hi,
+> > 
+> > ich habe mal einen ersten Prototypen für dich fertig gestellt.
+> > 
+> > Zunächst muss ich dir dazu sagen, dass die eine Seite, die du mir gegeben
+> > hast 
+> > nicht funktioniert. Dessen HTML ist einfach zu schlecht! Aber probiere es
+> > ruhig 
+> > mit möglichst vielen Seiten aus.
+> > 
+> > Wir müssen uns auf jeden Fall noch zusammensetzen, um das weitere
+> > Vorgehen zu 
+> > besprechen. Dieses Wochenende habe ich leider keine Zeit, aber im darauf 
+> > folgenden Wochenende müsste es von meiner Seite klappen.
+> > 
+> > 
+> > Hier noch eine Erklärung, wie du es zum Laufen kriegst:
+> > 
+> > Diese Datei herunterladen:
+> > http://www.python.org/ftp/python/3.1.2/python-3.1.2.msi
+> > Hierbei handelt es sich um den Python-Interpreter. Wenn du lernen willst,
+> > wie 
+> > man programmiert, hast du gleich eine vernünftige und leicht zu
+> > erlernende 
+> > Sprache. ;)
+> > 
+> > Nachdem du dieses Programm installiert hast, müsste mein Programm nach
+> > einem 
+> > Doppelklick auf "table.py" starten.
+> > 
+> > In diese Eingabezeile kannst du die Adresse zu irgendeiner Web-Seite mit 
+> > Tabellen angeben und das Programm versucht dann diese Tabellen anzuzeigen.
+> > Diese 
+> > Adresse muss vollständig sein (mit "http://" usw.)!
+> > 
+> > Ich habe da noch eine Datei namens "links.txt" beigelegt. Dort stehen ein
+> > paar 
+> > Adressen, die du genauso (d.h. Copy & Paste auf die jeweilige Zeile) in
+> > die 
+> > Adress-Leiste eingeben kannst.
+> > 
+> > 
+> > Bis wir uns mal sehen, würde ich dich bitten, mir noch ein paar Links zu
+> > ein 
+> > paar Tabellen zu schicken und mir vielleicht Feedback zu geben, damit ich
+> > bei 
+> > Gelegenheit mein Programm verbessern kann.
+> > 
+> > Viel Spaß
+> > Christian
+-- GMX DSL SOMMER-SPECIAL: Surf & Phone Flat 16.000 für nur 19,99 ¿/mtl.!* http://portal.gmx.net/de/go/dsl 

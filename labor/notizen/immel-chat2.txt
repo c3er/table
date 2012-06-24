@@ -1,0 +1,35 @@
+[17:34:32] Christian: hi, ich hab ne gute und ne schlechte nachricht. die
+            schlechte zuerst: dein programm wird sich wohl noch weiter verzögern.
+            die gute: ich mach dein programm jetzt im rahmen von
+            "projektmanagemant", d.h. spätestens gegen ende des semesters wirst
+            du endlich was benutzbares haben.
+[17:34:49] Christian: haste noch etwas zeit?
+[17:36:29] immanuel42: hey ja des passt... ;)
+[17:37:02] Christian: ok
+[17:37:20] Christian: ich muss noch ein lastenheft schreiben
+[17:38:19] Christian: und dafür brauche ich noch eine kurze beschreibung, wie
+            das programm deiner meinung nach am ende aussehen soll...
+[17:38:44] immanuel42: ähm naja das design ist mir eigentlich egal^^
+[17:38:59] Christian: die features
+[17:39:03] Christian: was willste machen?
+[17:39:24] immanuel42: nur halt das es die funktion hat dass es alle tipper
+            durchgeht von alleine und deren balances mitspeichert
+[17:39:52] Christian: die balances ist eine spalte in der tabelle, oder?
+[17:40:04] immanuel42: -japp
+[17:40:09] immanuel42: http://fun2.asianbookie.com/index.cfm?top20=1
+[17:40:31] Christian: jo, die seite kenn ich noch :)
+[17:40:32] immanuel42: in der season nehmen 9459 tipper teil und die soll das
+            programm dann speichern
+[17:40:44] Christian: was haste dann vor?
+[17:42:10] immanuel42: dann, nachdem ich ein paar seasons gespeichert hab, will
+            ich dass das programm alle usernames in den anderen gespeicherten
+            seasons findet
+[17:42:34] immanuel42: sodass ich(oder das programm) eine gesamtbalance
+            erstellen kann von jedem user
+[17:42:47] immanuel42: sodass ich weiss wie seine gesamtbilanz ist
+[17:43:11] immanuel42: und der user wirklich gut ist und nicht etwa nur eine
+            eintagsfliege(one season)
+[17:43:41] immanuel42: aber wichtiger ist erstmal dass automatische abspeichern
+            aller user
+[17:44:10] immanuel42: der rest hat zeit, weil ich dann eh erstmal ein paar
+            seasons daten sammeln muss zum auswerten
