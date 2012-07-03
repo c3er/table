@@ -399,13 +399,19 @@ class AsianWorker(threading.Thread):
                         
                         lasttab = tab
                         
+                        # XXX The ugliest fucking thing I have ever written!
+                        # I can't believe, that I wrote this fucking piece of
+                        # uglyness!
+                        # The usage of the fucking (self written) helper program
+                        # must be reworked!!!
                         succeeded = False
+                        counter = 0
                         while not succeeded:
                             succeeded = False
                             try:
-                                counter = 0
                                 tab = tables[1]
                                 succeeded = True
+                                counter = 0
                             except IndexError:
                                 counter += 1
                                 print(
