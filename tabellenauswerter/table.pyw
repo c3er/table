@@ -6,6 +6,7 @@ XXX This comment is not up to date anymore'''
 
 import sys
 import collections
+import gc
 
 import tkinter
 import tkinter.font
@@ -497,6 +498,7 @@ class Entry:
     
 class TableRow(collections.UserList):
     def __init__(self, table, initlist = None):
+        #print('TableRow created -', initlist)
         super().__init__(initlist)
         self.table = table
     
@@ -505,9 +507,9 @@ class TableRow(collections.UserList):
             return self.data[key]
         elif isinstance(key, str):
             for i, entry in enumerate(self.table.header):
-                if entry == key:
+                if entry.data == key:
                     return self.data[i]
-            raise KeyError()
+            raise KeyError('Key "{}" not found.'.format(key))
         else:
             raise TypeError('The key must be either of type "int" or "str"')
     
@@ -687,14 +689,14 @@ class Table:
         '''Appends a row to the table.
         The optional parameter row must be a list or a tuple.
         '''
-        if isinstance(row, list):
-            self._data.append(row)
-        elif isinstance(row, tuple):
-            self._data.append(list(row))
+        if (isinstance(row, list) or
+                isinstance(row, tuple) or
+                isinstance(row, TableRow)):
+            self._data.append(TableRow(self, row))
         elif row is not None:
             raise TypeError('"row" is neither list nor tuple')
         else:
-            self._data.append([])
+            self._data.append(TableRow(self))
         self.row += 1
 
     def add_data(self, data):
@@ -754,7 +756,27 @@ class Table:
                 
     def merge(self, other):
         # XXX Ugly: Specific for Asianbookie!
-        pass
+        for row1 in self.data:
+            for row2 in other.data:
+                try:
+                    if row1['Tipster'].data == row2['Tipster'].data:
+                        print('Row to merge:', row1['Tipster'].data)
+                        
+                        row1['Balance'].add_olddata(row1['Balance'].number)
+                        row1['W'].add_olddata(row1['W'].number)
+                        row1['D'].add_olddata(row1['D'].number)
+                        row1['L'].add_olddata(row1['L'].number)
+                        
+                        row1['Balance'].number += row2['Balance'].number
+                        row1['W'].number += row2['W'].number
+                        row1['D'].number += row2['D'].number
+                        row1['L'].number += row2['L'].number
+                    else:
+                        self.add_row(row2)
+                except MemoryError:
+                    print('MemoryError')
+                    collected = gc.collect()
+                    print(collected, 'objects collected.')
 
 # This stuff was originally from some demos ####################################
 def sortby(tree, col, descending):
@@ -981,7 +1003,7 @@ def split_data(data):
     else:
         string = ''
 
-    #print ('split_data:', 'n:', number, 's:', string)
+    #print('split_data:', 'n:', number, 's:', string)
     return number, string
 ################################################################################
 

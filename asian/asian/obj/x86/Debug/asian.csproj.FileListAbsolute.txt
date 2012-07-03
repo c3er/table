@@ -1,0 +1,5 @@
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\bin\Debug\asian.exe
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\bin\Debug\asian.pdb
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Debug\ResolveAssemblyReference.cache
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Debug\asian.exe
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Debug\asian.pdb

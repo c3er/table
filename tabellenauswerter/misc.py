@@ -56,7 +56,7 @@ def cmdcall(cmd, *args):
 
 # This stuff was originally from some demos ####################################
 class AutoScrollbar(ttk.Scrollbar):
-    '''A scrollbar that hides itself if it's not needed.
+    '''A scrollbar that hides it self if it's not needed.
     Only works if you use the grid geometry manager.'''
     
     def set(self, lo, hi):

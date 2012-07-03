@@ -394,8 +394,26 @@ class AsianWorker(threading.Thread):
                     if len(tables) > 0:
                         row_offset = 1
                         
+                        '''for tab in tables:
+                            print(tab, end = '\n\n')'''
+                        
                         lasttab = tab
-                        tab = tables[1]
+                        
+                        succeeded = False
+                        while not succeeded:
+                            succeeded = False
+                            try:
+                                counter = 0
+                                tab = tables[1]
+                                succeeded = True
+                            except IndexError:
+                                counter += 1
+                                print(
+                                    'XXXX IndexError',
+                                    counter,
+                                    file = sys.stderr
+                                )
+                                tables = self.request_tables(addr)
                     
                         tab.make_header()
                     else:

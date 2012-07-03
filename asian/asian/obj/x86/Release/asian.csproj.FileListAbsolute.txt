@@ -1,0 +1,12 @@
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\bin\Release\asian.exe
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\bin\Release\asian.pdb
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Release\ResolveAssemblyReference.cache
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Release\asian.exe
+e:\eigene dateien\visual studio 2010\Projects\asian\asian\obj\x86\Release\asian.pdb
+E:\eigene dateien\devel\c#\asian\asian\obj\x86\Release\asian.exe
+E:\eigene dateien\devel\c#\asian\asian\obj\x86\Release\asian.pdb
+E:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\asian.exe
+E:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\asian.pdb
+E:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.exe
+E:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.pdb
+E:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\ResolveAssemblyReference.cache
