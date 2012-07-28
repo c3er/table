@@ -1,5 +1,5 @@
 ﻿[PyScripter]
-Version=2.4.1.0
+Version=2.5.3.0
 
 [Project]
 ClassName=TProjectRootNode
@@ -44,8 +44,12 @@ FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
 ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\table.pyw
 
+[Project\ChildNodes\Node0\ChildNodes\Node7]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\testmodule.py
+
 [Project\ChildNodes\Node0\ChildNodes]
-Count=7
+Count=8
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

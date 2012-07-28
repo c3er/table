@@ -33,7 +33,7 @@ def disable(button):
 
 def enable(button):
     button.config(state = 'enabled')
-  
+
 def avoid_tableloss():
     '''Ask the user for every table, which is modified, if he wants to save it.
     If the user only clicks on "Yes" or "No", the function returns True.
@@ -68,7 +68,7 @@ def create_button(frame, label, command):
 def adjust_state(sess):
     if not sess.isempty:
         enable(save_as_button)
-        #enable(merge_table_button)
+        enable(merge_table_button)
         
         curtab = sess.current_table
         

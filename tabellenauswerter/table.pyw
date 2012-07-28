@@ -20,6 +20,8 @@ import res
 import log
 from misc import *
 
+import objgraph
+
 # Version of the table file.
 CURRENT_FILE_VERSION = '0.2'
 
@@ -366,7 +368,14 @@ class TableFileReader(TableReaderBase):
         self.read_data_flag = True
     
     def string_end(self):
-        self.entrydata.string = self.tmpdat.strip()
+        # In previous versions of the program was a bug, which caused it to
+        # actually break the file...
+        number, string = split_data(self.tmpdat.strip())
+        if number is not None:
+            self.entrydata.number = number
+        if string:
+            self.entrydata.string = string
+            
         self.read_data_flag = False
     
     def link(self, attrs):
@@ -498,7 +507,6 @@ class Entry:
     
 class TableRow(collections.UserList):
     def __init__(self, table, initlist = None):
-        #print('TableRow created -', initlist)
         super().__init__(initlist)
         self.table = table
     
@@ -518,18 +526,15 @@ class TableRow(collections.UserList):
             self.data[key] = val
         elif isinstance(key, str):
             for i, entry in enumerate(self.table.header):
-                if entry == key:
+                if entry.data == key:
                     self.data[i] = val
                     return
-            raise KeyError()
+            raise KeyError('Key "{}" not found.'.format(key))
         else:
             raise TypeError('The key must be either of type "int" or "str"')
         
     def __str__(self):
         return str(self.data)
-    
-    def __repr__(self):
-        return '[' + ', '.join(self.data) + ']'
     
     def dumb(self):
         content = ''
@@ -687,11 +692,9 @@ class Table:
 
     def add_row(self, row = None):
         '''Appends a row to the table.
-        The optional parameter row must be a list or a tuple.
+        The optional parameter row must be a TableRow, list or tuple.
         '''
-        if (isinstance(row, list) or
-                isinstance(row, tuple) or
-                isinstance(row, TableRow)):
+        if islistlike(row):
             self._data.append(TableRow(self, row))
         elif row is not None:
             raise TypeError('"row" is neither list nor tuple')
@@ -705,9 +708,7 @@ class Table:
         the current row. This is also true for list or tuples.
         '''
         if self.row >= 0:
-            if isinstance(data, list) or isinstance(data, tuple):
-                # A tuple will be transformed automatically to a list if the row
-                # is already a list
+            if islistlike(self.row):
                 self._data[self.row] += data
             elif isinstance(data, Entry):
                 self._data[self.row].append(data)
@@ -722,6 +723,9 @@ class Table:
         '''Adds new data to the header.
         This function has to be called, before normal data has been added.
         '''
+        if self.row > 1:
+            raise TableError('Table contains already data.')
+        
         if not self.isheadered:
             self.isheadered = True
         self.add_data(data)
@@ -756,28 +760,39 @@ class Table:
                 
     def merge(self, other):
         # XXX Ugly: Specific for Asianbookie!
+        merged_rows = []
         for row1 in self.data:
-            for row2 in other.data:
+            for i, row2 in enumerate(other.data):
                 try:
                     if row1['Tipster'].data == row2['Tipster'].data:
-                        print('Row to merge:', row1['Tipster'].data)
+                        if row2['Balance'].data != 'Bankrupt':
+                            print('Row to merge:', row1['Tipster'].data)
+                            
+                            row1['Balance'].add_olddata(row1['Balance'].number)
+                            row1['W'].add_olddata(row1['W'].number)
+                            row1['D'].add_olddata(row1['D'].number)
+                            row1['L'].add_olddata(row1['L'].number)
+                            
+                            row1['Balance'].number += row2['Balance'].number
+                            row1['W'].number += row2['W'].number
+                            row1['D'].number += row2['D'].number
+                            row1['L'].number += row2['L'].number
                         
-                        row1['Balance'].add_olddata(row1['Balance'].number)
-                        row1['W'].add_olddata(row1['W'].number)
-                        row1['D'].add_olddata(row1['D'].number)
-                        row1['L'].add_olddata(row1['L'].number)
+                        merged_rows.append(i)
                         
-                        row1['Balance'].number += row2['Balance'].number
-                        row1['W'].number += row2['W'].number
-                        row1['D'].number += row2['D'].number
-                        row1['L'].number += row2['L'].number
-                    else:
-                        self.add_row(row2)
-                except MemoryError:
-                    print('MemoryError')
-                    collected = gc.collect()
-                    print(collected, 'objects collected.')
-
+                except Exception as exc:
+                    print(row1)
+                    print(row2)
+                    raise exc
+        
+        print('Adding new rows.')
+        for i in range(len(other.data)):
+            row = other.data[i]
+            if i not in merged_rows and row['Balance'].data != 'Bankrupt':
+                self.data.append(row)
+                
+        print('Finished')
+                        
 # This stuff was originally from some demos ####################################
 def sortby(tree, col, descending):
     '''Sort tree contents when a column is clicked on.'''
@@ -1005,6 +1020,9 @@ def split_data(data):
 
     #print('split_data:', 'n:', number, 's:', string)
     return number, string
+
+def islistlike(list_):
+    return isinstance(list_, (list, tuple, collections.UserList))
 ################################################################################
 
 # "Public" functions ###########################################################
