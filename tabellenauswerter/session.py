@@ -71,7 +71,7 @@ class TableContainer:
     def update(self, session_update = False):
         '''Regenerates the view of the table.
         The parameter "session_update" will be set to "True", if this function
-        is called in the update method of the a "Session" object.
+        is called in the update method of a "Session" object.
         '''
         if not session_update:
             self.session.update()

@@ -37,9 +37,9 @@ def setentry(entry, text):
     entry.delete(0, 'end')
     entry.insert(0, text)
 
-# Normally, this constant should be defined in subprocess.
-# Needed to hide the console window, which would appear under Windows by calling
-# an external command line program.
+# Normally, this constant should be defined in the subprocess module.
+# Needed to hide the console window, which would appear under Windows when an
+# external command line program is called.
 STARTF_USESHOWWINDOW = 1
     
 def cmdcall(cmd, *args):

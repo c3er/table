@@ -369,7 +369,8 @@ class TableFileReader(TableReaderBase):
     
     def string_end(self):
         # In previous versions of the program was a bug, which caused it to
-        # actually break the file...
+        # actually break the file. To handle this broken file a workaraound is
+        # needed.
         number, string = split_data(self.tmpdat.strip())
         if number is not None:
             self.entrydata.number = number
