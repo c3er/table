@@ -383,19 +383,22 @@ class AsianWorker(threading.Thread):
                     entry = tab.data[0][1]
                     #entry = tab.lastrow[1]
                     
+                    print('Phase 0')
                     print(entry.data, entry.link)
                     
                     addr = urllib.parse.urljoin(addr, entry.link)
                 else:
                     i += 1
                     
+                    print('Requesting tables')
                     tables = self.request_tables(addr)
+                    print('Tables requested')
                     
-                    if len(tables) > 0:
+                    if len(tables) > 1 and len(tables[1].data[0]) > 2:
                         row_offset = 1
                         
-                        '''for tab in tables:
-                            print(tab, end = '\n\n')'''
+                        for tab in tables:
+                            print(tab, end = '\n\n')
                         
                         lasttab = tab
                         
@@ -409,16 +412,19 @@ class AsianWorker(threading.Thread):
                         while not succeeded:
                             succeeded = False
                             try:
+                                #if len(tables[1].data[0]) > 2:
                                 tab = tables[1]
                                 succeeded = True
                                 counter = 0
                             except IndexError:
-                                counter += 1
+                                succeeded = False
                                 print(
                                     'XXXX IndexError',
                                     counter,
                                     file = sys.stderr
                                 )
+                            if not succeeded:
+                                counter += 1
                                 tables = self.request_tables(addr)
                     
                         tab.make_header()
@@ -449,6 +455,7 @@ class AsianWorker(threading.Thread):
                             data = DataToken(phase = phase, count = i)
                         )
                     else:
+                        print(tab != lasttab, bool(entry.link))
                         phase = 1
                         print(phase)
             elif phase == 1:

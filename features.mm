@@ -1,10 +1,58 @@
-<map version="0.9.0">
+<map version="freeplane 1.2.0">
 <!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
-<node TEXT="Features vom Tabellenauswerter" ID="ID_1604918203" CREATED="1305434583643" MODIFIED="1305434642591">
-<hook NAME="MapStyle" max_node_width="600"/>
+<node TEXT="Features vom Tabellenauswerter" FOLDED="false" ID="ID_1604918203" CREATED="1305434583643" MODIFIED="1305434642591"><hook NAME="MapStyle">
+    <properties show_note_icons="true"/>
+
+<map_styles>
+<stylenode LOCALIZED_TEXT="styles.root_node">
+<stylenode LOCALIZED_TEXT="styles.predefined" POSITION="right">
+<stylenode LOCALIZED_TEXT="default" MAX_WIDTH="600" COLOR="#000000" STYLE="as_parent">
+<font NAME="SansSerif" SIZE="10" BOLD="false" ITALIC="false"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="defaultstyle.details"/>
+<stylenode LOCALIZED_TEXT="defaultstyle.note"/>
+<stylenode LOCALIZED_TEXT="defaultstyle.floating">
+<edge STYLE="hide_edge"/>
+<cloud COLOR="#f0f0f0" SHAPE="ROUND_RECT"/>
+</stylenode>
+</stylenode>
+<stylenode LOCALIZED_TEXT="styles.user-defined" POSITION="right">
+<stylenode LOCALIZED_TEXT="styles.topic" COLOR="#18898b" STYLE="fork">
+<font NAME="Liberation Sans" SIZE="10" BOLD="true"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="styles.subtopic" COLOR="#cc3300" STYLE="fork">
+<font NAME="Liberation Sans" SIZE="10" BOLD="true"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="styles.subsubtopic" COLOR="#669900">
+<font NAME="Liberation Sans" SIZE="10" BOLD="true"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="styles.important">
+<icon BUILTIN="yes"/>
+</stylenode>
+</stylenode>
+<stylenode LOCALIZED_TEXT="styles.AutomaticLayout" POSITION="right">
+<stylenode LOCALIZED_TEXT="AutomaticLayout.level.root" COLOR="#000000">
+<font SIZE="18"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="AutomaticLayout.level,1" COLOR="#0033ff">
+<font SIZE="16"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="AutomaticLayout.level,2" COLOR="#00b439">
+<font SIZE="14"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="AutomaticLayout.level,3" COLOR="#990000">
+<font SIZE="12"/>
+</stylenode>
+<stylenode LOCALIZED_TEXT="AutomaticLayout.level,4" COLOR="#111111">
+<font SIZE="10"/>
+</stylenode>
+</stylenode>
+</stylenode>
+</map_styles>
+</hook>
 <node TEXT="GUI" POSITION="right" ID="ID_1094315688" CREATED="1305987582634" MODIFIED="1305987584925">
-<node TEXT="Werkzeugleiste" ID="ID_1119424026" CREATED="1305439820838" MODIFIED="1309724114081">
-<richcontent TYPE="NOTE">
+<node TEXT="Werkzeugleiste" ID="ID_1119424026" CREATED="1305439820838" MODIFIED="1309724114081"><richcontent TYPE="NOTE">
+
 <html>
   <head>
     
@@ -14,11 +62,12 @@
       main.png
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <node TEXT="Neu" ID="ID_577865463" CREATED="1305439867598" MODIFIED="1305439870073">
 <node TEXT="Erm&#xf6;glicht das Anlegen einer neuen Session" ID="ID_11569246" CREATED="1305434670072" MODIFIED="1305434760046"/>
-<node TEXT="Dialog" ID="ID_1958690479" CREATED="1305434644241" MODIFIED="1309724114099">
-<richcontent TYPE="NOTE">
+<node TEXT="Dialog" ID="ID_1958690479" CREATED="1305434644241" MODIFIED="1309724114099"><richcontent TYPE="NOTE">
+
 <html>
   <head>
     
@@ -33,7 +82,8 @@
       </li>
     </ul>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <node TEXT="Arten von Sessions" ID="ID_908360389" CREATED="1305434780495" MODIFIED="1305434792545">
 <node TEXT="Einzelne Webseite einlesen" ID="ID_119057641" CREATED="1305434797001" MODIFIED="1305434810422">
 <node TEXT="Liest eine Webseite ein und stellt dann die enthaltenen Tabellen dar" ID="ID_604587785" CREATED="1305994617091" MODIFIED="1305994653106"/>
@@ -49,8 +99,8 @@
 <node TEXT="Windows-Standard-Datei-&#xf6;ffnen (Endung: &quot;.html&quot;, &quot;.htm&quot;" ID="ID_1814427848" CREATED="1306089476791" MODIFIED="1306089524220"/>
 </node>
 </node>
-<node ID="ID_1606463314" CREATED="1305988479735" MODIFIED="1305988490264">
-<richcontent TYPE="NODE">
+<node ID="ID_1606463314" CREATED="1305988479735" MODIFIED="1305988490264"><richcontent TYPE="NODE">
+
 <html>
   <head>
     
@@ -58,7 +108,8 @@
   <body>
     <img src="bilder/gui-entwurf/new-session1.png"/>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node TEXT="Asianbookie einlesen" ID="ID_147269227" CREATED="1305434832927" MODIFIED="1305434851271">
@@ -69,8 +120,8 @@
 <node TEXT="Adresse zu der Webseite, wo die ersten 50 Teilnehmer angezeigt werden" ID="ID_533691519" CREATED="1305435252203" MODIFIED="1306093918395"/>
 </node>
 </node>
-<node ID="ID_805437352" CREATED="1305988517416" MODIFIED="1305988524281">
-<richcontent TYPE="NODE">
+<node ID="ID_805437352" CREATED="1305988517416" MODIFIED="1305988524281"><richcontent TYPE="NODE">
+
 <html>
   <head>
     
@@ -78,7 +129,8 @@
   <body>
     <img src="bilder/gui-entwurf/new-session2.png"/>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 </node>
@@ -106,8 +158,8 @@
 <node TEXT="Mit weiterer Tabelle verschmelzen" ID="ID_919851768" CREATED="1305442376695" MODIFIED="1305643424859">
 <node TEXT="Durchzuf&#xfc;hrende Operationen" ID="ID_906584211" CREATED="1305647971127" MODIFIED="1305648000969">
 <node TEXT="Erkennen, welche Teilnehmer in beiden Tabellen vorkommen" ID="ID_1709865063" CREATED="1305648012639" MODIFIED="1305648269891">
-<node TEXT="Wenn das der Fall ist, Werte zusammenrechen" ID="ID_1917667870" CREATED="1305648190648" MODIFIED="1309724114124">
-<richcontent TYPE="NOTE">
+<node TEXT="Wenn das der Fall ist, Werte zusammenrechen" ID="ID_1917667870" CREATED="1305648190648" MODIFIED="1309724114124"><richcontent TYPE="NOTE">
+
 <html>
   <head>
     
@@ -117,7 +169,8 @@
       Einfache Addition unter Ber&#252;cksichtigung negativer Werte
     </p>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 <node TEXT="Balance" ID="ID_351046870" CREATED="1305725348107" MODIFIED="1305911673500"/>
 <node TEXT="W" ID="ID_835243798" CREATED="1305725441364" MODIFIED="1305725444352"/>
 <node TEXT="D" ID="ID_64752058" CREATED="1305725444723" MODIFIED="1305725446338"/>
@@ -130,8 +183,8 @@
 <node TEXT="Windows-Standard Datei-&#xd6;ffnen (Endung: &quot;.table&quot;)" ID="ID_1591013961" CREATED="1305438116934" MODIFIED="1305648803985"/>
 </node>
 </node>
-<node ID="ID_1005229" CREATED="1305988457874" MODIFIED="1305988471686">
-<richcontent TYPE="NODE">
+<node ID="ID_1005229" CREATED="1305988457874" MODIFIED="1305988471686"><richcontent TYPE="NODE">
+
 <html>
   <head>
     
@@ -139,7 +192,8 @@
   <body>
     <img src="bilder/gui-entwurf/main.png"/>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node TEXT="Sonstiges" ID="ID_732315773" CREATED="1306628438088" MODIFIED="1306628444673">
@@ -153,8 +207,8 @@
 </node>
 </node>
 </node>
-<node ID="ID_1145914878" CREATED="1305996187931" MODIFIED="1305996198405">
-<richcontent TYPE="NODE">
+<node ID="ID_1145914878" CREATED="1305996187931" MODIFIED="1305996198405"><richcontent TYPE="NODE">
+
 <html>
   <head>
     
@@ -162,7 +216,8 @@
   <body>
     <img src="bilder/gui-entwurf/main2.png"/>
   </body>
-</html></richcontent>
+</html>
+</richcontent>
 </node>
 </node>
 <node TEXT="Dateiformat" POSITION="right" ID="ID_85558740" CREATED="1305442944925" MODIFIED="1305442950723">
@@ -203,18 +258,18 @@
 <node TEXT="headerrow" ID="ID_113307158" CREATED="1308485294684" MODIFIED="1308485301957">
 <node TEXT="Umschlie&#xdf;t die Kopfzeile" ID="ID_694793384" CREATED="1308485304535" MODIFIED="1308485315744"/>
 <node TEXT="entry" ID="ID_90118174" CREATED="1308485398896" MODIFIED="1309724216540">
-<arrowlink DESTINATION="ID_1759449217" STARTINCLINATION="93;0;" ENDINCLINATION="93;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="9" FONT_FAMILY="SansSerif" DESTINATION="ID_1759449217" STARTINCLINATION="93;0;" ENDINCLINATION="93;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <node TEXT="Umschlie&#xdf;t eine Zelle (bzw. Eintrag)" ID="ID_959911296" CREATED="1308485403454" MODIFIED="1308485416008"/>
 <node TEXT="data" ID="ID_1470666103" CREATED="1308485503694" MODIFIED="1308485507281">
 <node TEXT="Umschlie&#xdf;t den Bereich mit den eigentlichen Daten" ID="ID_1440581222" CREATED="1309645870500" MODIFIED="1309645892211"/>
 <node TEXT="current" ID="ID_692700616" CREATED="1309646181250" MODIFIED="1309646192684">
 <node TEXT="Enth&#xe4;lt die aktuellen (bzw. zusammengerechneten) Daten" ID="ID_1374997989" CREATED="1309646195626" MODIFIED="1309646224993"/>
 <node TEXT="number" ID="ID_1459751687" CREATED="1309728548082" MODIFIED="1309728724915">
-<arrowlink DESTINATION="ID_1629018717" STARTINCLINATION="74;0;" ENDINCLINATION="74;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="9" FONT_FAMILY="SansSerif" DESTINATION="ID_1629018717" STARTINCLINATION="74;0;" ENDINCLINATION="74;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <node TEXT="Eine Zahl" ID="ID_1559201321" CREATED="1309728564411" MODIFIED="1309728694446"/>
 </node>
 <node TEXT="string" ID="ID_526025042" CREATED="1309728572229" MODIFIED="1309728741749">
-<arrowlink DESTINATION="ID_1629018717" STARTINCLINATION="62;0;" ENDINCLINATION="62;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="9" FONT_FAMILY="SansSerif" DESTINATION="ID_1629018717" STARTINCLINATION="62;0;" ENDINCLINATION="62;0;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <node TEXT="Eine Zeichenkette" ID="ID_1982132333" CREATED="1309728697869" MODIFIED="1309728706734"/>
 </node>
 </node>

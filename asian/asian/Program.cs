@@ -70,12 +70,14 @@ namespace ConsoleApplication1
         [STAThreadAttribute]
         static int Main(string[] args)
         {
+            string addr;
             if (args.Length == 0)
             {
-                Console.WriteLine("Bitte Webseite angeben");
-                return 1;
+                Console.Write("Bitte Webseite angeben: ");
+                addr = Console.ReadLine();
             }
-            string addr = args[0];
+            else
+                addr = args[0];
             WebBrowser wb = new WebBrowser();
             wb.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(wb_DocumentCompleted);
             wb.Navigate(new Uri(addr));

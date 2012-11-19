@@ -10,3 +10,8 @@ E:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\asian.pdb
 E:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.exe
 E:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.pdb
 E:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\ResolveAssemblyReference.cache
+D:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\asian.exe
+D:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\asian.pdb
+D:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.exe
+D:\eigene dateien\devel\python\table\asian\asian\bin\Release\asian.pdb
+D:\eigene dateien\devel\python\table\asian\asian\obj\x86\Release\ResolveAssemblyReference.cache

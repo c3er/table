@@ -520,7 +520,7 @@ class TableRow(collections.UserList):
                     return self.data[i]
             raise KeyError('Key "{}" not found.'.format(key))
         else:
-            raise TypeError('The key must be either of type "int" or "str"')
+            raise TypeError('The key must be of type "int" or "str"')
     
     def __setitem__(self, key, val):
         if isinstance(key, int):
@@ -532,7 +532,7 @@ class TableRow(collections.UserList):
                     return
             raise KeyError('Key "{}" not found.'.format(key))
         else:
-            raise TypeError('The key must be either of type "int" or "str"')
+            raise TypeError('The key must be of type "int" or "str"')
         
     def __str__(self):
         return str(self.data)
