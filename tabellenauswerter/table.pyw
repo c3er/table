@@ -152,7 +152,7 @@ class TableHTMLReader(TableReaderBase):
         ) = self.stack.pop()
 
     # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
-    def table_start (self, attrs):
+    def table_start(self, attrs):
         if self.table is None:
             self.table = Table()
         else:
