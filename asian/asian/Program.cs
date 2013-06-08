@@ -71,6 +71,7 @@ namespace ConsoleApplication1
         static int Main(string[] args)
         {
             string addr;
+
             if (args.Length == 0)
             {
                 Console.Write("Bitte Webseite angeben: ");
@@ -78,15 +79,18 @@ namespace ConsoleApplication1
             }
             else
                 addr = args[0];
+
             WebBrowser wb = new WebBrowser();
             wb.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(wb_DocumentCompleted);
             wb.Navigate(new Uri(addr));
+
             while (!values.Completed)
             {
                 Application.DoEvents();
                 Thread.Sleep(50);
             }
             Console.Write(values.Result);
+
             wb.Dispose();
             return 0;
         }
