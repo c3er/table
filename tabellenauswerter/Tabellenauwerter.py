@@ -36,8 +36,10 @@ def enable(button):
 
 def avoid_tableloss():
     '''Ask the user for every table, which is modified, if he wants to save it.
-    If the user only clicks on "Yes" or "No", the function returns True.
-    If the user clicks on any dialog on "Cancel", the function returns False.
+    
+    Returns:
+        True if the user clicked on all boxes on "Yes" or "No".
+        False if the user clicked on any dialog on "Cancel".
     '''
     if not sess.modified:
         return True

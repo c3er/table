@@ -34,13 +34,13 @@ class EntryError(TableError):
 class TableFileError(TableError):
     pass
 
-class TableReaderBase(html.parser.HTMLParser):
+class MarkupReaderBase(html.parser.HTMLParser):
     def __init__(self):
         super().__init__()
         self.tmpdat = ''
         self._read_data_flag = False
-        self.starttags = {}
-        self.endtags = {}
+        self.starttags = self._fill_tagdict('starttag')
+        self.endtags = self._fill_tagdict('endtag')
 
     def __enter__(self):
         return self.__class__()
@@ -49,15 +49,24 @@ class TableReaderBase(html.parser.HTMLParser):
         self.close()
         
     # Properties ###############################################################
-    def get_read_data_flag(self):
+    @property
+    def read_data_flag(self):
         return self._read_data_flag
     
-    def set_read_data_flag(self, val):
+    @read_data_flag.setter
+    def read_data_flag(self, val):
         self._read_data_flag = val
         self.tmpdat = ''
-    
-    read_data_flag = property(get_read_data_flag, set_read_data_flag)
     ############################################################################
+    
+    def _fill_tagdict(self, tag_marker):
+        tagdict = {}
+        attrs = dir(self)
+        for attr in attrs:
+            if attr.startswith(tag_marker):
+                tag_name = attr.split('_')[1]
+                tagdict[tag_name] = getattr(self, attr)
+        return tagdict
     
     # Inherited from html.parser.HTMLParser ####################################
     def handle_starttag(self, tag, attrs):
@@ -77,7 +86,6 @@ class TableReaderBase(html.parser.HTMLParser):
 
     def handle_data(self, data):
         if self.read_data_flag:
-            #print (data)
             self.tmpdat += data
 
     def handle_charref(self, name):
@@ -85,14 +93,14 @@ class TableReaderBase(html.parser.HTMLParser):
             try:
                 self.tmpdat += chr(int(name))
             except ValueError:
-                self.tmpdat += '?'
+                self.tmpdat += '&' + str(int(name)) + ';'
 
     def handle_entityref(self, name):
         if self.read_data_flag:
             self.tmpdat += html.entities.entitydefs[name]
     ############################################################################
 
-class TableHTMLReader(TableReaderBase):
+class TableHTMLReader(MarkupReaderBase):
     '''Internal used parser class to parse the tables from the given HTML.'''
 
     def __init__(self):
@@ -100,21 +108,6 @@ class TableHTMLReader(TableReaderBase):
         self.stack = []
         self._reset(True)
         self.tablelist = []
-        self.starttags = {
-            'table': self.table_start,
-            'tr': self.tr_start,
-            'td': self.td_start,
-            'th': self.th_start,
-            'a': self.a_start,
-            'img': self.img
-        }
-        self.endtags = {
-            'table': self.table_end,
-            'tr': self.tr_end,
-            'td': self.td_end,
-            'th': self.th_end,
-            'a': self.a_end
-        }
 
     # Properties ###############################################################
     def get_tables(self):
@@ -152,14 +145,14 @@ class TableHTMLReader(TableReaderBase):
         ) = self.stack.pop()
 
     # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
-    def table_start(self, attrs):
+    def starttag_table(self, attrs):
         if self.table is None:
             self.table = Table()
         else:
             self.push()
             self._reset()
 
-    def table_end(self):
+    def endtag_table(self):
         if self.nested:
             self.tablelist.append(self.table)
             self.pop()
@@ -167,16 +160,16 @@ class TableHTMLReader(TableReaderBase):
             self.tablelist.append(self.table)
             self.table = None
 
-    def tr_start(self, attrs):
+    def starttag_tr(self, attrs):
         if self.table is not None:
             self.table.add_row()
 
-    def tr_end(self):
+    def endtag_tr(self):
         if self.table is not None and self.colspaned:
             self.table.del_last_row()
             self.colspaned = False
 
-    def th_start(self, attrs):
+    def starttag_th(self, attrs):
         if self.table is not None and not self.read_data_flag:
             val = find_attr(attrs, 'colspan')
             if val is not None:
@@ -184,7 +177,7 @@ class TableHTMLReader(TableReaderBase):
             self.read_data_flag = True
             self.entry = Entry()
 
-    def th_end(self):
+    def endtag_th(self):
         if self.table is not None:
             if type(self.colspaned) == int:
                 self.tmpdat = self.tmpdat.strip()
@@ -201,28 +194,28 @@ class TableHTMLReader(TableReaderBase):
             else:
                 self.add_cell_data(self.table.add_header_data)
 
-    def td_start(self, attrs):
+    def starttag_td(self, attrs):
         if self.table is not None and not self.read_data_flag:
             self.colspaned = find_attr(attrs, 'colspan') is not None
             if not self.colspaned:
                 self.read_data_flag = True
                 self.entry = Entry()
 
-    def td_end(self):
+    def endtag_td(self):
         if self.table is not None:
             self.add_cell_data(self.table.add_data)
 
-    def img(self, attrs):
+    def starttag_img(self, attrs):
         if self.read_data_flag:
             # Todo: Download the actual image from the web page
             # self.tmpdat += res.IMAGE_DUMMY
             pass
 
-    def a_start(self, attrs):
+    def starttag_a(self, attrs):
         if self.read_data_flag:
             self.entry.link = find_attr(attrs, 'href')
 
-    def a_end(self):
+    def endtag_a(self):
         pass
     ############################################################################
 
@@ -242,7 +235,7 @@ class TableHTMLReader(TableReaderBase):
             self.entry = None
     ############################################################################
 
-class TableFileReader(TableReaderBase):
+class TableFileReader(MarkupReaderBase):
     def __init__(self):
         super().__init__()
         self.table = None
@@ -251,36 +244,9 @@ class TableFileReader(TableReaderBase):
         self.headerflag = False
         self.isolddata = False
         self.add_data_func = None
-        self.starttags = {
-            'tablefile': self.tablefile_start,
-            'table': self.table_start,
-            'headerrow': self.headerrow_start,
-            'row': self.row_start,
-            'entry': self.entry_start,
-            'data': self.data_start,
-            'current': self.current_start,
-            'old': self.old_start,
-            'olddata': self.olddata_start,
-            'number': self.number_start,
-            'string': self.string_start,
-            'link': self.link
-        }
-        self.endtags = {
-            'tablefile': self.tablefile_end,
-            'table': self.table_end,
-            'headerrow': self.headerrow_end,
-            'row': self.row_end,
-            'entry': self.entry_end,
-            'data': self.data_end,
-            'current': self.current_end,
-            'old': self.old_end,
-            'olddata': self.olddata_end,
-            'number': self.number_end,
-            'string': self.string_end
-        }
         
     # Handler for the tags #####################################################
-    def tablefile_start(self, attrs):
+    def starttag_tablefile(self, attrs):
         if not attrs:
             raise TableFileError('No file version found.')
 
@@ -292,66 +258,66 @@ class TableFileReader(TableReaderBase):
                 'Wrong file version. The found version is {}.'.format(version)
             )
     
-    def tablefile_end(self):
+    def endtag_tablefile(self):
         pass
     
-    def table_start(self, attrs):
+    def starttag_table(self, attrs):
         self.table = Table()
     
-    def table_end(self):
+    def endtag_table(self):
         pass
     
-    def headerrow_start(self, attrs):
+    def starttag_headerrow(self, attrs):
         self.headerflag = True
         self.table.add_row()
         self.add_data_func = self.table.add_header_data
     
-    def headerrow_end(self):
+    def endtag_headerrow(self):
         self.headerflag = False
     
-    def row_start(self, attrs):
+    def starttag_row(self, attrs):
         self.table.add_row()
         self.add_data_func = self.table.add_data
     
-    def row_end(self):
+    def endtag_row(self):
         pass
     
-    def entry_start(self, attrs):
+    def starttag_entry(self, attrs):
         self.entry = Entry()
     
-    def entry_end(self):
+    def endtag_entry(self):
         pass
     
-    def data_start(self, attrs):
+    def starttag_data(self, attrs):
         pass
     
-    def data_end(self):
+    def endtag_data(self):
         self.add_data_func(self.entry)
         #print(self.table)
     
-    def current_start(self, attrs):
+    def starttag_current(self, attrs):
         self.isolddata = False
         self.entrydata = EntryData()
     
-    def current_end(self):
+    def endtag_current(self):
         self.entry.data = self.entrydata
     
-    def old_start(self, attrs):
+    def starttag_old(self, attrs):
         self.isolddata = True
     
-    def old_end(self):
+    def endtag_old(self):
         self.isolddata = False
     
-    def olddata_start(self, attrs):
+    def starttag_olddata(self, attrs):
         self.entrydata = EntryData()
     
-    def olddata_end(self):
+    def endtag_olddata(self):
         self.entry.add_olddata(self.entrydata)
     
-    def number_start(self, attrs):
+    def starttag_number(self, attrs):
         self.read_data_flag = True
     
-    def number_end(self):
+    def endtag_number(self):
         tmpdat = self.tmpdat.strip()
         
         try:
@@ -364,10 +330,11 @@ class TableFileReader(TableReaderBase):
 
         self.read_data_flag = False
     
-    def string_start(self, attrs):
+    def starttag_string(self, attrs):
+        print(dir(self))
         self.read_data_flag = True
     
-    def string_end(self):
+    def endtag_string(self):
         # In previous versions of the program was a bug, which caused it to
         # actually break the file. To handle this broken file a workaraound is
         # needed.
@@ -379,7 +346,7 @@ class TableFileReader(TableReaderBase):
             
         self.read_data_flag = False
     
-    def link(self, attrs):
+    def starttag_link(self, attrs):
         addr = find_attr(attrs, 'addr')
         if addr is not None:
             self.entry.link = addr

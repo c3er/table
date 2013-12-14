@@ -31,6 +31,8 @@ Selection = enum(
 # This stuff was originally from some demos ####################################
 class _DialogBase(tkinter.Toplevel):
     def __init__(self, parent, title = None):
+        'Must be called after initialization of inheriting classes.'
+        
         super().__init__(parent)
         
         self.transient(parent)
@@ -260,7 +262,7 @@ class NewDialog(_DialogBase):
         else:
             self.addr = self.base_addr_entry.get()
             self.selection = Selection.ASIANBOOKIE
-            return self.addr == res.BASE_ADDR
+            return True
         
     def apply(self):
         if self.selection == Selection.ONE_WEBSITE:
@@ -402,9 +404,7 @@ class AsianWorker(threading.Thread):
                         
                         lasttab = tab
                         
-                        # XXX The ugliest fucking thing I have ever written!
-                        # I can't believe, that I wrote this fucking piece of
-                        # uglyness!
+                        # XXX Even more ugly!!!
                         # The usage of the fucking (self written) helper program
                         # must be reworked!!!
                         succeeded = False
