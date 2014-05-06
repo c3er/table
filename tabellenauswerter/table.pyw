@@ -6,7 +6,6 @@ XXX This comment is not up to date anymore'''
 
 import sys
 import collections
-import gc
 
 import tkinter
 import tkinter.font
@@ -19,8 +18,6 @@ import html.entities
 import res
 import log
 from misc import *
-
-import objgraph
 
 # Version of the table file.
 CURRENT_FILE_VERSION = '0.2'
@@ -35,6 +32,8 @@ class TableFileError(TableError):
     pass
 
 class MarkupReaderBase(html.parser.HTMLParser):
+    '''XXX Must be documented!
+    '''
     def __init__(self):
         super().__init__()
         self.tmpdat = ''
@@ -42,11 +41,13 @@ class MarkupReaderBase(html.parser.HTMLParser):
         self.starttags = self._fill_tagdict('starttag')
         self.endtags = self._fill_tagdict('endtag')
 
+    # Needed to use it with a "with" statement #################################
     def __enter__(self):
         return self.__class__()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+    ############################################################################
         
     # Properties ###############################################################
     @property
@@ -60,12 +61,31 @@ class MarkupReaderBase(html.parser.HTMLParser):
     ############################################################################
     
     def _fill_tagdict(self, tag_marker):
+        '''Helper method to fill the dictionaries for handling the tags.
+        
+        The dictionary that is returned has the following form:
+        {<tag-name1>: handler1,
+         <tag-name2>: handler2,
+         ...
+         <tag-nameN>: handlerN}
+        
+        A handler must be named with the following schema:
+        <value of tag_marker>_<name of tag>
+        Every method which is named after this schema will be added to the
+        dictionary as mentioned above.
+        '''
         tagdict = {}
         attrs = dir(self)
+        
         for attr in attrs:
             if attr.startswith(tag_marker):
-                tag_name = attr.split('_')[1]
+                
+                # It shall be possible to use underlines in tag names.
+                tmp = attr.split('_')[1:]
+                tag_name = '_'.join(tmp)
+                
                 tagdict[tag_name] = getattr(self, attr)
+                
         return tagdict
     
     # Inherited from html.parser.HTMLParser ####################################
@@ -144,7 +164,7 @@ class TableHTMLReader(MarkupReaderBase):
             self.nested
         ) = self.stack.pop()
 
-    # Handler for the HTML-Tags (registered in self.starttags and self.endtags)
+    # Handler for the HTML-Tags ################################################
     def starttag_table(self, attrs):
         if self.table is None:
             self.table = Table()
@@ -927,11 +947,12 @@ def write_tag(tag, *args, attrs = None, content = None):
     
     return output
 
+####
+whitelist = [chr(i) for i in range(39, 127)]
+whitelist.remove('<')
+whitelist.remove('>')
+
 def encode_string(string):
-    whitelist = [chr(i) for i in range(39, 127)]
-    whitelist.remove('<')
-    whitelist.remove('>')
-    
     output = ''
     for s in string:
         if s in whitelist:
@@ -940,6 +961,7 @@ def encode_string(string):
             output += '&#' + str(ord(s)) + ';'
     
     return output
+####
             
 def split_data(data):
     '''Splits the given data (which shall be a str object) and returns a tupel,
@@ -952,7 +974,7 @@ def split_data(data):
 
     tmpstr = ''
     if data is not None:
-        #print ('1:', data)
+        #print('1:', data)
         data = data.strip()
         if data != '' and (data[0].isdigit() or data[0] == '-'):
             
@@ -975,9 +997,9 @@ def split_data(data):
             while numstr.endswith('.'):
                 numstr = numstr[: -1]
             
-            #print ('2:', numstr)
+            #print('2:', numstr)
             
-            # The resulting numstr can still contain an illegal value...
+            # The resulting number string can still contain an illegal value...
             try:
                 number = str2num(numstr)
                 string = tmpstr
