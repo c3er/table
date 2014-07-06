@@ -34,12 +34,12 @@ class TableFileError(TableError):
 class MarkupReaderBase(html.parser.HTMLParser):
     '''XXX Must be documented!
     '''
-    def __init__(self):
+    def __init__(self, tag_marker_start = 'starttag', tag_marker_end ='endtag'):
         super().__init__()
         self.tmpdat = ''
         self._read_data_flag = False
-        self.starttags = self._fill_tagdict('starttag')
-        self.endtags = self._fill_tagdict('endtag')
+        self.starttags = self._fill_tagdict(tag_marker_start)
+        self.endtags = self._fill_tagdict(tag_marker_end)
 
     # Needed to use it with a "with" statement #################################
     def __enter__(self):
@@ -351,7 +351,7 @@ class TableFileReader(MarkupReaderBase):
         self.read_data_flag = False
     
     def starttag_string(self, attrs):
-        print(dir(self))
+        #print(dir(self))
         self.read_data_flag = True
     
     def endtag_string(self):
@@ -645,6 +645,7 @@ class Table:
             if len(row) > index:
                 col.append(row[index])
             else:
+                # XXX WTF?
                 row.append(Entry())
                 col.append(row[index])
         return col
@@ -719,7 +720,6 @@ class Table:
         self.add_data(data)
 
     def del_last_row(self):
-        '''Deletes the last row of the table.'''
         if self.row >= 0:
             self._data.pop()
             self.row -= 1
@@ -727,7 +727,6 @@ class Table:
             raise TableError('Table contains no row to delete')
 
     def del_col(self, index):
-        '''Deletes a column of the table.'''
         if self._header is not None:
             self._header.remove(self._header[index])
         if self._data is not None and self._data != []:
@@ -737,7 +736,7 @@ class Table:
             raise TableError('Error by deleting column')
 
     def make_header(self):
-        '''Transforms the first line of the table to the header line.'''
+        'Transforms the first line of the table to the header line.'
         self.isheadered = True
         self._mk_header()
         
@@ -788,7 +787,7 @@ def sortby(tree, col, descending):
     # Grab values to sort
     data = [(tree.set(child, col), child) for child in tree.get_children('')]
 
-    # The numeric values should not be sorted alphabetical
+    # The numeric values shall not be sorted alphabetically
     converted = True
     tmpdat = []
     string = ''
@@ -882,8 +881,8 @@ class TableWidget:
                 command = curry(sortby, self.tree, col, False)
             )
 
-            # XXX tkinter.font.Font().measure expected args are incorrect
-            # according to the Tk docs
+            # tkinter.font.Font().measure expected args are incorrect
+            # according to the Tk docs...
             self.tree.column(col, width = tkinter.font.Font().measure(str(col)))
 
         for line in self.tabdata:
@@ -962,13 +961,16 @@ def encode_string(string):
     
     return output
 ####
-            
+
 def split_data(data):
-    '''Splits the given data (which shall be a str object) and returns a tupel,
+    '''Splits the given data (which shall be a str object) and returns a tuple,
     containig the number as first element and the rest as second element.
     If the data does not begin with a number, the first element of the tuple
     will be None.
     '''
+    if data is not None and not isinstance(data, str):
+        raise TypeError('"data" must be an "str" object.')
+    
     number = None
     string = data
 

@@ -46,10 +46,14 @@ FileName=$[Project-Path]tabellenauswerter\table.pyw
 
 [Project\ChildNodes\Node0\ChildNodes\Node7]
 ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\testing.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node8]
+ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\testmodule.py
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=8
+Count=9
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

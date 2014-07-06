@@ -160,16 +160,10 @@ class Session:
         index = 0
         
         if self.notebook is not None:
-            # If the session is newly created,
-            # then there will be no current index
-            if not isnew:
+            # Save the current index, if some tables are open.
+            tablen = len(self.notebook.tabs())
+            if not isnew and tablen > 0:
                 index = self.notebook.index('current')
-                
-                # An empty string is not a valid value for the
-                # method "select" of the class "ttk.Notebook".
-                if index == '':
-                    index = 0
-                    
                 #print('index: "{}"'.format(index), type(index))
                 
             self.notebook.destroy()

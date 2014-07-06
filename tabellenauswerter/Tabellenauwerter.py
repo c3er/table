@@ -185,7 +185,9 @@ def bind_events(root):
     root.protocol('WM_DELETE_WINDOW', curry(appclose_callback, root))
 ################################################################################
 
-if __name__ == '__main__':
+def main():
+    global sess
+    
     # Initializing
     log.init(res.LOGFILE, DEBUG_ON)
     log.info('###### Anwendung gestartet ######')
@@ -200,3 +202,6 @@ if __name__ == '__main__':
     # Cleaning up
     log.info('###### Anwendung beendet ########')
     log.close()
+
+if __name__ == '__main__':
+    main()
