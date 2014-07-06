@@ -407,7 +407,7 @@ class EntryData:
         elif isinstance(val, int) or isinstance(val, float):
             self.number = val
         else:
-            raise EntryError(
+            raise TypeError(
                 "The value must be either of type " +
                 "'EntryData', 'str', 'int' or 'float'."
             )
