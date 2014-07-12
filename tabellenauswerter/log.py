@@ -80,7 +80,7 @@ def logfunction(f):
     '''Creates a decorator to log a function.'''
     @wraps(f)
     def wrapper(*args, **kw):
-        debug ("{} called".format(f.__name__))
+        debug("{} called".format(f.__name__))
         return f(*args, **kw)
     return wrapper
 
@@ -88,6 +88,6 @@ def logmethod(m):
     '''Creates a decorator to log a method.'''
     @wraps(m)
     def wrapper(self, *args, **kw):
-        debug ("{} in {} called".format(m.__name__, self.__class__.__name__))
+        debug("{} in {} called".format(m.__name__, self.__class__.__name__))
         return m(self, *args, **kw)
     return wrapper

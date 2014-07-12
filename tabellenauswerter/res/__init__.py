@@ -60,6 +60,7 @@ BASE_ADDR_LABEL = 'Basisadresse'
 HELPER_LABEL = 'Hilfsprogramm benutzen'
 OPEN_HTML_LABEL = 'HTML-Datei öffnen'
 
+# Asianbookie specific #########################################################
 ASIAN_READING_MSG = '''Asianbookie wird eingelesen.
 
 Diese Operation kann eine Weile dauern. Wenn es abgebrochen wird,
@@ -71,3 +72,4 @@ ASIAN_PHASE_EXPLANATION = (
     'Tabelle wird zusammengefügt',
     'Ende'
 )
+################################################################################

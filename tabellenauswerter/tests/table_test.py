@@ -5,6 +5,32 @@ import unittest
 
 import table
 
+class TestClassEntryDataInitialization(unittest.TestCase):
+    def test_EntryData_initialization(self):
+        io_dict = {
+            None: (None, ''),
+            '': (None, ''),
+            'foo': (None, 'foo'),
+            123: (123, ''),
+            '100%': (100, '%'),
+        }
+        
+        for arg, exp_pair in io_dict.items():
+            ed = table.EntryData(arg)
+            self.assertEqual(exp_pair[0], ed.number)
+            self.assertEqual(exp_pair[1], ed.string)
+            
+    def test_EntryData_initialization_with_illegal_args(self):
+        illegal_args = (object(), [], {}, )
+        
+        for arg in illegal_args:
+            with self.assertRaises(TypeError):
+                table.EntryData(arg)
+                
+class TestClassEntryData(unittest.TestCase):
+    def setUp(self):
+        self.entry_data = table.EntryData()
+
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
         io_dict = {
@@ -38,28 +64,6 @@ class TestFunctionSplitData(unittest.TestCase):
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.split_data(arg)
-
-class TestClassEntryData(unittest.TestCase):
-    def test_EntryData_initialization(self):
-        io_dict = {
-            None: (None, ''),
-            '': (None, ''),
-            'foo': (None, 'foo'),
-            123: (123, ''),
-            '100%': (100, '%'),
-        }
-        
-        for arg, exp_pair in io_dict.items():
-            ed = table.EntryData(arg)
-            self.assertEqual(exp_pair[0], ed.number)
-            self.assertEqual(exp_pair[1], ed.string)
-            
-    def test_EntryData_initialization_with_illegal_args(self):
-        illegal_args = (object(), [], {}, )
-        
-        for arg in illegal_args:
-            with self.assertRaises(TypeError):
-                table.EntryData(arg)
 
 def main():
     unittest.main()

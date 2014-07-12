@@ -34,12 +34,12 @@ class TableFileError(TableError):
 class MarkupReaderBase(html.parser.HTMLParser):
     '''XXX Must be documented!
     '''
-    def __init__(self, tag_marker_start = 'starttag', tag_marker_end ='endtag'):
+    def __init__(self, tagmarker_start = 'starttag', tagmarker_end = 'endtag'):
         super().__init__()
         self.tmpdat = ''
         self._read_data_flag = False
-        self.starttags = self._fill_tagdict(tag_marker_start)
-        self.endtags = self._fill_tagdict(tag_marker_end)
+        self.starttags = self._fill_tagdict(tagmarker_start)
+        self.endtags = self._fill_tagdict(tagmarker_end)
 
     # Needed to use it with a "with" statement #################################
     def __enter__(self):
@@ -60,7 +60,7 @@ class MarkupReaderBase(html.parser.HTMLParser):
         self.tmpdat = ''
     ############################################################################
     
-    def _fill_tagdict(self, tag_marker):
+    def _fill_tagdict(self, tagmarker):
         '''Helper method to fill the dictionaries for handling the tags.
         
         The dictionary that is returned has the following form:
@@ -70,7 +70,7 @@ class MarkupReaderBase(html.parser.HTMLParser):
          <tag-nameN>: handlerN}
         
         A handler must be named with the following schema:
-        <value of tag_marker>_<name of tag>
+        <value of tagmarker>_<name of tag>
         Every method which is named after this schema will be added to the
         dictionary as mentioned above.
         '''
@@ -78,7 +78,7 @@ class MarkupReaderBase(html.parser.HTMLParser):
         attrs = dir(self)
         
         for attr in attrs:
-            if attr.startswith(tag_marker):
+            if attr.startswith(tagmarker):
                 
                 # It shall be possible to use underlines in tag names.
                 tmp = attr.split('_')[1:]
@@ -228,7 +228,7 @@ class TableHTMLReader(MarkupReaderBase):
     def starttag_img(self, attrs):
         if self.read_data_flag:
             # Todo: Download the actual image from the web page
-            # self.tmpdat += res.IMAGE_DUMMY
+            #self.tmpdat += res.IMAGE_DUMMY
             pass
 
     def starttag_a(self, attrs):
