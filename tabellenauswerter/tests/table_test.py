@@ -29,7 +29,22 @@ class TestClassEntryDataInitialization(unittest.TestCase):
                 
 class TestClassEntryData(unittest.TestCase):
     def setUp(self):
-        self.entry_data = table.EntryData()
+        self.entry_data = table.EntryData((3, 'r'))
+        
+    def test_equality(self):
+        ed = table.EntryData((3, 'r'))
+        self.assertTrue(self.entry_data == ed)
+        
+    def test_unequality(self):
+        data = (
+            (2, 'r'),
+            (3, 'b'),
+            (2, 'b'),
+        )
+        for d in data:
+            ed = table.EntryData(d)
+            self.assertFalse(self.entry_data == ed)
+            self.assertTrue(self.entry_data != ed)
 
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
@@ -66,7 +81,7 @@ class TestFunctionSplitData(unittest.TestCase):
                 table.split_data(arg)
 
 def main():
-    unittest.main()
+    unittest.main(verbosity = 2)
 
 if __name__ == '__main__':
     main()

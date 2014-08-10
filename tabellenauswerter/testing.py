@@ -10,7 +10,7 @@ def main():
     testcases = loader.discover('tests', '*test.py')
     suite = unittest.TestSuite(testcases)
     
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(verbosity = 2)
     runner.run(suite)
     
 if __name__ == '__main__':

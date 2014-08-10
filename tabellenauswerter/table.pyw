@@ -406,11 +406,14 @@ class EntryData:
             self.string = val.string
         elif isinstance(val, int) or isinstance(val, float):
             self.number = val
+        elif isinstance(val, tuple) and len(val) == 2:
+            self.number = val[0]
+            self.string = val[1]
         else:
-            raise TypeError(
-                "The value must be either of type " +
-                "'EntryData', 'str', 'int' or 'float'."
-            )
+            msg = ('Supported types: "str", "int", "float", "EntryData" and a' +
+                ' tuple, containing a number as first value and a string as' +
+                ' second value.')
+            raise TypeError(msg)
     
     def dumb(self):
         output = ''
