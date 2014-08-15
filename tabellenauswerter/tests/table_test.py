@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import collections
 
 import table
 
@@ -67,7 +68,21 @@ class TestClassEntryData(unittest.TestCase):
             self.assertEqual(str(ed), exp)
             
     def test_setting_values(self):
-        self.assertFalse(True)
+        ed = table.EntryData()
+        for number, string in self.data:
+            ed.set(number)
+            self.assertEqual(number, ed.number)
+            
+            ed.set(string)
+            self.assertEqual(string, ed.string)
+            
+            ed.set((number, string))
+            self.assertEqual(number, ed.number)
+            self.assertEqual(string, ed.string)
+            
+class TestClassEntry(unittest.TestCase):
+    def setUp(self):
+        self.entry = table.Entry()
 
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
@@ -102,6 +117,17 @@ class TestFunctionSplitData(unittest.TestCase):
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.split_data(arg)
+                
+class TestFunctionIsListLike(unittest.TestCase):
+    def test_list_like_objects_are_recognized(self):
+        data = ([], (), collections.UserList(), table.TableRow(None))
+        for listobj in data:
+            self.assertTrue(table.islistlike(listobj))
+            
+    def test_other_objects_are_not_list_like(self):
+        data = ('', {}, 1, 1.1, table.Table())
+        for obj in data:
+            self.assertFalse(table.islistlike(obj))
 
 def main():
     unittest.main(verbosity = 2)

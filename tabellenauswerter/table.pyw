@@ -407,8 +407,7 @@ class EntryData:
         elif isinstance(val, int) or isinstance(val, float):
             self.number = val
         elif isinstance(val, tuple) and len(val) == 2:
-            self.number = val[0]
-            self.string = val[1]
+            self.number, self.string = val
         else:
             msg = ('Supported types: "str", "int", "float", "EntryData" and a' +
                 ' tuple, containing a number as first value and a string as' +
@@ -427,7 +426,7 @@ class Entry:
     def __init__(self, data = '', link = None):
         self._data = EntryData(data)
         self.link = link
-        self.olddata = []
+        self.olddata = []  # Deprecated
 
     def __str__(self):
         return str(self.data)
@@ -473,6 +472,7 @@ class Entry:
         return self.data in ('', None)
     
     def add_olddata(self, val):
+        # Deprecated
         self.olddata.append(EntryData(val))
     
     def dumb(self):
