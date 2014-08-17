@@ -580,6 +580,9 @@ class Table:
         
     def __ne__(self, other):
         return not self.__eq__(other)
+        
+    def __len__(self):
+        return len(self._data)
     ############################################################################
 
     def _mk_header(self):
@@ -700,7 +703,7 @@ class Table:
         the current row. This is also true for list or tuples.
         '''
         if self.row >= 0:
-            if islistlike(self.row):
+            if islistlike(data):
                 self._data[self.row] += data
             elif isinstance(data, Entry):
                 self._data[self.row].append(data)
@@ -715,7 +718,7 @@ class Table:
         '''Adds new data to the header.
         This function has to be called, before normal data has been added.
         '''
-        if self.row > 1:
+        if self.row > 0 or len(self._data[self.row]) > 0:
             raise TableError('Table contains already data.')
         
         if not self.isheadered:
@@ -1016,8 +1019,8 @@ def split_data(data):
     #print('split_data:', 'n:', number, 's:', string)
     return number, string
 
-def islistlike(list_):
-    return isinstance(list_, (list, tuple, collections.UserList))
+def islistlike(listobj):
+    return isinstance(listobj, (list, tuple, collections.UserList))
 ################################################################################
 
 # "Public" functions ###########################################################

@@ -21,39 +21,50 @@ FileName=$[Project-Path]tabellenauswerter\res\__init__.py
 Count=1
 
 [Project\ChildNodes\Node0\ChildNodes\Node1]
+ClassName=TProjectFolderNode
+Name=tests
+
+[Project\ChildNodes\Node0\ChildNodes\Node1\ChildNodes\Node0]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\dialogs.py
+FileName=$[Project-Path]tabellenauswerter\tests\table_test.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node1\ChildNodes]
+Count=1
 
 [Project\ChildNodes\Node0\ChildNodes\Node2]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\log.py
+FileName=$[Project-Path]tabellenauswerter\dialogs.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node3]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\misc.py
+FileName=$[Project-Path]tabellenauswerter\log.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node4]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\session.py
+FileName=$[Project-Path]tabellenauswerter\misc.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node5]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
+FileName=$[Project-Path]tabellenauswerter\session.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node6]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\table.pyw
+FileName=$[Project-Path]tabellenauswerter\Tabellenauwerter.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node7]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]tabellenauswerter\testing.py
+FileName=$[Project-Path]tabellenauswerter\table.pyw
 
 [Project\ChildNodes\Node0\ChildNodes\Node8]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]tabellenauswerter\testing.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node9]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]tabellenauswerter\testmodule.py
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=9
+Count=10
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

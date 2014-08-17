@@ -15,15 +15,17 @@ class TestClassEntryDataInitialization(unittest.TestCase):
             123: (123, ''),
             '100%': (100, '%'),
         }
-        
         for arg, exp_pair in io_dict.items():
             ed = table.EntryData(arg)
             self.assertEqual(exp_pair[0], ed.number)
             self.assertEqual(exp_pair[1], ed.string)
             
     def test_EntryData_initialization_with_illegal_args(self):
-        illegal_args = (object(), [], {}, )
-        
+        illegal_args = (
+            object(),
+            [],
+            {},
+        )
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.EntryData(arg)
@@ -79,10 +81,45 @@ class TestClassEntryData(unittest.TestCase):
             ed.set((number, string))
             self.assertEqual(number, ed.number)
             self.assertEqual(string, ed.string)
-            
+
+# XXX
 class TestClassEntry(unittest.TestCase):
     def setUp(self):
         self.entry = table.Entry()
+        
+class TestClassTable(unittest.TestCase):
+    def setUp(self):
+        self.table = table.Table()
+        self.header = ['A', 'B', 'C']
+        self.data_row = [1, 2, 3]
+        
+    def test_freshly_created_table_does_not_contain_data(self):
+        self.assertEqual(len(self.table), 0)
+        self.assertEqual(len(self.table.data), 0)
+        
+    def test_freshly_created_table_is_not_headered(self):
+        self.assertFalse(self.table.isheadered)
+        
+    def test_adding_row(self):
+        self.assertEqual(len(self.table), 0)
+        self.table.add_row()
+        self.assertEqual(len(self.table), 1)
+        
+    def test_adding_header(self):
+        self.table.add_row()
+        self.table.add_header_data(self.header)
+        self.assertTrue(self.table.isheadered)
+        self.assertEqual(str(self.table), "['A', 'B', 'C']\n")
+        
+    def test_adding_data_without_row_is_not_allowed(self):
+        with self.assertRaises(table.TableError):
+            self.table.add_data(self.data_row)
+            
+    def test_adding_header_after_data_is_not_allowed(self):
+        self.table.add_row()
+        self.table.add_data(self.data_row)
+        with self.assertRaises(table.TableError):
+            self.table.add_header_data(self.header)
 
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
@@ -107,25 +144,39 @@ class TestFunctionSplitData(unittest.TestCase):
             'hello': (None, 'hello'),
             'hello123': (None, 'hello123'),
         }
-        
         for arg, expected in io_dict.items():
             self.assertEqual(table.split_data(arg), expected)
             
     def test_other_then_str_is_not_allowed(self):
-        illegal_args = (123, 12.5, object(), ['a', 'b', 'c'])
-        
+        illegal_args = (
+            123,
+            12.5,
+            object(),
+            ['a', 'b', 'c']
+        )
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.split_data(arg)
                 
 class TestFunctionIsListLike(unittest.TestCase):
     def test_list_like_objects_are_recognized(self):
-        data = ([], (), collections.UserList(), table.TableRow(None))
+        data = (
+            [],
+            (),
+            collections.UserList(),
+            table.TableRow(None)
+        )
         for listobj in data:
             self.assertTrue(table.islistlike(listobj))
             
     def test_other_objects_are_not_list_like(self):
-        data = ('', {}, 1, 1.1, table.Table())
+        data = (
+            '',
+            {},
+            1,
+            1.1,
+            table.Table()
+        )
         for obj in data:
             self.assertFalse(table.islistlike(obj))
 
