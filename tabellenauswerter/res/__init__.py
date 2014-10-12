@@ -14,6 +14,9 @@ TAB_FILE_EXT = '.table'
 HTML_FILE_STR = 'HTML-Dateien'
 HTML_FILE_EXT = '*.htm;*.html'
 
+TEXT_FILE_STR = 'Text-Dateien'
+TEXT_FILE_EXT = '*.txt'
+
 UNKNOWN_FILE = 'Unbekannt'
 
 STD_ERROR_TITLE = 'Fehler'
@@ -38,6 +41,8 @@ ASIANBOOKIE_ERROR = 'Asianbookie konnte nicht eingelesen werden.\n'
 SAVE_TABLE_TITLE = 'Tabelle speichern'
 SAVE_TABLE_QUESTION = 'Soll die Tabelle "{}" gespeichert werden?'
 
+BROWSE_LABEL = 'Durchsuchen'
+
 NEW_LABEL = 'Neu'
 OPEN_LABEL = 'Öffnen'
 SAVE_LABEL = 'Speichern'
@@ -59,6 +64,8 @@ ADDR_WEBSITE_LABEL = 'Adresse der Webseite'
 BASE_ADDR_LABEL = 'Basisadresse'
 HELPER_LABEL = 'Hilfsprogramm benutzen'
 OPEN_HTML_LABEL = 'HTML-Datei öffnen'
+IMPORT_TEXTFILE_LABEL = 'Textdatei importieren'
+FILEPATH_LABEL = 'Dateipfad'
 
 # Asianbookie specific #########################################################
 ASIAN_READING_MSG = '''Asianbookie wird eingelesen.

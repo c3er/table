@@ -116,10 +116,13 @@ class TestClassTable(unittest.TestCase):
             self.table.add_data(self.data_row)
             
     def test_adding_header_after_data_is_not_allowed(self):
+        # XXX Broken test
         self.table.add_row()
         self.table.add_data(self.data_row)
         with self.assertRaises(table.TableError):
             self.table.add_header_data(self.header)
+            
+    # ...
 
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
@@ -141,6 +144,12 @@ class TestFunctionSplitData(unittest.TestCase):
             '100.5 %': (100.5, '%'),
             '-100.5 %': (-100.5, '%'),
             '- 100.5 %': (-100.5, '%'),
+            '100,5%': (100.5, '%'),
+            '-100,5%': (-100.5, '%'),
+            '- 100,5%': (-100.5, '%'),
+            '100,5 %': (100.5, '%'),
+            '-100,5 %': (-100.5, '%'),
+            '- 100,5 %': (-100.5, '%'),
             'hello': (None, 'hello'),
             'hello123': (None, 'hello123'),
         }

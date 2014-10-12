@@ -20,12 +20,17 @@ import table
 
 from misc import *
 
+PAGE_ONE_WEBSITE = 0
+PAGE_ASIANBOOKIE = 1
+PAGE_TEXTFILE = 2
+
 Selection = enum(
     'UNKNOWN',
     'ONE_WEBSITE',
     'ONE_WEBSITE_HELPER',
     'LOCAL_FILE',
-    'ASIANBOOKIE'
+    'ASIANBOOKIE',
+    'TEXTFILE',
 )
 
 # This stuff was originally from some demos ####################################
@@ -135,10 +140,13 @@ class _DialogBase(tkinter.Toplevel):
 ################################################################################
 
 class NewDialog(_DialogBase):
+    TEXTBOX_WIDTH = 40
+    
     def __init__(self, parent, title = None):
         self.notebook = None
         self.addr_entry = None
         self.base_addr_entry = None
+        self.textfile_entry = None
         self.helper_flag = None
         self.selection = None
         self.addr = None
@@ -146,12 +154,23 @@ class NewDialog(_DialogBase):
         super().__init__(parent, title)
 
     # Helper functions #########################################################
-    def open_html(self):
+    @staticmethod
+    def open_file(file_str, file_ext, entry):
         fname = tkinter.filedialog.askopenfilename (
-            filetypes = [(res.HTML_FILE_STR, res.HTML_FILE_EXT)]
+            filetypes = [(file_str, file_ext)]
         )
         if fname:
-            setentry(self.addr_entry, fname)
+            setentry(entry, fname)
+    
+    def open_html(self):
+        self.open_file(res.HTML_FILE_STR, res.HTML_FILE_EXT, self.addr_entry)
+            
+    def open_textfile(self):
+        self.open_file(
+            res.TEXT_FILE_STR,
+            res.TEXT_FILE_EXT,
+            self.textfile_entry
+        )
     ############################################################################
 
     # Definition of the appearence #############################################
@@ -168,7 +187,9 @@ class NewDialog(_DialogBase):
         ########################################################################
         middle_frame = ttk.Frame(subpage)
         
-        self.addr_entry = tkinter.Entry(middle_frame, width = 40)
+        self.addr_entry = tkinter.Entry(middle_frame,
+            width = self.TEXTBOX_WIDTH
+        )
         self.addr_entry.insert(0, res.DEFAULT_ADDR)
         self.addr_entry.pack(side = 'left')
         
@@ -209,6 +230,29 @@ class NewDialog(_DialogBase):
 
         subpage.pack(padx = 5, pady = 5, fill = 'both')
         return page
+    
+    def frame_textfile(self, master):
+        page = ttk.Frame(master)
+        subpage = ttk.Frame(page)
+        
+        top_frame = ttk.Frame(subpage)
+        ttk.Label(top_frame, text = res.FILEPATH_LABEL).pack(side = 'left')
+        top_frame.pack(side = 'top', fill = 'x')
+        
+        middle_frame = ttk.Frame(subpage)
+        self.textfile_entry = tkinter.Entry(middle_frame)
+        self.textfile_entry.pack(fill = 'x')
+        middle_frame.pack(side = 'top', fill = 'x')
+        
+        bottom_frame = ttk.Frame(subpage)
+        ttk.Button(bottom_frame,
+            text = res.BROWSE_LABEL,
+            command = self.open_textfile,
+        ).pack(side = 'left', pady = 5)
+        bottom_frame.pack(side = 'top', fill = 'x')
+        
+        subpage.pack(padx = 5, pady = 5, fill = 'both')
+        return page
     ############################################################################
 
     @log.logmethod
@@ -232,6 +276,9 @@ class NewDialog(_DialogBase):
         self.notebook.add(self.frame_asianbookie(master),
             text = res.ASIAN_LABEL
         )
+        self.notebook.add(self.frame_textfile(master),
+            text = res.IMPORT_TEXTFILE_LABEL
+        )
         self.notebook.pack(expand = True, fill = 'both', anchor = 'n')
 
         # Set focus to the address entry
@@ -239,7 +286,7 @@ class NewDialog(_DialogBase):
 
     def validate(self):
         index = self.notebook.index('current')
-        if index == 0:
+        if index == PAGE_ONE_WEBSITE:
             self.addr = self.addr_entry.get()
 
             if not self.addr:
@@ -259,10 +306,17 @@ class NewDialog(_DialogBase):
                     return False
             
             return True
-        else:
+        elif index == PAGE_ASIANBOOKIE:
             self.addr = self.base_addr_entry.get()
             self.selection = Selection.ASIANBOOKIE
             return True
+        elif index == PAGE_TEXTFILE:
+            # ...
+            self.selection = Selection.TEXTFILE
+            return True
+        else:
+            error(res.STD_ERROR_MSG)
+            return False
         
     def apply(self):
         if self.selection == Selection.ONE_WEBSITE:
@@ -295,6 +349,10 @@ class NewDialog(_DialogBase):
             
         elif self.selection == Selection.ASIANBOOKIE:
             self.read_asianbookie()
+            return
+        
+        elif self.selection == Selection.TEXTFILE:
+            # ...
             return
         
         else:
@@ -405,7 +463,7 @@ class AsianWorker(threading.Thread):
                         lasttab = tab
                         
                         # XXX Even more ugly!!!
-                        # The usage of the fucking (self written) helper program
+                        # The usage of the (self written) helper program
                         # must be reworked!!!
                         succeeded = False
                         counter = 0

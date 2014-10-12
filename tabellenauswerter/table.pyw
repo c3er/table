@@ -618,9 +618,9 @@ class Table:
             for i in range(len(self._header)):
                 col = self.get_col(j)
                 if col is not None:
-                    col = [str(entry) for entry in col]
-                    collen = len(col) - 1
-                    if col[1:] == ['' for k in range(collen)]:
+                    strcol = [str(entry) for entry in col]
+                    collen = len(strcol) - 1
+                    if strcol[1:] == ['' for k in range(collen)]:
                         self.del_col(j)
                     else:
                         j += 1
@@ -702,6 +702,7 @@ class Table:
         The table must contain at least one row. The data will be appended to
         the current row. This is also true for list or tuples.
         '''
+        #print('Add data:', str(self))
         if self.row >= 0:
             if islistlike(data):
                 self._data[self.row] += data
@@ -718,7 +719,8 @@ class Table:
         '''Adds new data to the header.
         This function has to be called, before normal data has been added.
         '''
-        if self.row > 0 or len(self._data[self.row]) > 0:
+        #print('Add header data:', str(self))
+        if self.row > 0:
             raise TableError('Table contains already data.')
         
         if not self.isheadered:
@@ -981,7 +983,9 @@ def split_data(data):
     string = data
 
     tmpstr = ''
-    if data is not None:
+    if data is None:
+        string = ''
+    else:
         #print('1:', data)
         data = data.strip()
         if data != '' and (data[0].isdigit() or data[0] == '-'):
@@ -1013,8 +1017,6 @@ def split_data(data):
                 string = tmpstr
             except ValueError:
                 string = data
-    else:
-        string = ''
 
     #print('split_data:', 'n:', number, 's:', string)
     return number, string
@@ -1054,6 +1056,10 @@ def html2tables(page):
             except html.parser.HTMLParseError:
                 parerr = True
         return parser.tables
+    
+def txt2table(fname):
+    'Interpretation of a test file as table...'
+    pass
 ################################################################################
 
 if __name__ == '__main__':
