@@ -8,6 +8,7 @@ import tkinter.ttk as ttk
 import res
 import log
 
+
 def _print_log(msg, exc = None):
     '''Used by the error function.'''
     if exc is None:
@@ -15,6 +16,7 @@ def _print_log(msg, exc = None):
     else:
         log.error(msg)
         log.exception(exc)
+
 
 def error(msg, exc = None):
     '''The function, which will be always called, if there a foreseen error
@@ -33,15 +35,18 @@ def error(msg, exc = None):
         _print_log(msg, exc)
         log.close()
 
+
 def setentry(entry, text):
     entry.delete(0, 'end')
     entry.insert(0, text)
+
 
 # Normally, this constant should be defined in the subprocess module.
 # Needed to hide the console window, which would appear under Windows when an
 # external command line program is called.
 STARTF_USESHOWWINDOW = 1
-    
+
+
 def cmdcall(cmd, *args):
     # Hide the console window, which would appear under Windows
     startupinfo = subprocess.STARTUPINFO()
@@ -53,6 +58,7 @@ def cmdcall(cmd, *args):
     
     # Do the actual call
     return subprocess.check_output(calllist, startupinfo = startupinfo)
+
 
 # This stuff was originally from some demos ####################################
 class AutoScrollbar(ttk.Scrollbar):
@@ -72,6 +78,7 @@ class AutoScrollbar(ttk.Scrollbar):
     def place(self, **kw):
         raise TclError("Can not use place with this widget")
 
+
 class curry:
     '''Handles arguments for callback functions.'''
     def __init__(self, callback, *args, **kw):
@@ -81,6 +88,7 @@ class curry:
 
     def __call__(self):
         return self.callback(*self.args, **self.kw)
+    
     
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)

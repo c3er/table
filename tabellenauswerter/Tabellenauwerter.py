@@ -19,6 +19,7 @@ import session
 import dialogs
 from misc import *
 
+
 sess = None
 
 # GUI elements, which are needed globally
@@ -27,12 +28,15 @@ save_as_button = None
 tabcols_button = None
 merge_table_button = None
 
+
 # Helper functions #############################################################
 def disable(button):
     button.config(state = 'disabled')
 
+
 def enable(button):
     button.config(state = 'enabled')
+
 
 def avoid_tableloss():
     '''Ask the user for every table, which is modified, if he wants to save it.
@@ -59,11 +63,13 @@ def avoid_tableloss():
                 # Do nothing, if the user clicked on "No"
         return True
     
+    
 def create_button(frame, label, command):
     button = ttk.Button(frame, text = label, command = command)
     button.pack(side = 'left')
     return button
 ################################################################################
+
 
 # Handler functions ############################################################
 @log.logfunction
@@ -90,6 +96,7 @@ def adjust_state(sess):
         disable(tabcols_button)
         disable(merge_table_button)
 
+
 @log.logfunction
 def new_session(root):
     if avoid_tableloss():
@@ -99,6 +106,7 @@ def new_session(root):
         elif not nd.canceled:
             tkinter.messagebox.showwarning(res.TITLE, res.NO_TABLE_ERROR)
 
+
 @log.logfunction
 def open_table():
     path = tkinter.filedialog.askopenfilename(
@@ -106,6 +114,7 @@ def open_table():
     )
     if path:
         sess.open_tabfile(path)
+
 
 @log.logfunction
 def save_table_as(tab = None):
@@ -119,6 +128,7 @@ def save_table_as(tab = None):
             tab = sess.current_table
         tab.save(path)
 
+
 @log.logfunction
 def save_table(tab = None):
     try:
@@ -128,9 +138,11 @@ def save_table(tab = None):
     except session.UnknownPathException:
         save_table_as(tab)
 
+
 @log.logfunction
 def mk_tabcols():
     sess.current_table.mk_tabcols()
+
 
 @log.logfunction
 def merge_tables():
@@ -140,11 +152,13 @@ def merge_tables():
     if path:
         sess.merge_tables(path)
 
+
 @log.logfunction
 def appclose_callback(root):
     if avoid_tableloss():
         root.destroy()
 ################################################################################
+
 
 # Build the actual interface ###################################################
 def toolbar(root):
@@ -171,11 +185,13 @@ def toolbar(root):
     
     return frame
 
+
 def cmdwidget(root):
     '''Container for the elements, which appear at application start.'''
     frame = ttk.Frame(root)
     toolbar(root).pack(anchor = 'n', fill = 'x', padx = 2, pady = 2)
     return frame
+
 
 def bind_events(root):
     root.bind('<Control-n>', lambda event: new_session(root))
@@ -184,6 +200,7 @@ def bind_events(root):
     root.bind('<Control-S>', lambda event: save_table_as())
     root.protocol('WM_DELETE_WINDOW', curry(appclose_callback, root))
 ################################################################################
+
 
 def main():
     global sess
@@ -202,6 +219,7 @@ def main():
     # Cleaning up
     log.info('###### Anwendung beendet ########')
     log.close()
+
 
 if __name__ == '__main__':
     main()

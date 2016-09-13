@@ -13,11 +13,14 @@ import log
 import res
 from misc import *
 
+
 class SessionError(Exception):
     pass
 
+
 class UnknownPathException(Exception):
     pass
+
 
 class TableContainer:
     def __init__(self, tab, session, path = None):
@@ -84,6 +87,7 @@ class TableContainer:
                     self.data
                 )
                 self.frame = self.tablewidget.frame
+
 
 class Session:
     def __init__(self, root, state_handler):

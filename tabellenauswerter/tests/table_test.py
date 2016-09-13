@@ -6,6 +6,7 @@ import collections
 
 import table
 
+
 class TestClassEntryDataInitialization(unittest.TestCase):
     def test_EntryData_initialization(self):
         io_dict = {
@@ -29,6 +30,7 @@ class TestClassEntryDataInitialization(unittest.TestCase):
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.EntryData(arg)
+         
                 
 class TestClassEntryData(unittest.TestCase):
     def setUp(self):
@@ -82,10 +84,12 @@ class TestClassEntryData(unittest.TestCase):
             self.assertEqual(number, ed.number)
             self.assertEqual(string, ed.string)
 
+
 # XXX
 class TestClassEntry(unittest.TestCase):
     def setUp(self):
         self.entry = table.Entry()
+       
         
 class TestClassTable(unittest.TestCase):
     def setUp(self):
@@ -123,6 +127,7 @@ class TestClassTable(unittest.TestCase):
             self.table.add_header_data(self.header)
             
     # ...
+
 
 class TestFunctionSplitData(unittest.TestCase):
     def test_all_kinds_of_strings_and_None_as_parameter(self):
@@ -166,6 +171,7 @@ class TestFunctionSplitData(unittest.TestCase):
         for arg in illegal_args:
             with self.assertRaises(TypeError):
                 table.split_data(arg)
+     
                 
 class TestFunctionIsListLike(unittest.TestCase):
     def test_list_like_objects_are_recognized(self):
@@ -189,8 +195,10 @@ class TestFunctionIsListLike(unittest.TestCase):
         for obj in data:
             self.assertFalse(table.islistlike(obj))
 
+
 def main():
     unittest.main(verbosity = 2)
+
 
 if __name__ == '__main__':
     main()

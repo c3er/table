@@ -652,6 +652,8 @@ class Table:
                 col.append(row[index])
             else:
                 # XXX WTF?
+				# Theory: Handling of special conditions for tables those lines
+				# do not have the same length. Must be solved better.
                 row.append(Entry())
                 col.append(row[index])
         return col
@@ -681,7 +683,7 @@ class Table:
             content = tablestr
         )
         
-        # Do the fucking write.
+        # Write data to mass storage.
         with open(path, 'w') as f:
             f.write(output)
 
@@ -799,7 +801,7 @@ def sortby(tree, col, descending):
     converted = True
     tmpdat = []
     string = ''
-    for val, foo in data:
+    for val, foo in data:                  # XXX What is foo?
         number, string = split_data(val)
         if number is not None:
             tmpdat.append((number, foo))
@@ -1047,6 +1049,8 @@ def html2tables(page):
     page = page.decode('utf_8', 'ignore').strip()
     linecount = len(page.splitlines())
     with TableHTMLReader() as parser:
+        # There shall be returned something usable, regardless whot goes wrong
+        # at parsing.
         parerr = False
         while parser.getpos()[0] < linecount:
             try:

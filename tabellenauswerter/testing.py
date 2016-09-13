@@ -6,8 +6,7 @@
 import unittest
 
 def main():
-    loader = unittest.TestLoader()
-    testcases = loader.discover('tests', '*test.py')
+    testcases = unittest.TestLoader().discover('tests', '*test.py')
     suite = unittest.TestSuite(testcases)
     runner = unittest.TextTestRunner(verbosity = 2)
     runner.run(suite)
